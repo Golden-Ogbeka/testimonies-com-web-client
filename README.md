@@ -2,6 +2,11 @@
 
 Twitter-like web client for testimonies, built with Next.js App Router, Tailwind, React Query, and Axios.
 
+## 📋 Documentation
+
+- **[Product Requirements Document (PRD)](./PRD.md)** — Full feature specifications for the web client
+- **[Agent Guidelines](./AGENTS.md)** — Development rules and coding standards for AI agents
+
 ## Setup
 
 1. Install dependencies:
