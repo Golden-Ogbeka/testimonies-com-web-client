@@ -1,6 +1,7 @@
 'use client';
 
 import { api, unwrap } from '@/lib/api';
+import type { Paginated } from '@/types/api';
 import type { ActivityLog, AddTeamMemberPayload, CreateRolePayload, TeamMember, TeamRole, UpdateRolePayload, UpdateTeamMemberPayload } from '@/types/domain';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -9,7 +10,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 export function useTeamMembers() {
   return useQuery({
     queryKey: ['team', 'members'],
-    queryFn: async () => unwrap<TeamMember[]>((await api.get('/user/team/members')).data),
+    queryFn: async () => unwrap<Paginated<TeamMember>>((await api.get('/user/team/members')).data),
   });
 }
 
@@ -24,7 +25,7 @@ export function useTeamMember(id: string) {
 export function useSearchTeamMembers(query: string) {
   return useQuery({
     queryKey: ['team', 'members', 'search', query],
-    queryFn: async () => unwrap<TeamMember[]>((await api.get(`/user/team/members/search?query=${encodeURIComponent(query)}`)).data),
+    queryFn: async () => unwrap<Paginated<TeamMember>>((await api.get(`/user/team/members/search?query=${encodeURIComponent(query)}`)).data),
     enabled: query.length > 1,
   });
 }
@@ -32,7 +33,7 @@ export function useSearchTeamMembers(query: string) {
 export function useTeamMemberActivity(id: string) {
   return useQuery({
     queryKey: ['team', 'members', id, 'activity'],
-    queryFn: async () => unwrap<ActivityLog[]>((await api.get(`/user/team/members/${id}/activity`)).data),
+    queryFn: async () => unwrap<Paginated<ActivityLog>>((await api.get(`/user/team/members/${id}/activity`)).data),
     enabled: !!id,
   });
 }
@@ -40,7 +41,7 @@ export function useTeamMemberActivity(id: string) {
 export function useAllActivityLogs() {
   return useQuery({
     queryKey: ['team', 'activity'],
-    queryFn: async () => unwrap<ActivityLog[]>((await api.get('/user/team/activity/all')).data),
+    queryFn: async () => unwrap<Paginated<ActivityLog>>((await api.get('/user/team/activity/all')).data),
   });
 }
 
@@ -114,7 +115,7 @@ export function useLogActivity() {
 export function useRoles() {
   return useQuery({
     queryKey: ['team', 'roles'],
-    queryFn: async () => unwrap<TeamRole[]>((await api.get('/user/team/roles')).data),
+    queryFn: async () => unwrap<Paginated<TeamRole>>((await api.get('/user/team/roles')).data),
   });
 }
 

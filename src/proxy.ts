@@ -2,17 +2,22 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 const PUBLIC_PATHS = ['/signin', '/signup', '/verify-otp', '/forgot-password'];
+const COOKIE_NAME = 'testimonies_token';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const search = request.nextUrl.search;
-  const token = request.cookies.get('testimonies_token')?.value;
+  const token = request.cookies.get(COOKIE_NAME)?.value;
 
   const isPublic = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
   const isFileRequest = /\.[^/]+$/.test(pathname);
+  const isRoot = pathname === '/';
 
-  if (isFileRequest) {
-    return NextResponse.next();
+  if (isFileRequest) return NextResponse.next();
+
+  if (isRoot) {
+    if (token) return NextResponse.redirect(new URL('/home', request.url));
+    return NextResponse.redirect(new URL('/signin', request.url));
   }
 
   if (!token && !isPublic) {

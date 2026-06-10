@@ -1,17 +1,15 @@
 'use client';
 
-import { Avatar, Button, Card, EmptyState, SkeletonCard } from '@/components/common';
+import { Avatar, Button, EmptyState, PageHeader, SkeletonCard } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useMe } from '@/hooks/useAuth';
 import {
-    useDeleteReply,
-    useLikeReply,
-    useReplies, useReplyToTestimony, useTestimony,
-    useUnlikeReply,
-    useUpdateReply,
+  useDeleteReply, useLikeReply, useReplies,
+  useReplyToTestimony, useTestimony, useUnlikeReply,
+  useUpdateReply,
 } from '@/hooks/useTestimonies';
 import { apiMessage, cn } from '@/lib/utils';
-import { Check, Heart, Pencil, Trash2, X } from 'lucide-react';
+import { Check, Heart, MessageCircle, Pencil, Trash2, X } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -27,15 +25,15 @@ export default function PostDetailPage() {
   const likeReply = useLikeReply();
   const unlikeReply = useUnlikeReply();
 
-  const [description, setDescription] = useState('');
+  const [replyContent, setReplyContent] = useState('');
   const [editId, setEditId] = useState('');
   const [editText, setEditText] = useState('');
 
   const submitReply = async () => {
-    if (!description.trim()) return;
+    if (!replyContent.trim()) return;
     try {
-      await sendReply.mutateAsync({ id, description: description.trim() });
-      setDescription('');
+      await sendReply.mutateAsync({ id, content: replyContent.trim() });
+      setReplyContent('');
     } catch (error) {
       toast.error(apiMessage(error));
     }
@@ -43,75 +41,75 @@ export default function PostDetailPage() {
 
   return (
     <div>
-      <div className='sticky top-0 z-10 border-b border-slate-200 bg-white/80 px-4 py-3 backdrop-blur'>
-        <h1 className='text-lg font-bold'>Testimony</h1>
-      </div>
+      <PageHeader icon={MessageCircle} title='Testimony' />
 
-      <div className='p-4 space-y-4'>
-        {testimony.isLoading && <SkeletonCard />}
+      <div>
+        {testimony.isLoading && <div className='p-4'><SkeletonCard /></div>}
         {testimony.data && <TestimonyCard testimony={testimony.data} />}
 
-        {/* Reply composer */}
-        <Card className='flex gap-3'>
-          <Avatar src={me?.picture} name={me?.fullName ?? me?.username} />
-          <div className='flex-1'>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder='Write a reply...'
-              rows={2}
-              className='w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500'
-            />
-            <div className='mt-2 flex justify-end'>
-              <Button onClick={submitReply} disabled={sendReply.isPending || !description.trim()}>
-                {sendReply.isPending ? 'Replying...' : 'Reply'}
-              </Button>
+        <div className='border-b border-gray-200 p-4'>
+          <div className='flex gap-3'>
+            <Avatar src={me?.picture} name={me?.fullName ?? me?.username} />
+            <div className='flex-1'>
+                <textarea
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  placeholder='Write a reply...'
+                  rows={2}
+                  className='w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-[#2C3248]/50 focus:ring-1 focus:ring-[#2C3248]/20'
+                />
+                <div className='mt-2 flex justify-end'>
+                  <Button onClick={submitReply} disabled={sendReply.isPending || !replyContent.trim()}>
+                    {sendReply.isPending ? 'Replying...' : 'Reply'}
+                  </Button>
+                </div>
             </div>
           </div>
-        </Card>
+        </div>
 
-        {/* Replies */}
-        <div className='divide-y divide-slate-100'>
-          {replies.isLoading && <SkeletonCard />}
-          {!replies.isLoading && (replies.data ?? []).length === 0 && (
-            <EmptyState title='No replies yet' message='Be the first to reply.' />
+        <div>
+          {replies.isLoading && <div className='p-4'><SkeletonCard /></div>}
+          {!replies.isLoading && (replies.data?.results ?? []).length === 0 && (
+            <div className='p-4'>
+              <EmptyState title='No replies yet' message='Be the first to reply.' icon={<MessageCircle className='h-8 w-8' />} />
+            </div>
           )}
-          {(replies.data ?? []).map((reply) => (
-            <div key={reply._id} className='py-3'>
+          {(replies.data?.results ?? []).map((reply) => (
+            <div key={reply._id} className='border-b border-gray-200 px-4 py-3 hover:bg-gray-50'>
               {editId === reply._id ? (
                 <div className='flex gap-2'>
                   <textarea
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
                     rows={2}
-                    className='flex-1 resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500'
+                    className='flex-1 resize-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-[#2C3248]/50 focus:ring-1 focus:ring-[#2C3248]/20'
                   />
                   <div className='flex flex-col gap-1'>
-                    <button onClick={async () => { await updateReply.mutateAsync({ id: reply._id, description: editText }); setEditId(''); }} className='rounded-full p-1.5 text-green-600 hover:bg-green-50'><Check className='h-4 w-4' /></button>
-                    <button onClick={() => setEditId('')} className='rounded-full p-1.5 text-slate-500 hover:bg-slate-100'><X className='h-4 w-4' /></button>
+                    <button onClick={async () => { await updateReply.mutateAsync({ id: reply._id, content: editText }); setEditId(''); }} className='rounded-full p-1.5 text-green-600 hover:bg-green-50'><Check className='h-4 w-4' /></button>
+                    <button onClick={() => setEditId('')} className='rounded-full p-1.5 text-gray-400 hover:bg-gray-100'><X className='h-4 w-4' /></button>
                   </div>
                 </div>
               ) : (
                 <div className='flex items-start gap-3'>
-                  <Avatar src={reply.user?.picture} name={reply.user?.fullName ?? reply.user?.username} className='h-8 w-8 text-xs' />
+                  <Avatar src={reply.user?.picture} name={reply.user?.fullName ?? reply.user?.username} size='sm' />
                   <div className='flex-1'>
                     <div className='flex items-center gap-2'>
-                      <span className='text-sm font-semibold text-slate-900'>{reply.user?.fullName ?? reply.user?.username}</span>
-                      <span className='text-xs text-slate-400'>@{reply.user?.username}</span>
+                      <span className='text-sm font-semibold text-gray-900'>{reply.user?.fullName ?? reply.user?.username}</span>
+                      <span className='text-xs text-gray-500'>@{reply.user?.username}</span>
                     </div>
-                    <p className='mt-0.5 text-sm text-slate-700'>{reply.description}</p>
-                    <div className='mt-2 flex items-center gap-3 text-xs text-slate-500'>
+                    <p className='mt-0.5 text-sm text-gray-700'>{reply.content}</p>
+                    <div className='mt-2 flex items-center gap-3 text-xs text-gray-500'>
                       <button
                         onClick={() => reply.liked ? unlikeReply.mutate(reply._id) : likeReply.mutate(reply._id)}
-                        className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 hover:bg-red-50 hover:text-red-500', reply.liked && 'text-red-500')}
+                        className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 transition-colors hover:text-[#2C3248]', reply.liked && 'text-[#2C3248]')}
                       >
-                        <Heart className={cn('h-3.5 w-3.5', reply.liked && 'fill-red-500')} />
+                        <Heart className={cn('h-3.5 w-3.5', reply.liked && 'fill-[#2C3248]')} strokeWidth={1.5} />
                         {reply.likesCount ?? 0}
                       </button>
                       {me?._id === reply.user?._id && (
                         <>
-                          <button onClick={() => { setEditId(reply._id); setEditText(reply.description); }} className='rounded-full p-1 hover:bg-slate-100'><Pencil className='h-3.5 w-3.5' /></button>
-                          <button onClick={() => deleteReply.mutate(reply._id)} className='rounded-full p-1 hover:bg-red-50 hover:text-red-500'><Trash2 className='h-3.5 w-3.5' /></button>
+                          <button onClick={() => { setEditId(reply._id); setEditText(reply.content); }} className='rounded-full p-1 hover:bg-gray-100 transition-colors'><Pencil className='h-3.5 w-3.5' /></button>
+                          <button onClick={() => deleteReply.mutate(reply._id)} className='rounded-full p-1 hover:bg-red-50 hover:text-red-500 transition-colors'><Trash2 className='h-3.5 w-3.5' /></button>
                         </>
                       )}
                     </div>

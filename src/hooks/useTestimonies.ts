@@ -3,6 +3,7 @@
 import { api, unwrap } from '@/lib/api';
 import type { Paginated } from '@/types/api';
 import type { UpdateTestimonyPayload } from '@/types/domain';
+import type { User } from '@/types/auth';
 import type { BroadcastRequest, Reply, Testimony, TestimonyStats } from '@/types/testimony';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -54,7 +55,7 @@ export function usePublicTestimony(id: string) {
 export function useTrending() {
   return useQuery({
     queryKey: testimonyKeys.trending,
-    queryFn: async () => unwrap<Testimony[]>((await api.get('/user/testimony/filter/trending')).data),
+    queryFn: async () => unwrap<Paginated<Testimony>>((await api.get('/user/testimony/filter/trending')).data),
   });
 }
 
@@ -69,7 +70,7 @@ export function useTestimony(id: string) {
 export function useReplies(id: string) {
   return useQuery({
     queryKey: testimonyKeys.replies(id),
-    queryFn: async () => unwrap<Reply[]>((await api.get(`/user/testimony/${id}/replies`)).data),
+    queryFn: async () => unwrap<Paginated<Reply>>((await api.get(`/user/testimony/${id}/replies`)).data),
     enabled: !!id,
   });
 }
@@ -116,7 +117,7 @@ export function useTestimonyStats() {
 export function useTestimonyTags(limit?: number) {
   return useQuery({
     queryKey: testimonyKeys.tags,
-    queryFn: async () => unwrap<string[]>((await api.get(`/user/testimony/tag/all${limit ? `?limit=${limit}` : ''}`)).data),
+    queryFn: async () => unwrap<Paginated<string>>((await api.get(`/user/testimony/tag/all${limit ? `?limit=${limit}` : ''}`)).data),
   });
 }
 
@@ -127,7 +128,8 @@ export function useCreateTestimony() {
   return useMutation({
     mutationFn: async (payload: { title: string; description: string; tags?: string[]; mediaFiles?: File[]; isBroadcast?: boolean; broadcastOrganizationId?: string; isSecret?: boolean }) => {
       if (!payload.mediaFiles?.length) {
-        const { mediaFiles, ...rest } = payload;
+        const { mediaFiles: _mf, ...rest } = payload;
+        void _mf;
         return (await api.post('/user/testimony', rest)).data;
       }
 
@@ -240,7 +242,7 @@ export function useTestimonyLiked(id: string) {
 export function useTestimonyLikes(id: string) {
   return useQuery({
     queryKey: testimonyKeys.likes(id),
-    queryFn: async () => (await api.get(`/user/testimony/${id}/likes`)).data,
+    queryFn: async () => unwrap<Paginated<{ _id: string; user: User }>>((await api.get(`/user/testimony/${id}/likes`)).data),
     enabled: !!id,
   });
 }
@@ -250,8 +252,8 @@ export function useTestimonyLikes(id: string) {
 export function useReplyToTestimony() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, description }: { id: string; description: string }) =>
-      (await api.post(`/user/testimony/${id}/reply`, { description })).data,
+    mutationFn: async ({ id, content }: { id: string; content: string }) =>
+      (await api.post(`/user/testimony/${id}/reply`, { content })).data,
     onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: testimonyKeys.replies(vars.id) }),
   });
 }
@@ -259,8 +261,8 @@ export function useReplyToTestimony() {
 export function useUpdateReply() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, description }: { id: string; description: string }) =>
-      (await api.put(`/user/testimony/reply/${id}`, { description })).data,
+    mutationFn: async ({ id, content }: { id: string; content: string }) =>
+      (await api.put(`/user/testimony/reply/${id}`, { content })).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['testimony'] }),
   });
 }
@@ -300,7 +302,7 @@ export function useReplyLiked(id: string) {
 export function useReplyLikes(id: string) {
   return useQuery({
     queryKey: testimonyKeys.replyLikes(id),
-    queryFn: async () => (await api.get(`/user/testimony/reply/${id}/likes`)).data,
+    queryFn: async () => unwrap<Paginated<{ _id: string; user: User }>>((await api.get(`/user/testimony/reply/${id}/likes`)).data),
     enabled: !!id,
   });
 }

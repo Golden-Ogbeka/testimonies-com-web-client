@@ -1,6 +1,7 @@
 'use client';
 
 import { api, unwrap } from '@/lib/api';
+import type { Paginated } from '@/types/api';
 import type { User } from '@/types/auth';
 import type {
     BlockedUser,
@@ -47,7 +48,7 @@ export function useProfileById(id: string) {
 export function useFollowers(id: string) {
   return useQuery({
     queryKey: profileKeys.followers(id),
-    queryFn: async () => unwrap<User[]>((await api.get(`/user/profile/followers/${id}`)).data),
+    queryFn: async () => unwrap<Paginated<User>>((await api.get(`/user/profile/followers/${id}`)).data),
     enabled: !!id,
   });
 }
@@ -55,7 +56,7 @@ export function useFollowers(id: string) {
 export function useFollowing(id: string) {
   return useQuery({
     queryKey: profileKeys.following(id),
-    queryFn: async () => unwrap<User[]>((await api.get(`/user/profile/following/${id}`)).data),
+    queryFn: async () => unwrap<Paginated<User>>((await api.get(`/user/profile/following/${id}`)).data),
     enabled: !!id,
   });
 }
@@ -63,14 +64,14 @@ export function useFollowing(id: string) {
 export function useFollowRequests() {
   return useQuery({
     queryKey: profileKeys.followRequests,
-    queryFn: async () => unwrap<FollowRequest[]>((await api.get('/user/profile/follow-requests')).data),
+    queryFn: async () => unwrap<Paginated<FollowRequest>>((await api.get('/user/profile/follow-requests')).data),
   });
 }
 
-export function useBlockedUsers() {
+export function useBlockedUsers(page = 1) {
   return useQuery({
-    queryKey: profileKeys.blocked,
-    queryFn: async () => unwrap<BlockedUser[]>((await api.get('/user/profile/blocked')).data),
+    queryKey: [...profileKeys.blocked, page] as const,
+    queryFn: async () => unwrap<Paginated<BlockedUser>>((await api.get(`/user/profile/blocked?page=${page}`)).data),
   });
 }
 
@@ -92,7 +93,7 @@ export function useProfileShareUrlByUsername(username: string) {
 export function useSearchUsers(name: string) {
   return useQuery({
     queryKey: profileKeys.search(name),
-    queryFn: async () => unwrap<User[]>((await api.get(`/user/profile/search-users?name=${encodeURIComponent(name)}`)).data),
+    queryFn: async () => unwrap<Paginated<User>>((await api.get(`/user/profile/search-users?name=${encodeURIComponent(name)}`)).data),
     enabled: name.length > 1,
   });
 }

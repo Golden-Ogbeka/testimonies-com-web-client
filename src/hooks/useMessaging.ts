@@ -1,6 +1,7 @@
 'use client';
 
 import { api, unwrap } from '@/lib/api';
+import type { Paginated } from '@/types/api';
 import type { ConversationPreview, Message } from '@/types/message';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -13,21 +14,21 @@ const msgKeys = {
 export function useContacts() {
   return useQuery({
     queryKey: msgKeys.contacts,
-    queryFn: async () => unwrap<ConversationPreview[]>((await api.get('/user/messaging/contacts')).data),
+    queryFn: async () => unwrap<Paginated<ConversationPreview>>((await api.get('/user/messaging/contacts')).data),
   });
 }
 
 export function useHistory() {
   return useQuery({
     queryKey: msgKeys.history,
-    queryFn: async () => unwrap<Message[]>((await api.get('/user/messaging/history')).data),
+    queryFn: async () => unwrap<Paginated<Message>>((await api.get('/user/messaging/history')).data),
   });
 }
 
 export function useConversation(userId: string) {
   return useQuery({
     queryKey: msgKeys.conversation(userId),
-    queryFn: async () => unwrap<Message[]>((await api.get(`/user/messaging/conversation/${userId}`)).data),
+    queryFn: async () => unwrap<Paginated<Message>>((await api.get(`/user/messaging/conversation/${userId}`)).data),
     enabled: !!userId,
   });
 }
@@ -35,10 +36,11 @@ export function useConversation(userId: string) {
 export function useSendMessage() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { to: string; text: string }) => (await api.post('/user/messaging/send', payload)).data,
+    mutationFn: async (payload: { recipientId: string; recipientType: 'user' | 'organization'; content: string }) =>
+      (await api.post('/user/messaging/send', payload)).data,
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['messaging'] });
-      qc.invalidateQueries({ queryKey: msgKeys.conversation(vars.to) });
+      qc.invalidateQueries({ queryKey: msgKeys.conversation(vars.recipientId) });
     },
   });
 }
@@ -46,7 +48,7 @@ export function useSendMessage() {
 export function useEditMessage() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, text }: { id: string; text: string }) => (await api.put(`/user/messaging/message/${id}`, { text })).data,
+    mutationFn: async ({ id, content }: { id: string; content: string }) => (await api.put(`/user/messaging/message/${id}`, { content })).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['messaging'] }),
   });
 }
@@ -86,7 +88,7 @@ export function useGetUserForMessaging(id: string) {
 export function useSearchMessages(keyword: string, page = 1) {
   return useQuery({
     queryKey: ['messaging', 'search', keyword, page],
-    queryFn: async () => (await api.get(`/user/messaging/search?keyword=${encodeURIComponent(keyword)}&page=${page}`)).data,
+    queryFn: async () => unwrap<Paginated<Message>>((await api.get(`/user/messaging/search?q=${encodeURIComponent(keyword)}&page=${page}`)).data),
     enabled: keyword.length > 1,
   });
 }

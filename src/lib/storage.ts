@@ -12,7 +12,7 @@ export const storage = {
   setToken(token: string): void {
     if (!canUseStorage) return;
     localStorage.setItem(STORAGE_KEYS.token, token);
-    document.cookie = `${TOKEN_COOKIE}=${encodeURIComponent(token)}; path=/; SameSite=Lax`;
+    document.cookie = `${TOKEN_COOKIE}=${encodeURIComponent(token)}; path=/; SameSite=Lax; max-age=${60 * 60 * 24 * 7}`;
   },
   getAuthKind(): AuthKind | null {
     if (!canUseStorage) return null;

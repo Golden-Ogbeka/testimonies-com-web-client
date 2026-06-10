@@ -1,14 +1,21 @@
 export type SignUpPayload = {
-  email: string;
+  email?: string;
   password: string;
   username?: string;
-  fullName?: string;
-  organizationName?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  businessName?: string;
+  businessEmail?: string;
+  businessPhoneNumber?: string;
+  businessAddress?: string;
 };
 
 export type UpdateProfilePayload = {
-  fullName?: string;
+  firstName?: string;
+  lastName?: string;
   bio?: string;
+  address?: string;
   phone?: string;
   username?: string;
 };

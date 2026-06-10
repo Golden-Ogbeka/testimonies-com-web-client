@@ -1,18 +1,21 @@
 'use client';
 
-import { Avatar, Card, EmptyState, SkeletonCard } from '@/components/common';
+import { EmptyState, PageHeader, SearchInput, SkeletonCard, SpinnerPage, TabBar, UserRow } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useSearchUsers } from '@/hooks/useProfile';
 import { useFeed, useTestimonyTags, useTrending } from '@/hooks/useTestimonies';
-import { Search } from 'lucide-react';
-import Link from 'next/link';
-import { useState } from 'react';
+import { Hash, Search, TrendingUp, Users } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, Suspense } from 'react';
 
 type Tab = 'people' | 'testimonies' | 'trending' | 'tags';
 
-export default function ExplorePage() {
-  const [tab, setTab] = useState<Tab>('people');
-  const [query, setQuery] = useState('');
+function ExploreContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const initialTag = searchParams.get('tag') ?? '';
+  const [tab, setTab] = useState<Tab>(initialTag ? 'tags' : 'people');
+  const [query, setQuery] = useState(initialTag);
 
   const users = useSearchUsers(query);
   const trending = useTrending();
@@ -26,51 +29,42 @@ export default function ExplorePage() {
       )
     : (feed.data?.results ?? []);
 
+  const handleTagClick = (tag: string) => {
+    setQuery(tag);
+    setTab('testimonies');
+    router.push(`/explore?tag=${tag}`);
+  };
+
   return (
     <div>
-      <div className='sticky top-0 z-10 border-b border-slate-200 bg-white/80 px-4 py-3 backdrop-blur'>
-        <h1 className='mb-3 text-lg font-bold'>Explore</h1>
-        <div className='relative'>
-          <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400' />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder='Search people or testimonies...'
-            className='w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-sm outline-none focus:ring-2 focus:ring-blue-500'
-          />
-        </div>
+      <div className='sticky top-0 z-10 border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-lg'>
+        <h1 className='mb-3 text-lg font-bold text-gray-900'>Explore</h1>
+        <SearchInput value={query} onChange={(v) => { setQuery(v); setTab(v ? 'people' : 'people'); }} placeholder='Search people or testimonies...' />
       </div>
 
-      <div className='flex border-b border-slate-200'>
-        {(['people', 'testimonies', 'trending', 'tags'] as Tab[]).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`flex-1 py-3 text-sm font-medium capitalize transition hover:bg-slate-50 ${tab === t ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
+      <TabBar
+        tabs={[
+          { id: 'people', label: 'People', icon: Users },
+          { id: 'testimonies', label: 'Testimonies', icon: Search },
+          { id: 'trending', label: 'Trending', icon: TrendingUp },
+          { id: 'tags', label: 'Tags', icon: Hash },
+        ]}
+        activeTab={tab}
+        onTabChange={(t) => setTab(t as Tab)}
+      />
 
       <div className='p-4 space-y-3'>
         {tab === 'people' && (
           <>
             {users.isLoading && <SkeletonCard />}
-            {!users.isLoading && query.length > 1 && (users.data ?? []).length === 0 && (
-              <EmptyState title='No users found' message='Try a different name.' />
+            {!users.isLoading && query.length > 1 && (users.data?.results ?? []).length === 0 && (
+              <EmptyState title='No users found' message='Try a different name.' icon={<Users className='h-8 w-8' />} />
             )}
-            {query.length <= 1 && <p className='text-sm text-slate-500 text-center py-8'>Type at least 2 characters to search people.</p>}
-            {(users.data ?? []).map((user) => (
-              <Link key={user._id} href={`/u/${user.username}`}>
-                <Card className='flex items-center gap-3 hover:bg-slate-50 transition-colors'>
-                  <Avatar src={user.picture} name={user.fullName ?? user.username} />
-                  <div>
-                    <p className='font-semibold text-slate-900'>{user.fullName ?? user.username}</p>
-                    <p className='text-sm text-slate-500'>@{user.username}</p>
-                  </div>
-                </Card>
-              </Link>
+            {query.length <= 1 && (
+              <p className='py-8 text-center text-sm text-gray-400'>Type at least 2 characters to search people.</p>
+            )}
+            {(users.data?.results ?? []).map((user) => (
+              <UserRow key={user._id} user={user} href={`/u/${user.username}`} />
             ))}
           </>
         )}
@@ -79,7 +73,7 @@ export default function ExplorePage() {
           <>
             {feed.isLoading && <SkeletonCard />}
             {filteredTestimonies.length === 0 && !feed.isLoading && (
-              <EmptyState title='No testimonies found' message='Try a different keyword.' />
+              <EmptyState title='No testimonies found' message='Try a different keyword.' icon={<Search className='h-8 w-8' />} />
             )}
             {filteredTestimonies.map((t) => <TestimonyCard key={t._id} testimony={t} compact />)}
           </>
@@ -88,10 +82,10 @@ export default function ExplorePage() {
         {tab === 'trending' && (
           <>
             {trending.isLoading && <SkeletonCard />}
-            {(trending.data ?? []).length === 0 && !trending.isLoading && (
-              <EmptyState title='Nothing trending' message='Check back later.' />
+            {(trending.data?.results ?? []).length === 0 && !trending.isLoading && (
+              <EmptyState title='Nothing trending' message='Check back later.' icon={<TrendingUp className='h-8 w-8' />} />
             )}
-            {(trending.data ?? []).map((t) => <TestimonyCard key={t._id} testimony={t} compact />)}
+            {(trending.data?.results ?? []).map((t) => <TestimonyCard key={t._id} testimony={t} compact />)}
           </>
         )}
 
@@ -99,11 +93,11 @@ export default function ExplorePage() {
           <>
             {tags.isLoading && <SkeletonCard />}
             <div className='flex flex-wrap gap-2'>
-              {(tags.data ?? []).map((tag) => (
+              {(tags.data?.results ?? []).map((tag) => (
                 <button
                   key={tag}
-                  onClick={() => { setQuery(tag); setTab('testimonies'); }}
-                  className='rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100 transition-colors'
+                  onClick={() => handleTagClick(tag)}
+                  className='rounded-full bg-[#2C3248]/5 px-4 py-2 text-sm font-medium text-[#2C3248] transition-colors hover:bg-[#2C3248]/10'
                 >
                   #{tag}
                 </button>
@@ -113,5 +107,13 @@ export default function ExplorePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense fallback={<SpinnerPage />}>
+      <ExploreContent />
+    </Suspense>
   );
 }

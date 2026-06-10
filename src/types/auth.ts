@@ -5,6 +5,8 @@ export type User = {
   email: string;
   username?: string;
   fullName?: string;
+  firstName?: string;
+  lastName?: string;
   picture?: string;
   coverPicture?: string;
   kind?: AuthKind;
@@ -18,5 +20,5 @@ export type AuthResponse = {
 
 export type OtpPayload = {
   email: string;
-  otp: string;
+  verificationCode: string;
 };

@@ -4,7 +4,7 @@ export type Message = {
   _id: string;
   from?: User;
   to?: User;
-  text: string;
+  content: string;
   createdAt: string;
   read?: boolean;
 };
