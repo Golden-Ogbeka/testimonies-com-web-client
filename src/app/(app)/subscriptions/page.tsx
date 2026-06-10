@@ -1,12 +1,12 @@
 'use client';
 
-import { Button, EmptyState, Input, SkeletonCard } from '@/components/common';
+import { Button, EmptyState, Input, PageHeader, SelectableCard, SkeletonCard, TabBar } from '@/components/common';
 import {
   useCancelSubscription, usePaySubscription, useSubscribe,
   useSubscriptionHistory, useSubscriptionPlans,
   useSubscriptionStatus, useVerifyPayment,
 } from '@/hooks/useSubscription';
-import { apiMessage, cn } from '@/lib/utils';
+import { apiMessage } from '@/lib/utils';
 import { CheckCircle, Clock, CreditCard } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -28,37 +28,28 @@ export default function SubscriptionsPage() {
 
   return (
     <div>
-      <div className='sticky top-0 z-10 border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-lg'>
-        <div className='flex items-center gap-2'>
-          <CreditCard className='h-5 w-5 text-[#2C3248]' />
-          <h1 className='text-lg font-bold text-gray-900'>Subscription</h1>
-        </div>
-      </div>
+      <PageHeader icon={CreditCard} title='Subscription' />
 
-      <div className='flex border-b border-gray-200'>
-        {(['plans', 'status', 'history'] as Tab[]).map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={cn('flex-1 py-3 text-sm font-medium capitalize transition-colors hover:bg-gray-50',
-              tab === t ? 'border-b-2 border-[#2C3248] text-[#2C3248]' : 'text-gray-500')}>
-            {t}
-          </button>
-        ))}
-      </div>
+      <TabBar
+        tabs={[
+          { id: 'plans', label: 'Plans' },
+          { id: 'status', label: 'Status' },
+          { id: 'history', label: 'History' },
+        ]}
+        activeTab={tab}
+        onTabChange={(t) => setTab(t as Tab)}
+      />
 
       <div className='p-4 space-y-4'>
         {tab === 'plans' && (
           <>
             {plans.isLoading && <SkeletonCard />}
-            {(plans.data ?? []).length === 0 && !plans.isLoading && <EmptyState title='No plans available' message='' icon={<CreditCard className='h-8 w-8' />} />}
+            {(plans.data?.results ?? []).length === 0 && !plans.isLoading && <EmptyState title='No plans available' message='' icon={<CreditCard className='h-8 w-8' />} />}
             <div className='grid gap-4 sm:grid-cols-2'>
-              {(plans.data ?? []).map((plan) => {
+              {(plans.data?.results ?? []).map((plan) => {
                 const id = plan._id ?? plan.id ?? '';
-                const isSelected = selectedPlanId === id;
                 return (
-                  <div key={id}
-                    className={cn('cursor-pointer rounded-xl border bg-white p-4 transition-all',
-                      isSelected ? 'border-[#2C3248]/50 ring-1 ring-[#2C3248]/20' : 'border-gray-200 hover:border-gray-300')}
-                    onClick={() => setSelectedPlanId(id)}>
+                  <SelectableCard key={id} selected={selectedPlanId === id} onClick={() => setSelectedPlanId(id)}>
                     <div className='flex items-start justify-between'>
                       <div>
                         <p className='font-bold text-gray-900'>{plan.name}</p>
@@ -79,7 +70,7 @@ export default function SubscriptionsPage() {
                         Pay
                       </Button>
                     </div>
-                  </div>
+                  </SelectableCard>
                 );
               })}
             </div>
@@ -125,9 +116,9 @@ export default function SubscriptionsPage() {
         {tab === 'history' && (
           <>
             {history.isLoading && <SkeletonCard />}
-            {(history.data ?? []).length === 0 && !history.isLoading && <EmptyState title='No history' message='No subscription history yet.' icon={<Clock className='h-8 w-8' />} />}
+            {(history.data?.results ?? []).length === 0 && !history.isLoading && <EmptyState title='No history' message='No subscription history yet.' icon={<Clock className='h-8 w-8' />} />}
             <div className='space-y-2'>
-              {(history.data ?? []).map((item) => (
+              {(history.data?.results ?? []).map((item) => (
                 <div key={item._id} className='flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4'>
                   <div className='flex items-center gap-3'>
                     <Clock className='h-4 w-4 text-gray-400' />

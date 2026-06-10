@@ -4,6 +4,7 @@ import { api, unwrap } from '@/lib/api';
 import { storage } from '@/lib/storage';
 import { useAuthState } from '@/app/providers';
 import type { AuthResponse, OtpPayload, User } from '@/types/auth';
+import type { Paginated } from '@/types/api';
 import type { SignUpPayload } from '@/types/domain';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -39,12 +40,9 @@ export function useMe() {
 }
 
 export function useSignIn() {
-  const qc = useQueryClient();
-  const { setAuth } = useAuthState();
   return useMutation({
     mutationFn: async (payload: { email: string; password: string }) =>
-      unwrap<AuthResponse>((await api.post('/user/auth/signin', payload)).data),
-    onSuccess: (data) => persistAuth(data, qc, setAuth),
+      (await api.post('/user/auth/signin', payload)).data,
   });
 }
 
@@ -74,7 +72,10 @@ export function useSignUpOrganization() {
 
 export function useSendOtp(mode: 'signup' | 'signin' | 'reset-password') {
   return useMutation({
-    mutationFn: async (payload: { email: string }) => (await api.post(`/user/auth/${mode}/send-otp`, payload)).data,
+    mutationFn: async (payload: { email: string }) => {
+      const path = mode === 'reset-password' ? '/user/auth/reset-password' : `/user/auth/${mode}/send-otp`;
+      return (await api.post(path, payload)).data;
+    },
   });
 }
 
@@ -96,7 +97,7 @@ export function useVerifyOtp(mode: 'signup' | 'signin') {
 
 export function useResetPasswordUpdate() {
   return useMutation({
-    mutationFn: async (payload: { email: string; otp: string; password: string }) =>
+    mutationFn: async (payload: { email: string; verificationCode: string; newPassword: string }) =>
       (await api.post('/user/auth/reset-password/update', payload)).data,
   });
 }
@@ -105,7 +106,7 @@ export function useSessions() {
   return useQuery({
     queryKey: authKeys.sessions,
     queryFn: async () =>
-      unwrap<Array<{ _id: string; createdAt?: string; ip?: string; userAgent?: string }>>(
+      unwrap<Paginated<{ _id: string; createdAt?: string; ip?: string; userAgent?: string }>>(
         (await api.get('/user/auth/sessions')).data
       ),
     enabled: !!storage.getToken(),

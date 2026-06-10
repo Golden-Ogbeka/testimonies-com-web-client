@@ -1,6 +1,7 @@
 'use client';
 
 import { api, unwrap } from '@/lib/api';
+import type { Paginated } from '@/types/api';
 import type { CancelSubscriptionPayload, PaySubscriptionPayload, SubscribePayload, SubscriptionHistoryItem, SubscriptionPlan, VerifyPaymentPayload } from '@/types/domain';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -14,7 +15,7 @@ const subscriptionKeys = {
 export function useSubscriptionPlans() {
   return useQuery({
     queryKey: subscriptionKeys.plans,
-    queryFn: async () => unwrap<SubscriptionPlan[]>((await api.get('/user/subscription/plans')).data),
+    queryFn: async () => unwrap<Paginated<SubscriptionPlan>>((await api.get('/user/subscription/plans')).data),
   });
 }
 
@@ -36,7 +37,7 @@ export function useSubscriptionStatus() {
 export function useSubscriptionHistory() {
   return useQuery({
     queryKey: subscriptionKeys.history,
-    queryFn: async () => unwrap<SubscriptionHistoryItem[]>((await api.get('/user/subscription/history')).data),
+    queryFn: async () => unwrap<Paginated<SubscriptionHistoryItem>>((await api.get('/user/subscription/history')).data),
   });
 }
 

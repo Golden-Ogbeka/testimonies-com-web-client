@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, Button, EmptyState, SkeletonCard } from '@/components/common';
+import { Avatar, Button, EmptyState, SkeletonCard, TabBar } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useMe } from '@/hooks/useAuth';
 import {
@@ -10,7 +10,6 @@ import {
   useUnfollowUser,
 } from '@/hooks/useProfile';
 import { useFeed, useUserReplies } from '@/hooks/useTestimonies';
-import { cn } from '@/lib/utils';
 import { Settings, UserMinus, UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -99,28 +98,24 @@ export default function ProfilePage() {
 
         <div className='mt-3 flex gap-4 text-sm text-gray-500'>
           <button onClick={() => setTab('followers')} className='hover:text-gray-700 transition-colors'>
-            <span className='font-bold text-gray-900'>{followers.data?.length ?? 0}</span> Followers
+            <span className='font-bold text-gray-900'>{followers.data?.results?.length ?? 0}</span> Followers
           </button>
           <button onClick={() => setTab('following')} className='hover:text-gray-700 transition-colors'>
-            <span className='font-bold text-gray-900'>{following.data?.length ?? 0}</span> Following
+            <span className='font-bold text-gray-900'>{following.data?.results?.length ?? 0}</span> Following
           </button>
         </div>
       </div>
 
-      <div className='flex border-b border-gray-200'>
-        {(['testimonies', 'replies', 'followers', 'following'] as Tab[]).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={cn(
-              'flex-1 py-3 text-sm font-medium capitalize transition-colors hover:bg-gray-50',
-              tab === t ? 'border-b-2 border-[#2C3248] text-[#2C3248]' : 'text-gray-500'
-            )}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
+      <TabBar
+        tabs={[
+          { id: 'testimonies', label: 'Testimonies' },
+          { id: 'replies', label: 'Replies' },
+          { id: 'followers', label: 'Followers' },
+          { id: 'following', label: 'Following' },
+        ]}
+        activeTab={tab}
+        onTabChange={(t) => setTab(t as Tab)}
+      />
 
       <div>
         {tab === 'testimonies' && (
@@ -144,7 +139,7 @@ export default function ProfilePage() {
             )}
             {(userReplies.data?.results ?? []).map((reply) => (
               <div key={reply._id} className='border-b border-gray-200 px-4 py-3 hover:bg-gray-50'>
-                <p className='text-sm text-gray-700'>{reply.description}</p>
+                <p className='text-sm text-gray-700'>{reply.content}</p>
                 <p className='mt-1 text-xs text-gray-400'>{new Date(reply.createdAt).toLocaleDateString()}</p>
               </div>
             ))}
@@ -154,10 +149,10 @@ export default function ProfilePage() {
         {tab === 'followers' && (
           <>
             {followers.isLoading && <SkeletonCard />}
-            {(followers.data ?? []).length === 0 && !followers.isLoading && (
+            {(followers.data?.results ?? []).length === 0 && !followers.isLoading && (
               <div className='p-4'><EmptyState title='No followers' message='' /></div>
             )}
-            {(followers.data ?? []).map((u) => (
+            {(followers.data?.results ?? []).map((u) => (
               <Link key={u._id} href={`/u/${u.username}`}>
                 <div className='flex items-center gap-3 border-b border-gray-200 px-4 py-3 transition-colors hover:bg-gray-50'>
                   <Avatar src={u.picture} name={u.fullName ?? u.username} />
@@ -174,10 +169,10 @@ export default function ProfilePage() {
         {tab === 'following' && (
           <>
             {following.isLoading && <SkeletonCard />}
-            {(following.data ?? []).length === 0 && !following.isLoading && (
+            {(following.data?.results ?? []).length === 0 && !following.isLoading && (
               <div className='p-4'><EmptyState title='Not following anyone' message='' /></div>
             )}
-            {(following.data ?? []).map((u) => (
+            {(following.data?.results ?? []).map((u) => (
               <Link key={u._id} href={`/u/${u.username}`}>
                 <div className='flex items-center gap-3 border-b border-gray-200 px-4 py-3 transition-colors hover:bg-gray-50'>
                   <Avatar src={u.picture} name={u.fullName ?? u.username} />

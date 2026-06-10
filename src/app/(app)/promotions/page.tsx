@@ -1,13 +1,13 @@
 'use client';
 
-import { Button, EmptyState, Input, SkeletonCard } from '@/components/common';
+import { Button, EmptyState, Input, PageHeader, SkeletonCard, StatusBadge, TabBar } from '@/components/common';
 import {
   useActivatePromotion, useCreatePromotion, useDeactivatePromotion,
   useDeletePromotion, useDeletePromotionRequest,
   usePromotionForAd, usePromotionRequests, usePromotions,
   usePromotionStats, useUpdatePromotion,
 } from '@/hooks/usePromotion';
-import { apiMessage, cn } from '@/lib/utils';
+import { apiMessage } from '@/lib/utils';
 import { BarChart2, Megaphone } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -36,27 +36,18 @@ export default function PromotionsPage() {
 
   return (
     <div>
-      <div className='sticky top-0 z-10 border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-lg'>
-        <div className='flex items-center gap-2'>
-          <Megaphone className='h-5 w-5 text-[#2C3248]' />
-          <h1 className='text-lg font-bold text-gray-900'>Promotions</h1>
-        </div>
-      </div>
+      <PageHeader icon={Megaphone} title='Promotions' />
 
-      <div className='flex border-b border-gray-200'>
-        {([
-          { id: 'my-promotions' as Tab, label: 'My Promotions' },
-          { id: 'requests' as Tab, label: 'Requests' },
-          { id: 'stats' as Tab, label: 'Stats' },
-          { id: 'ad' as Tab, label: 'View Ad' },
-        ]).map(({ id, label }) => (
-          <button key={id} onClick={() => setTab(id)}
-            className={cn('flex-1 py-3 text-sm font-medium transition-colors hover:bg-gray-50',
-              tab === id ? 'border-b-2 border-[#2C3248] text-[#2C3248]' : 'text-gray-500')}>
-            {label}
-          </button>
-        ))}
-      </div>
+      <TabBar
+        tabs={[
+          { id: 'my-promotions', label: 'My Promotions' },
+          { id: 'requests', label: 'Requests' },
+          { id: 'stats', label: 'Stats' },
+          { id: 'ad', label: 'View Ad' },
+        ]}
+        activeTab={tab}
+        onTabChange={(t) => setTab(t as Tab)}
+      />
 
       <div className='p-4 space-y-4'>
         {tab === 'my-promotions' && (
@@ -73,10 +64,10 @@ export default function PromotionsPage() {
             </div>
 
             {promos.isLoading && <SkeletonCard />}
-            {(promos.data ?? []).length === 0 && !promos.isLoading && <EmptyState title='No promotions' message='Create your first promotion.' icon={<Megaphone className='h-8 w-8' />} />}
+            {(promos.data?.results ?? []).length === 0 && !promos.isLoading && <EmptyState title='No promotions' message='Create your first promotion.' icon={<Megaphone className='h-8 w-8' />} />}
 
             <div className='space-y-3'>
-              {(promos.data ?? []).map((item) => {
+              {(promos.data?.results ?? []).map((item) => {
                 const id = item._id ?? item.id ?? '';
                 const isEditing = editingId === id;
                 return (
@@ -97,10 +88,7 @@ export default function PromotionsPage() {
                         <div className='flex items-start justify-between'>
                           <div>
                             <p className='font-semibold text-gray-900'>{item.title ?? item.name}</p>
-                            <span className={cn('mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium',
-                              item.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500')}>
-                              {item.status ?? 'pending'}
-                            </span>
+                            <StatusBadge status={item.status} className='mt-1' />
                           </div>
                           <Megaphone className='h-5 w-5 text-gray-400' />
                         </div>
@@ -122,17 +110,15 @@ export default function PromotionsPage() {
         {tab === 'requests' && (
           <>
             {requests.isLoading && <SkeletonCard />}
-            {(requests.data ?? []).length === 0 && !requests.isLoading && <EmptyState title='No requests' message='No pending promotion requests.' icon={<Megaphone className='h-8 w-8' />} />}
+            {(requests.data?.results ?? []).length === 0 && !requests.isLoading && <EmptyState title='No requests' message='No pending promotion requests.' icon={<Megaphone className='h-8 w-8' />} />}
             <div className='space-y-2'>
-              {(requests.data ?? []).map((item) => {
+              {(requests.data?.results ?? []).map((item) => {
                 const id = item._id ?? item.id ?? '';
                 return (
                   <div key={id} className='flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4'>
                     <div>
                       <p className='font-semibold text-gray-900'>{item.title ?? item.name}</p>
-                      <span className={cn('text-xs', item.status === 'approved' ? 'text-green-600' : item.status === 'rejected' ? 'text-red-500' : 'text-gray-500')}>
-                        {item.status ?? 'pending'}
-                      </span>
+                      <StatusBadge status={item.status} />
                     </div>
                     <Button variant='danger' className='text-xs px-3 py-1.5' onClick={() => deleteRequest.mutate(id)}>Delete</Button>
                   </div>
@@ -151,18 +137,16 @@ export default function PromotionsPage() {
             {stats.isLoading && <SkeletonCard />}
             {stats.data && (
               <div className='grid grid-cols-3 gap-4'>
-                <div className='rounded-lg border border-gray-200 bg-white p-4 text-center'>
-                  <p className='text-2xl font-bold text-[#2C3248]'>{stats.data.views ?? 0}</p>
-                  <p className='text-xs text-gray-500 mt-1'>Views</p>
-                </div>
-                <div className='rounded-lg border border-gray-200 bg-white p-4 text-center'>
-                  <p className='text-2xl font-bold text-[#2C3248]'>{stats.data.clicks ?? 0}</p>
-                  <p className='text-xs text-gray-500 mt-1'>Clicks</p>
-                </div>
-                <div className='rounded-lg border border-gray-200 bg-white p-4 text-center'>
-                  <p className='text-2xl font-bold text-[#2C3248]'>{stats.data.conversions ?? 0}</p>
-                  <p className='text-xs text-gray-500 mt-1'>Conversions</p>
-                </div>
+                {[
+                  { label: 'Views', value: stats.data.views },
+                  { label: 'Clicks', value: stats.data.clicks },
+                  { label: 'Conversions', value: stats.data.conversions },
+                ].map(({ label, value }) => (
+                  <div key={label} className='rounded-lg border border-gray-200 bg-white p-4 text-center'>
+                    <p className='text-2xl font-bold text-[#2C3248]'>{value ?? 0}</p>
+                    <p className='text-xs text-gray-500 mt-1'>{label}</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>

@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 const PUBLIC_PATHS = ['/signin', '/signup', '/verify-otp', '/forgot-password'];
 const COOKIE_NAME = 'testimonies_token';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const search = request.nextUrl.search;
   const token = request.cookies.get(COOKIE_NAME)?.value;

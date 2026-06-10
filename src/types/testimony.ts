@@ -25,7 +25,7 @@ export type Testimony = {
 export type Reply = {
   _id: string;
   testimonyId: string;
-  description: string;
+  content: string;
   createdAt: string;
   user?: User;
   likesCount?: number;

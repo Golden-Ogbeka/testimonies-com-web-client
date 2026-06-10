@@ -10,8 +10,8 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Feather } from 'lucide-react';
 
-type IndividualForm = { fullName: string; username: string; email: string; password: string };
-type OrgForm = { organizationName: string; username: string; email: string; password: string };
+type IndividualForm = { fullName: string; username: string; email: string; password: string; phoneNumber: string };
+type OrgForm = { businessName: string; username: string; email: string; password: string; businessPhoneNumber: string; businessAddress: string };
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -23,7 +23,17 @@ export default function SignUpPage() {
 
   const onIndividualSubmit = async (values: IndividualForm) => {
     try {
-      await signupIndividual.mutateAsync(values);
+      const names = values.fullName.trim().split(/\s+/);
+      const lastName = names.length > 1 ? names.pop()! : '';
+      const firstName = names.join(' ');
+      await signupIndividual.mutateAsync({
+        firstName,
+        lastName,
+        email: values.email,
+        password: values.password,
+        username: values.username,
+        phoneNumber: values.phoneNumber,
+      });
       toast.success('Account created. Check your email for OTP.');
       router.replace(`/verify-otp?mode=signup&email=${encodeURIComponent(values.email)}`);
     } catch (error) {
@@ -33,7 +43,14 @@ export default function SignUpPage() {
 
   const onOrgSubmit = async (values: OrgForm) => {
     try {
-      await signupOrg.mutateAsync(values);
+      await signupOrg.mutateAsync({
+        businessName: values.businessName,
+        businessEmail: values.email,
+        password: values.password,
+        username: values.username,
+        businessPhoneNumber: values.businessPhoneNumber,
+        businessAddress: values.businessAddress,
+      });
       toast.success('Organization account created. Check your email for OTP.');
       router.replace(`/verify-otp?mode=signup&email=${encodeURIComponent(values.email)}`);
     } catch (error) {
@@ -79,6 +96,7 @@ export default function SignUpPage() {
               <Input placeholder='Full name' {...individualForm.register('fullName', { required: true })} />
               <Input placeholder='Username' {...individualForm.register('username', { required: true })} />
               <Input placeholder='Email' type='email' {...individualForm.register('email', { required: true })} />
+              <Input placeholder='Phone number (+1234567890)' {...individualForm.register('phoneNumber', { required: true })} />
               <Input placeholder='Password' type='password' {...individualForm.register('password', { required: true })} />
               <Button type='submit' className='w-full' size='lg' disabled={signupIndividual.isPending}>
                 {signupIndividual.isPending ? 'Creating...' : 'Create account'}
@@ -86,9 +104,11 @@ export default function SignUpPage() {
             </form>
           ) : (
             <form className='space-y-3' onSubmit={orgForm.handleSubmit(onOrgSubmit)}>
-              <Input placeholder='Organization name' {...orgForm.register('organizationName', { required: true })} />
+              <Input placeholder='Organization name' {...orgForm.register('businessName', { required: true })} />
               <Input placeholder='Username' {...orgForm.register('username', { required: true })} />
-              <Input placeholder='Email' type='email' {...orgForm.register('email', { required: true })} />
+              <Input placeholder='Business email' type='email' {...orgForm.register('email', { required: true })} />
+              <Input placeholder='Business phone (+1234567890)' {...orgForm.register('businessPhoneNumber', { required: true })} />
+              <Input placeholder='Business address' {...orgForm.register('businessAddress', { required: true })} />
               <Input placeholder='Password' type='password' {...orgForm.register('password', { required: true })} />
               <Button type='submit' className='w-full' size='lg' disabled={signupOrg.isPending}>
                 {signupOrg.isPending ? 'Creating...' : 'Create organization'}

@@ -1,6 +1,6 @@
 'use client';
 
-import { EmptyState, ErrorState, SkeletonCard } from '@/components/common';
+import { EmptyState, ErrorState, PageHeader, Pagination, SkeletonCard } from '@/components/common';
 import { Composer } from '@/components/feed/Composer';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useFeed, useTestimonyTags, useTrending } from '@/hooks/useTestimonies';
@@ -17,12 +17,7 @@ export default function HomePage() {
   return (
     <div className='flex'>
       <div className='min-h-screen flex-1'>
-        <div className='sticky top-0 z-10 border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-lg'>
-          <div className='flex items-center gap-2'>
-            <Feather className='h-5 w-5 text-[#2C3248]' />
-            <h1 className='text-lg font-bold text-gray-900'>Home</h1>
-          </div>
-        </div>
+        <PageHeader icon={Feather} title='Home' />
 
         <Composer />
 
@@ -46,38 +41,21 @@ export default function HomePage() {
         </div>
 
         {feed.data && (feed.data.totalPages ?? 1) > 1 && (
-          <div className='flex items-center justify-center gap-4 border-t border-gray-200 p-4'>
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className='rounded-full px-4 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-40'
-            >
-              ← Prev
-            </button>
-            <span className='text-sm text-gray-400'>Page {page} of {feed.data.totalPages}</span>
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page >= (feed.data?.totalPages ?? 1)}
-              className='rounded-full px-4 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-40'
-            >
-              Next →
-            </button>
-          </div>
+          <Pagination page={page} totalPages={feed.data?.totalPages ?? 1} onPageChange={setPage} />
         )}
       </div>
 
-      {/* Right sidebar */}
       <aside className='hidden w-80 shrink-0 border-l border-gray-200 p-4 xl:block'>
         <div className='rounded-xl border border-gray-200 bg-white p-4 mb-4'>
           <div className='mb-3 flex items-center gap-2'>
             <TrendingUp className='h-4 w-4 text-[#2C3248]' />
             <h3 className='text-sm font-bold text-gray-900'>Trending</h3>
           </div>
-          {(trending.data ?? []).length === 0 && (
+          {(trending.data?.results ?? []).length === 0 && (
             <p className='text-xs text-gray-400'>Nothing trending right now.</p>
           )}
           <div className='space-y-1'>
-            {(trending.data ?? []).slice(0, 5).map((item) => (
+            {(trending.data?.results ?? []).slice(0, 5).map((item) => (
               <Link
                 key={item._id}
                 href={`/post/${item._id}`}
@@ -90,14 +68,14 @@ export default function HomePage() {
           </div>
         </div>
 
-        {(tags.data ?? []).length > 0 && (
+        {(tags.data?.results ?? []).length > 0 && (
           <div className='rounded-xl border border-gray-200 bg-white p-4'>
             <div className='mb-3 flex items-center gap-2'>
               <Hash className='h-4 w-4 text-[#2C3248]' />
               <h3 className='text-sm font-bold text-gray-900'>Popular Tags</h3>
             </div>
             <div className='flex flex-wrap gap-1.5'>
-              {(tags.data ?? []).map((tag) => (
+              {(tags.data?.results ?? []).map((tag) => (
                 <Link
                   key={tag}
                   href={`/explore?tag=${tag}`}

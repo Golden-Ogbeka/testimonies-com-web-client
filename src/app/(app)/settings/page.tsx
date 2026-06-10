@@ -26,7 +26,7 @@ export default function SettingsPage() {
   const [tab, setTab] = useState<SideTab>('profile');
   const { user, clearAuth } = useAuthState();
 
-  const profileForm = useForm({ defaultValues: { fullName: user?.fullName ?? '', bio: '' } });
+  const profileForm = useForm({ defaultValues: { firstName: user?.firstName ?? user?.fullName?.split(' ')[0] ?? '', lastName: user?.lastName ?? user?.fullName?.split(' ').slice(1).join(' ') ?? '', bio: '' } });
   const orgForm = useForm({ defaultValues: { businessName: '', businessAddress: '', businessWebsite: '', businessBio: '' } });
   const emailForm = useForm({ defaultValues: { email: '' } });
   const usernameForm = useForm({ defaultValues: { username: '' } });
@@ -134,7 +134,8 @@ export default function SettingsPage() {
                   <form className='space-y-3' onSubmit={profileForm.handleSubmit(async (v) => {
                     try { await updateProfile.mutateAsync(v); toast.success('Profile updated'); } catch (err) { toast.error(apiMessage(err)); }
                   })}>
-                    <Input label='Full name' placeholder='Full name' {...profileForm.register('fullName')} />
+                    <Input label='First name' placeholder='First name' {...profileForm.register('firstName')} />
+                    <Input label='Last name' placeholder='Last name' {...profileForm.register('lastName')} />
                     <Input label='Bio' placeholder='Bio' {...profileForm.register('bio')} />
                     <Button type='submit' disabled={updateProfile.isPending}>Save</Button>
                   </form>
@@ -233,9 +234,9 @@ export default function SettingsPage() {
 
               <div className='rounded-xl border border-gray-200 bg-white p-4'>
                 <h2 className='mb-4 text-sm font-bold text-gray-900'>Follow Requests</h2>
-                {(followRequests.data ?? []).length === 0 && <p className='text-sm text-gray-500'>No pending requests</p>}
+                {(followRequests.data?.results ?? []).length === 0 && <p className='text-sm text-gray-500'>No pending requests</p>}
                 <div className='space-y-2'>
-                  {(followRequests.data ?? []).map((req) => (
+                  {(followRequests.data?.results ?? []).map((req) => (
                     <div key={req._id} className='flex items-center justify-between rounded-lg border border-gray-200 p-3'>
                       <div className='flex items-center gap-2'>
                         <Avatar src={req.requester?.picture} name={req.requester?.fullName ?? req.requester?.username} size='sm' />
@@ -252,9 +253,9 @@ export default function SettingsPage() {
 
               <div className='rounded-xl border border-gray-200 bg-white p-4'>
                 <h2 className='mb-4 text-sm font-bold text-gray-900'>Blocked Users</h2>
-                {(blockedUsers.data ?? []).length === 0 && <p className='text-sm text-gray-500'>No blocked users</p>}
+                {(blockedUsers.data?.results ?? []).length === 0 && <p className='text-sm text-gray-500'>No blocked users</p>}
                 <div className='space-y-2'>
-                  {(blockedUsers.data ?? []).map((item) => (
+                  {(blockedUsers.data?.results ?? []).map((item) => (
                     <div key={item._id} className='flex items-center justify-between rounded-lg border border-gray-200 p-3'>
                       <div className='flex items-center gap-2'>
                         <Avatar src={item.blockedUser?.picture} name={item.blockedUser?.fullName ?? item.blockedUser?.username} size='sm' />
@@ -276,9 +277,9 @@ export default function SettingsPage() {
                   Logout other sessions
                 </Button>
               </div>
-              {(sessions.data ?? []).length === 0 && <p className='text-sm text-gray-500'>No sessions</p>}
+              {(sessions.data?.results ?? []).length === 0 && <p className='text-sm text-gray-500'>No sessions</p>}
               <div className='space-y-2'>
-                {(sessions.data ?? []).map((s) => (
+                {(sessions.data?.results ?? []).map((s) => (
                   <div key={s._id} className='flex items-center justify-between rounded-lg border border-gray-200 p-3'>
                     <div>
                       <p className='text-sm font-medium text-gray-700'>{(s as { userAgent?: string }).userAgent ?? 'Unknown device'}</p>

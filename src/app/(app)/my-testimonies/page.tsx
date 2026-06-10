@@ -1,9 +1,8 @@
 'use client';
 
-import { EmptyState, SkeletonCard } from '@/components/common';
+import { EmptyState, PageHeader, Pagination, SkeletonCard, TabBar } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useMyReplies, useMyTestimonies, useTestimonyStats } from '@/hooks/useTestimonies';
-import { cn } from '@/lib/utils';
 import { BookOpen, Heart, Eye, Reply } from 'lucide-react';
 import { useState } from 'react';
 
@@ -19,12 +18,7 @@ export default function MyTestimoniesPage() {
 
   return (
     <div>
-      <div className='sticky top-0 z-10 border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-lg'>
-        <div className='flex items-center gap-2'>
-          <BookOpen className='h-5 w-5 text-[#2C3248]' />
-          <h1 className='text-lg font-bold text-gray-900'>My Content</h1>
-        </div>
-      </div>
+      <PageHeader icon={BookOpen} title='My Content' />
 
       {stats.data && (
         <div className='grid grid-cols-4 divide-x divide-gray-200 border-b border-gray-200'>
@@ -45,20 +39,15 @@ export default function MyTestimoniesPage() {
         </div>
       )}
 
-      <div className='flex border-b border-gray-200'>
-        {(['testimonies', 'replies', 'stats'] as Tab[]).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={cn(
-              'flex-1 py-3 text-sm font-medium capitalize transition-colors hover:bg-gray-50',
-              tab === t ? 'border-b-2 border-[#2C3248] text-[#2C3248]' : 'text-gray-500'
-            )}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
+      <TabBar
+        tabs={[
+          { id: 'testimonies', label: 'Testimonies' },
+          { id: 'replies', label: 'Replies' },
+          { id: 'stats', label: 'Stats' },
+        ]}
+        activeTab={tab}
+        onTabChange={(t) => setTab(t as Tab)}
+      />
 
       <div>
         {tab === 'testimonies' && (
@@ -73,17 +62,7 @@ export default function MyTestimoniesPage() {
               <TestimonyCard key={t._id} testimony={t} compact />
             ))}
             {myTestimonies.data && (myTestimonies.data.totalPages ?? 1) > 1 && (
-              <div className='flex items-center justify-center gap-4 border-t border-gray-200 p-4'>
-                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-                  className='rounded-full px-4 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-40'>
-                  ← Prev
-                </button>
-                <span className='text-sm text-gray-400'>Page {page}</span>
-                <button onClick={() => setPage((p) => p + 1)} disabled={page >= (myTestimonies.data?.totalPages ?? 1)}
-                  className='rounded-full px-4 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-40'>
-                  Next →
-                </button>
-              </div>
+              <Pagination page={page} totalPages={myTestimonies.data?.totalPages ?? 1} onPageChange={setPage} />
             )}
           </>
         )}
@@ -98,7 +77,7 @@ export default function MyTestimoniesPage() {
             )}
             {(myReplies.data?.results ?? []).map((reply) => (
               <div key={reply._id} className='border-b border-gray-200 px-4 py-3 hover:bg-gray-50'>
-                <p className='text-sm text-gray-700'>{reply.description}</p>
+                <p className='text-sm text-gray-700'>{reply.content}</p>
                 <p className='mt-1 text-xs text-gray-400'>{new Date(reply.createdAt).toLocaleDateString()}</p>
               </div>
             ))}

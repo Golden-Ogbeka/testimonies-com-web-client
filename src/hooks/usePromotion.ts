@@ -1,13 +1,14 @@
 'use client';
 
 import { api, unwrap } from '@/lib/api';
+import type { Paginated } from '@/types/api';
 import type { CreatePromotionPayload, PromotionItem, PromotionStats, UpdatePromotionPayload } from '@/types/domain';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function usePromotions() {
   return useQuery({
     queryKey: ['promotion', 'all'],
-    queryFn: async () => unwrap<PromotionItem[]>((await api.get('/user/promotion')).data),
+    queryFn: async () => unwrap<Paginated<PromotionItem>>((await api.get('/user/promotion')).data),
   });
 }
 
@@ -22,7 +23,7 @@ export function usePromotion(id: string) {
 export function usePromotionRequests() {
   return useQuery({
     queryKey: ['promotion', 'requests'],
-    queryFn: async () => unwrap<PromotionItem[]>((await api.get('/user/promotion/requests/all')).data),
+    queryFn: async () => unwrap<Paginated<PromotionItem>>((await api.get('/user/promotion/requests/all')).data),
   });
 }
 

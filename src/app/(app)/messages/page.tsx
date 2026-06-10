@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, EmptyState } from '@/components/common';
+import { Avatar, EmptyState, SearchInput } from '@/components/common';
 import { useMe } from '@/hooks/useAuth';
 import {
   useContacts, useConversation, useDeleteMessage,
@@ -39,7 +39,7 @@ export default function MessagesPage() {
   const sendMsg = async () => {
     if (!activeUserId || !text.trim()) return;
     try {
-      await send.mutateAsync({ to: activeUserId, text: text.trim() });
+      await send.mutateAsync({ recipientId: activeUserId, recipientType: 'user', content: text.trim() });
       setText('');
     } catch (error) {
       toast.error(apiMessage(error));
@@ -56,36 +56,28 @@ export default function MessagesPage() {
               <h2 className='text-lg font-bold text-gray-900'>Messages</h2>
             </div>
           </div>
-          <div className='relative'>
-            <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400' />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder='Search messages...'
-              className='w-full rounded-full border border-gray-300 bg-white py-1.5 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-[#2C3248]/50 focus:ring-1 focus:ring-[#2C3248]/20'
-            />
-          </div>
+          <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder='Search messages...' />
         </div>
 
         <div className='flex-1 overflow-y-auto'>
           {searchQuery.length > 1 ? (
             <div className='p-2 space-y-1'>
-              {(search.data?.data ?? []).map((msg: { _id: string; text: string; from?: { fullName?: string; username?: string; picture?: string; _id: string } }) => (
+              {(search.data?.results ?? []).map((msg: { _id: string; content: string; from?: { fullName?: string; username?: string; picture?: string; _id: string } }) => (
                 <button
                   key={msg._id}
                   onClick={() => msg.from && openConversation(msg.from._id, msg.from.fullName ?? msg.from.username ?? '')}
                   className='w-full rounded-lg p-2 text-left transition-colors hover:bg-gray-50'
                 >
-                  <p className='text-xs text-gray-500 line-clamp-2'>{msg.text}</p>
+                  <p className='text-xs text-gray-500 line-clamp-2'>{msg.content}</p>
                 </button>
               ))}
             </div>
           ) : (
             <div>
-              {(contacts.data ?? []).length === 0 && (
+              {(contacts.data?.results ?? []).length === 0 && (
                 <div className='p-4'><EmptyState title='No conversations' message='Start a conversation.' icon={<Mail className='h-8 w-8' />} /></div>
               )}
-              {(contacts.data ?? []).map((item) => (
+              {(contacts.data?.results ?? []).map((item) => (
                 <button
                   key={item.user._id}
                   onClick={() => openConversation(item.user._id, item.user.fullName ?? item.user.username ?? '')}
@@ -102,7 +94,7 @@ export default function MessagesPage() {
                   </div>
                   <div className='min-w-0 flex-1'>
                     <p className='truncate text-sm font-semibold text-gray-900'>{item.user.fullName ?? item.user.username}</p>
-                    <p className='truncate text-xs text-gray-500'>{item.lastMessage?.text ?? ''}</p>
+                    <p className='truncate text-xs text-gray-500'>{item.lastMessage?.content ?? ''}</p>
                   </div>
                 </button>
               ))}
@@ -128,12 +120,12 @@ export default function MessagesPage() {
             </div>
 
             <div className='flex-1 overflow-y-auto p-4 space-y-3'>
-              {(conv.data ?? []).length === 0 && (
+              {(conv.data?.results ?? []).length === 0 && (
                 <div className='flex items-center justify-center h-full'>
                   <EmptyState title='No messages yet' message='Say hello!' icon={<Mail className='h-8 w-8' />} />
                 </div>
               )}
-              {(conv.data ?? []).map((msg) => {
+              {(conv.data?.results ?? []).map((msg) => {
                 const isOwn = msg.from?._id === me?._id;
                 return (
                   <div key={msg._id} className={cn('flex', isOwn ? 'justify-end' : 'justify-start')}>
@@ -144,15 +136,15 @@ export default function MessagesPage() {
                           onChange={(e) => setEditText(e.target.value)}
                           className='flex-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-[#2C3248]/50'
                         />
-                        <button onClick={async () => { await edit.mutateAsync({ id: msg._id, text: editText }); setEditId(''); }} className='text-green-600 hover:text-green-500'><Check className='h-4 w-4' /></button>
+                        <button onClick={async () => { await edit.mutateAsync({ id: msg._id, content: editText }); setEditId(''); }} className='text-green-600 hover:text-green-500'><Check className='h-4 w-4' /></button>
                         <button onClick={() => setEditId('')} className='text-gray-400 hover:text-gray-600'><X className='h-4 w-4' /></button>
                       </div>
                     ) : (
                       <div className={cn('group relative max-w-xs rounded-2xl px-4 py-2 text-sm', isOwn ? 'bg-[#2C3248] text-white' : 'bg-gray-100 text-gray-900')}>
-                        <p>{msg.text}</p>
+                        <p>{msg.content}</p>
                         {isOwn && (
                           <div className='absolute -left-16 top-1/2 hidden -translate-y-1/2 items-center gap-1 group-hover:flex'>
-                            <button onClick={() => { setEditId(msg._id); setEditText(msg.text); }} className='rounded-full p-1 text-white/70 hover:bg-white/10 hover:text-white'><Pencil className='h-3.5 w-3.5' /></button>
+                            <button onClick={() => { setEditId(msg._id); setEditText(msg.content); }} className='rounded-full p-1 text-white/70 hover:bg-white/10 hover:text-white'><Pencil className='h-3.5 w-3.5' /></button>
                             <button onClick={() => remove.mutate(msg._id)} className='rounded-full p-1 text-white/70 hover:bg-red-500/10 hover:text-red-300'><Trash2 className='h-3.5 w-3.5' /></button>
                           </div>
                         )}

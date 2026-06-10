@@ -33,7 +33,7 @@ export function AppSidebar() {
   const broadcastRequests = useBroadcastRequests();
   const logout = useLogout();
 
-  const notifCount = (followRequests.data?.length ?? 0) + (broadcastRequests.data?.results?.length ?? 0);
+  const notifCount = (followRequests.data?.results?.length ?? 0) + (broadcastRequests.data?.results?.length ?? 0);
 
   const handleLogout = async () => {
     await logout.mutateAsync();
