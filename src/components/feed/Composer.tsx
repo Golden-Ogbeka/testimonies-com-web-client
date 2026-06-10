@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, Button, Card } from '@/components/common';
+import { Avatar, Button } from '@/components/common';
 import { useMe } from '@/hooks/useAuth';
 import { useCreateTestimony } from '@/hooks/useTestimonies';
 import { apiMessage } from '@/lib/utils';
@@ -42,60 +42,67 @@ export function Composer() {
   };
 
   return (
-    <Card className='space-y-3'>
+    <div className='border-b border-gray-200 p-4'>
       <div className='flex gap-3'>
         <Avatar src={me?.picture} name={me?.fullName ?? me?.username} />
-        <div className='flex-1 space-y-2'>
+        <div className='flex-1 space-y-3'>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder='Title of your testimony...'
-            className='w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500'
+            className='w-full bg-transparent text-lg font-semibold text-gray-900 placeholder-gray-400 outline-none'
           />
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder='Share your testimony...'
             rows={3}
-            className='w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500'
+            className='w-full resize-none bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none'
           />
+
+          {tags.length > 0 && (
+            <div className='flex flex-wrap gap-1'>
+              {tags.map((tag) => (
+                <span key={tag} className='inline-flex items-center gap-1 rounded-full bg-[#2C3248]/5 px-2 py-0.5 text-xs text-[#2C3248]'>
+                  #{tag}
+                  <button onClick={() => setTags(tags.filter((t) => t !== tag))}>
+                    <X className='h-3 w-3' />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {files.length > 0 && (
+            <p className='text-xs text-gray-500'>{files.length} file(s) selected</p>
+          )}
+
+          <div className='flex items-center gap-3 border-t border-gray-200 pt-3'>
+            <button onClick={() => fileRef.current?.click()} className='rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-[#2C3248] transition-colors'>
+              <ImageIcon className='h-4 w-4' />
+            </button>
+            <input ref={fileRef} type='file' multiple accept='image/*,video/*' className='hidden'
+              onChange={(e) => setFiles(Array.from(e.target.files ?? []))} />
+            <div className='flex items-center gap-1'>
+              <input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                placeholder='Add tag...'
+                className='w-24 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700 placeholder-gray-400 outline-none'
+              />
+              <button onClick={addTag} className='rounded-full p-1 text-gray-400 hover:text-[#2C3248] transition-colors'>
+                <Tag className='h-3 w-3' />
+              </button>
+            </div>
+            <div className='ml-auto'>
+              <Button onClick={submit} disabled={create.isPending || !title.trim() || !description.trim()} size='sm'>
+                {create.isPending ? 'Posting...' : 'Post'}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
-
-      {tags.length > 0 && (
-        <div className='flex flex-wrap gap-1 pl-13'>
-          {tags.map((tag) => (
-            <span key={tag} className='inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600'>
-              #{tag}
-              <button onClick={() => setTags(tags.filter((t) => t !== tag))}><X className='h-3 w-3' /></button>
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className='flex items-center gap-2 border-t border-slate-100 pt-3'>
-        <button onClick={() => fileRef.current?.click()} className='rounded-full p-2 text-blue-500 hover:bg-blue-50'>
-          <ImageIcon className='h-4 w-4' />
-        </button>
-        <input ref={fileRef} type='file' multiple accept='image/*,video/*' className='hidden'
-          onChange={(e) => setFiles(Array.from(e.target.files ?? []))} />
-        <div className='flex items-center gap-1'>
-          <input
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-            placeholder='Add tag...'
-            className='w-24 rounded-full border border-slate-200 px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-blue-500'
-          />
-          <button onClick={addTag} className='rounded-full p-1 text-blue-500 hover:bg-blue-50'><Tag className='h-3 w-3' /></button>
-        </div>
-        {files.length > 0 && <span className='text-xs text-slate-500'>{files.length} file(s)</span>}
-        <div className='ml-auto'>
-          <Button onClick={submit} disabled={create.isPending || !title.trim() || !description.trim()}>
-            {create.isPending ? 'Posting...' : 'Post'}
-          </Button>
-        </div>
-      </div>
-    </Card>
+    </div>
   );
 }

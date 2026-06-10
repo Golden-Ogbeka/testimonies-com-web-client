@@ -127,7 +127,8 @@ export function useCreateTestimony() {
   return useMutation({
     mutationFn: async (payload: { title: string; description: string; tags?: string[]; mediaFiles?: File[]; isBroadcast?: boolean; broadcastOrganizationId?: string; isSecret?: boolean }) => {
       if (!payload.mediaFiles?.length) {
-        const { mediaFiles, ...rest } = payload;
+        const { mediaFiles: _mf, ...rest } = payload;
+        void _mf;
         return (await api.post('/user/testimony', rest)).data;
       }
 

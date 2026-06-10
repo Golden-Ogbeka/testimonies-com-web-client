@@ -2,6 +2,7 @@
 
 import { api, unwrap } from '@/lib/api';
 import { storage } from '@/lib/storage';
+import { useAuthState } from '@/app/providers';
 import type { AuthResponse, OtpPayload, User } from '@/types/auth';
 import type { SignUpPayload } from '@/types/domain';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -11,25 +12,39 @@ export const authKeys = {
   sessions: ['auth', 'sessions'] as const,
 };
 
-function persistAuth(data: AuthResponse, qc: ReturnType<typeof useQueryClient>) {
+function persistAuth(data: AuthResponse, qc: ReturnType<typeof useQueryClient>, setAuth?: (t: string, u: User) => void) {
   storage.setToken(data.token);
   storage.setUser(data.user);
+  if (setAuth) setAuth(data.token, data.user);
   qc.invalidateQueries({ queryKey: authKeys.me });
 }
 
 export function useMe() {
+  const { setAuth } = useAuthState();
   return useQuery({
     queryKey: authKeys.me,
-    queryFn: async () => unwrap<User>((await api.get('/user/profile')).data),
+    queryFn: async () => {
+      const data = await unwrap<User>((await api.get('/user/profile')).data);
+      if (data) {
+        storage.setUser(data);
+        if (setAuth) {
+          const token = storage.getToken();
+          if (token) setAuth(token, data);
+        }
+      }
+      return data;
+    },
     enabled: !!storage.getToken(),
   });
 }
 
 export function useSignIn() {
   const qc = useQueryClient();
+  const { setAuth } = useAuthState();
   return useMutation({
-    mutationFn: async (payload: { email: string; password: string }) => unwrap<AuthResponse>((await api.post('/user/auth/signin', payload)).data),
-    onSuccess: (data) => persistAuth(data, qc),
+    mutationFn: async (payload: { email: string; password: string }) =>
+      unwrap<AuthResponse>((await api.post('/user/auth/signin', payload)).data),
+    onSuccess: (data) => persistAuth(data, qc, setAuth),
   });
 }
 
@@ -71,22 +86,28 @@ export function useResendOtp(mode: 'signup' | 'signin' | 'reset-password') {
 
 export function useVerifyOtp(mode: 'signup' | 'signin') {
   const qc = useQueryClient();
+  const { setAuth } = useAuthState();
   return useMutation({
-    mutationFn: async (payload: OtpPayload) => unwrap<AuthResponse>((await api.post(`/user/auth/${mode}/verify-otp`, payload)).data),
-    onSuccess: (data) => persistAuth(data, qc),
+    mutationFn: async (payload: OtpPayload) =>
+      unwrap<AuthResponse>((await api.post(`/user/auth/${mode}/verify-otp`, payload)).data),
+    onSuccess: (data) => persistAuth(data, qc, setAuth),
   });
 }
 
 export function useResetPasswordUpdate() {
   return useMutation({
-    mutationFn: async (payload: { email: string; otp: string; password: string }) => (await api.post('/user/auth/reset-password/update', payload)).data,
+    mutationFn: async (payload: { email: string; otp: string; password: string }) =>
+      (await api.post('/user/auth/reset-password/update', payload)).data,
   });
 }
 
 export function useSessions() {
   return useQuery({
     queryKey: authKeys.sessions,
-    queryFn: async () => unwrap<Array<{ _id: string; createdAt?: string; ip?: string; userAgent?: string }>>((await api.get('/user/auth/sessions')).data),
+    queryFn: async () =>
+      unwrap<Array<{ _id: string; createdAt?: string; ip?: string; userAgent?: string }>>(
+        (await api.get('/user/auth/sessions')).data
+      ),
     enabled: !!storage.getToken(),
   });
 }

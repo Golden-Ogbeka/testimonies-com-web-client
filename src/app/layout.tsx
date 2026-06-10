@@ -6,8 +6,12 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Testimonies',
-  description: 'Share your testimony. Inspire the world.',
+  title: 'Testimonies — Share His Goodness',
+  description: 'Share your testimony of God\'s goodness and inspire the world.',
+  openGraph: {
+    title: 'Testimonies',
+    description: 'Share your testimony of God\'s goodness and inspire the world.',
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
