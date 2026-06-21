@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import { Providers } from './providers';
 
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         className={`${inter.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
+        <Script id="strip-ext-attrs" strategy="beforeInteractive" src='/strip-ext-attrs.js' />
         <Providers>{children}</Providers>
       </body>
     </html>
