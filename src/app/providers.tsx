@@ -1,7 +1,12 @@
 'use client';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import dynamic from 'next/dynamic';
+
+const ReactQueryDevtools = dynamic(
+  () => import('@tanstack/react-query-devtools').then((mod) => mod.ReactQueryDevtools),
+  { ssr: false }
+);
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { Toaster } from 'sonner';
 import { createQueryClient } from '@/lib/query-client';
@@ -72,7 +77,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
             },
           }}
         />
-        <ReactQueryDevtools initialIsOpen={false} />
+        {process.env.NODE_ENV === 'development' && (
+          <ReactQueryDevtools initialIsOpen={false} />
+        )}
       </AuthContext.Provider>
     </QueryClientProvider>
   );

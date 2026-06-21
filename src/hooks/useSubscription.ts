@@ -30,7 +30,7 @@ export function useSubscriptionPlan(id: string) {
 export function useSubscriptionStatus() {
   return useQuery({
     queryKey: subscriptionKeys.status,
-    queryFn: async () => (await api.get('/user/subscription/status')).data,
+    queryFn: async () => unwrap<{ status: string; plan?: string }>((await api.get('/user/subscription/status')).data),
   });
 }
 
@@ -45,7 +45,10 @@ export function useSubscribe() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: SubscribePayload) => (await api.post('/user/subscription/subscribe', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['subscription'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: subscriptionKeys.plans });
+      qc.invalidateQueries({ queryKey: subscriptionKeys.status });
+    },
   });
 }
 
@@ -53,7 +56,11 @@ export function usePaySubscription() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: PaySubscriptionPayload) => (await api.post('/user/subscription/pay', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['subscription'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: subscriptionKeys.plans });
+      qc.invalidateQueries({ queryKey: subscriptionKeys.status });
+      qc.invalidateQueries({ queryKey: subscriptionKeys.history });
+    },
   });
 }
 
@@ -61,7 +68,10 @@ export function useVerifyPayment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: VerifyPaymentPayload) => (await api.post('/user/subscription/verify-payment', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['subscription'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: subscriptionKeys.status });
+      qc.invalidateQueries({ queryKey: subscriptionKeys.history });
+    },
   });
 }
 
@@ -69,6 +79,9 @@ export function useCancelSubscription() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: CancelSubscriptionPayload = {}) => (await api.post('/user/subscription/cancel', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['subscription'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: subscriptionKeys.status });
+      qc.invalidateQueries({ queryKey: subscriptionKeys.history });
+    },
   });
 }

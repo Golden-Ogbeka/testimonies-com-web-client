@@ -1,7 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-
-const PUBLIC_PATHS = ['/signin', '/signup', '/verify-otp', '/forgot-password'];
+import { ROUTES, PUBLIC_PATHS, DEFAULT_REDIRECT } from '@/constants/routes';
 const COOKIE_NAME = 'testimonies_token';
 
 export function proxy(request: NextRequest) {
@@ -16,18 +15,18 @@ export function proxy(request: NextRequest) {
   if (isFileRequest) return NextResponse.next();
 
   if (isRoot) {
-    if (token) return NextResponse.redirect(new URL('/home', request.url));
-    return NextResponse.redirect(new URL('/signin', request.url));
+    if (token) return NextResponse.redirect(new URL(ROUTES.HOME, request.url));
+    return NextResponse.redirect(new URL(ROUTES.SIGNIN, request.url));
   }
 
   if (!token && !isPublic) {
-    const returnTo = encodeURIComponent(`${pathname}${search}`);
-    return NextResponse.redirect(new URL(`/signin?returnTo=${returnTo}`, request.url));
+    const returnTo = `${pathname}${search}`;
+    return NextResponse.redirect(new URL(ROUTES.signinWithReturnTo(returnTo), request.url));
   }
 
   if (token && isPublic) {
     const requested = request.nextUrl.searchParams.get('returnTo');
-    const safeTarget = requested && requested.startsWith('/') ? requested : '/home';
+    const safeTarget = requested && requested.startsWith('/') ? requested : DEFAULT_REDIRECT;
     return NextResponse.redirect(new URL(safeTarget, request.url));
   }
 

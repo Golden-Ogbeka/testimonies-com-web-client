@@ -1,10 +1,3 @@
-export type ApiEnvelope<T> = {
-  data?: T;
-  message?: string;
-  code?: string;
-  requestId?: string;
-};
-
 export type Paginated<T> = {
   results: T[];
   totalResults: number;
@@ -15,4 +8,4 @@ export type Paginated<T> = {
   totalPages: number;
 };
 
-export type Nullable<T> = T | null;
+

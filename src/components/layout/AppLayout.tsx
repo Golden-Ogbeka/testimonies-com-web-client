@@ -1,5 +1,6 @@
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import { AppSidebar } from './AppSidebar';
 import type { ReactNode } from 'react';
 import { useAuthState } from '@/app/providers';
@@ -12,7 +13,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.replace('/signin');
+      router.replace(ROUTES.SIGNIN);
     }
   }, [isAuthenticated, router]);
 

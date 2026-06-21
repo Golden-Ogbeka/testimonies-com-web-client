@@ -15,17 +15,24 @@ const sizeMap = {
   xl: 'h-20 w-20 text-2xl',
 };
 
+const dimensionMap = {
+  sm: 32,
+  md: 40,
+  lg: 48,
+  xl: 80,
+};
+
 export function Avatar({ name, src, className, size = 'md' }: AvatarProps) {
   const initial = (name?.trim()?.[0] ?? 'T').toUpperCase();
+  const dim = dimensionMap[size];
 
   if (src) {
     return (
       <Image
         src={src}
         alt={name ?? 'user'}
-        width={40}
-        height={40}
-        unoptimized
+        width={dim}
+        height={dim}
         className={cn('rounded-full object-cover ring-2 ring-gray-100', sizeMap[size], className)}
       />
     );
@@ -33,6 +40,8 @@ export function Avatar({ name, src, className, size = 'md' }: AvatarProps) {
 
   return (
     <div
+      role='img'
+      aria-label={name ?? 'User avatar'}
       className={cn(
         'flex items-center justify-center rounded-full bg-[#2C3248] font-semibold text-white',
         sizeMap[size],

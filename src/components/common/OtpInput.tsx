@@ -10,7 +10,7 @@ type OtpInputProps = {
 
 export function OtpInput({ value, onChange, numInputs = 6 }: OtpInputProps) {
   return (
-    <div className='w-full max-w-sm'>
+    <div className='w-full max-w-sm' aria-label='One-time password input'>
       <OtpInputBase
         value={value}
         onChange={onChange}

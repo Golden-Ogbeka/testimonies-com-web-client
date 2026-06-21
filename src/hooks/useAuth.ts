@@ -52,12 +52,6 @@ export function useSignInSendOtp() {
   });
 }
 
-export function useSignInResendOtp() {
-  return useMutation({
-    mutationFn: async (payload: { email: string }) => (await api.post('/user/auth/signin/resend-otp', payload)).data,
-  });
-}
-
 export function useSignUpIndividual() {
   return useMutation({
     mutationFn: async (payload: SignUpPayload) => (await api.post('/user/auth/signup/individual', payload)).data,
@@ -142,18 +136,4 @@ export function useLogout() {
   });
 }
 
-export function useCheckUsername(username: string) {
-  return useQuery({
-    queryKey: ['auth', 'username', username],
-    queryFn: async () => (await api.get(`/user/auth/username/${encodeURIComponent(username)}`)).data,
-    enabled: username.length > 2,
-  });
-}
 
-export function useSession(sessionId: string) {
-  return useQuery({
-    queryKey: ['auth', 'session', sessionId],
-    queryFn: async () => (await api.get(`/user/auth/session/${sessionId}`)).data,
-    enabled: !!sessionId,
-  });
-}

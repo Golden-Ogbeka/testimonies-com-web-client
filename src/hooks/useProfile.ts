@@ -24,7 +24,6 @@ export const profileKeys = {
   search: (q: string) => ['profile', 'search', q] as const,
   followRequests: ['profile', 'follow-requests'] as const,
   blocked: ['profile', 'blocked'] as const,
-  shareUrl: ['profile', 'share-url'] as const,
 };
 
 // ─── Read ────────────────────────────────────────────────────────────────────
@@ -34,14 +33,6 @@ export function useProfileByUsername(username: string) {
     queryKey: profileKeys.profile(username),
     queryFn: async () => unwrap<User>((await api.get(`/user/profile/username?username=${encodeURIComponent(username)}`)).data),
     enabled: !!username,
-  });
-}
-
-export function useProfileById(id: string) {
-  return useQuery({
-    queryKey: profileKeys.profile(id),
-    queryFn: async () => unwrap<User>((await api.get(`/user/profile/find-by-id/${id}`)).data),
-    enabled: !!id,
   });
 }
 
@@ -75,21 +66,6 @@ export function useBlockedUsers(page = 1) {
   });
 }
 
-export function useProfileShareUrl() {
-  return useQuery({
-    queryKey: profileKeys.shareUrl,
-    queryFn: async () => (await api.get('/user/profile/share-url')).data,
-  });
-}
-
-export function useProfileShareUrlByUsername(username: string) {
-  return useQuery({
-    queryKey: ['profile', 'share-url', username],
-    queryFn: async () => (await api.get(`/user/profile/share-url/${encodeURIComponent(username)}`)).data,
-    enabled: !!username,
-  });
-}
-
 export function useSearchUsers(name: string) {
   return useQuery({
     queryKey: profileKeys.search(name),
@@ -104,7 +80,7 @@ export function useUpdateUserProfile() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateProfilePayload) => (await api.patch('/user/profile/user', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
   });
 }
 
@@ -112,7 +88,7 @@ export function useUpdateOrgProfile() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateOrgProfilePayload) => (await api.patch('/user/profile/organization', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
   });
 }
 
@@ -120,7 +96,7 @@ export function useUpdateEmail() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateEmailPayload) => (await api.patch('/user/profile/email', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
   });
 }
 
@@ -134,7 +110,7 @@ export function useVerifyEmailOtp() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (verificationCode: string) => (await api.post('/user/profile/email/verify-otp', { verificationCode })).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
   });
 }
 
@@ -142,7 +118,7 @@ export function useUpdateUsername() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateUsernamePayload) => (await api.patch('/user/profile/username', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
   });
 }
 
@@ -150,7 +126,7 @@ export function useUpdatePhone() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdatePhonePayload) => (await api.patch('/user/profile/phone', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
   });
 }
 
@@ -164,7 +140,7 @@ export function useUpdateProfileVisibility() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateVisibilityPayload) => (await api.patch('/user/profile/visibility', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
   });
 }
 
@@ -184,7 +160,7 @@ export function useUploadProfilePicture() {
       formData.append('profilePhoto', file);
       return (await api.patch('/user/profile/picture', formData, { headers: { 'Content-Type': 'multipart/form-data' } })).data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
   });
 }
 
@@ -196,7 +172,7 @@ export function useUploadCoverPicture() {
       formData.append('coverImage', file);
       return (await api.patch('/user/profile/cover-picture', formData, { headers: { 'Content-Type': 'multipart/form-data' } })).data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
   });
 }
 
@@ -206,7 +182,11 @@ export function useFollowUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/user/profile/follow/${id}`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: profileKeys.profile() });
+      qc.invalidateQueries({ queryKey: profileKeys.following(id) });
+      qc.invalidateQueries({ queryKey: profileKeys.followers(id) });
+    },
   });
 }
 
@@ -214,7 +194,11 @@ export function useUnfollowUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => (await api.delete(`/user/profile/unfollow/${id}`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: profileKeys.profile() });
+      qc.invalidateQueries({ queryKey: profileKeys.following(id) });
+      qc.invalidateQueries({ queryKey: profileKeys.followers(id) });
+    },
   });
 }
 
@@ -234,18 +218,13 @@ export function useRejectFollowRequest() {
   });
 }
 
-export function useBlockUser() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => (await api.post(`/user/profile/block/${id}`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
-  });
-}
-
 export function useUnblockUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => (await api.delete(`/user/profile/block/${id}`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: profileKeys.blocked });
+      qc.invalidateQueries({ queryKey: profileKeys.profile() });
+    },
   });
 }

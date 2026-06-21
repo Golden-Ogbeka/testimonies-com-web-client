@@ -4,4 +4,3 @@ export const env = {
   appName: 'Testimonies',
 };
 
-export const isClient = typeof window !== 'undefined';

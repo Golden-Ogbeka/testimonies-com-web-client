@@ -18,11 +18,13 @@ type TabBarProps = {
 
 export function TabBar({ tabs, activeTab, onTabChange }: TabBarProps) {
   return (
-    <div className='flex border-b border-gray-200'>
+    <div className='flex border-b border-gray-200' role='tablist'>
       {tabs.map(({ id, label, icon: Icon, badge }) => (
         <button
           key={id}
           onClick={() => onTabChange(id)}
+          role='tab'
+          aria-selected={activeTab === id}
           className={cn(
             'flex flex-1 items-center justify-center gap-1.5 py-3 text-sm font-medium transition-colors hover:bg-gray-50',
             activeTab === id ? 'border-b-2 border-[#2C3248] text-[#2C3248]' : 'text-gray-500'

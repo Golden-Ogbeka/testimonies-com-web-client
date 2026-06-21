@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -7,10 +9,12 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 };
 
 export function Input({ className, label, error, ...props }: InputProps) {
+  const ariaLabel = props['aria-label'] ?? (label || (typeof props.placeholder === 'string' ? props.placeholder : undefined));
   return (
     <div className='space-y-1'>
       {label && <label className='text-xs font-medium text-gray-600'>{label}</label>}
       <input
+        aria-label={ariaLabel}
         className={cn(
           'h-10 w-full rounded-lg border bg-white px-3 text-sm text-gray-900 outline-none transition-colors duration-150',
           'border-gray-300 placeholder:text-gray-400',

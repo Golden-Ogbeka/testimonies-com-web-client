@@ -27,18 +27,24 @@ Next.js web client for Testimonies.com — a Twitter-like browser experience for
 src/
 ├── app/                    # Next.js App Router pages/layouts
 │   ├── (public)/          # Unauthenticated routes (signin, signup, verify-otp, forgot-password)
-│   ├── (app)/             # Authenticated routes (home, explore, profile, messages, etc.)
+│   ├── (app)/             # Authenticated routes (home, explore, profile, notifications, settings)
+│   ├── error.tsx          # Root error boundary
+│   ├── not-found.tsx      # 404 page
 │   ├── layout.tsx
-│   └── page.tsx           # Root redirect (/ → /home or /signin)
+│   ├── manifest.ts        # PWA manifest
+│   ├── opengraph-image.tsx
+│   └── twitter-image.tsx
 ├── components/
-│   ├── common/            # Reusable UI components (Button, Input, Avatar, PageHeader, TabBar, etc.)
-│   ├── feed/              # TestimonyCard, Composer
-│   └── layout/            # AppLayout, AppSidebar, AppMobileNav
-├── hooks/                 # React Query hooks by domain
-├── lib/                   # Axios client, utils, storage
-├── types/                 # TypeScript interfaces
-├── constants/             # App-wide constants
-└── config/                # Environment variable exports
+│   ├── common/            # 15 reusable UI components (Button, Input, Avatar, PageHeader, TabBar, etc.)
+│   ├── feed/              # TestimonyCard (memo), Composer, ReplyComposer, ReplyItem (memo)
+│   ├── layout/            # AppLayout, AppSidebar (includes mobile bottom nav)
+│   └── settings/          # ProfileTab, AccountTab, PrivacyTab, SessionsTab, DangerZoneTab
+├── hooks/                 # React Query hooks by domain + useCooldown + useIntersectionObserver
+├── lib/                   # Axios client, utils (cn, apiMessage, flattenPages), storage
+├── types/                 # TypeScript interfaces (api, auth, testimony, message, domain)
+├── constants/             # App-wide constants (routes, storage keys)
+├── config/                # Environment variable exports
+└── proxy.ts               # Next.js middleware (auto-discovered, not in src/middleware.ts)
 ```
 
 ## 4. Naming Conventions
@@ -66,24 +72,40 @@ src/
 
 ### 5.3 Data Fetching
 - All server data goes through React Query hooks in `src/hooks/`.
+- List endpoints use `useInfiniteQuery` with `getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined` and `initialPageParam: 1`.
+- Consume infinite query data with `flattenPages(data)` from `src/lib/utils.ts`.
+- Use `useIntersectionObserver` + `useEffect` to trigger `fetchNextPage()` when a sentinel element is visible.
 - Never fetch directly inside a component — always use a hook.
-- Use optimistic updates for like, follow, and message actions.
+- Mutations invalidate the correct query key prefixes on success (never optimistic updates for infinite queries unless you update all pages).
 - Invalidate relevant query keys after mutations.
 
 ```typescript
-export const useTestimonies = (params: FeedParams) =>
-  useQuery({
-    queryKey: ['testimonies', params],
-    queryFn: () => testimonyApi.getFeed(params),
+export const useFeed = () =>
+  useInfiniteQuery({
+    queryKey: ['testimony', 'feed'],
+    queryFn: async ({ pageParam = 1 }) =>
+      unwrap<Paginated<Testimony>>((await api.get(`/user/testimony?page=${pageParam}`)).data),
+    getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
+    initialPageParam: 1,
   });
+```
 
-export const useCreateTestimony = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: testimonyApi.create,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['testimonies'] }),
-  });
-};
+In components:
+
+```tsx
+const feed = useFeed();
+const { ref, isIntersecting } = useIntersectionObserver();
+
+useEffect(() => {
+  if (isIntersecting && feed.hasNextPage && !feed.isFetchingNextPage)
+    feed.fetchNextPage();
+}, [isIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
+
+// Render
+{flattenPages(feed.data).map(item => <Item key={item._id} item={item} />)}
+<div ref={ref} className='flex justify-center py-4'>
+  {feed.isFetchingNextPage && <Spinner />}
+</div>
 ```
 
 ### 5.4 Axios Client
@@ -127,10 +149,9 @@ Every UI pattern that appears more than once must become a reusable component in
 | `PageHeader` | Sticky header with icon + title |
 | `TabBar` | Tab navigation with optional icons and badges |
 | `SearchInput` | Search field with magnifier icon |
-| `Pagination` | Prev/next page controls |
+| `Pagination` | (removed — replaced by infinite scroll with `useIntersectionObserver`) |
 | `UserRow` | Avatar + name + username (optionally linked) |
 | `StatusBadge` | Green/gray/red pill for active/pending/rejected states |
-| `SelectableCard` | Card with selection ring on click |
 | `SpinnerPage` | Full-page centered spinner for suspense fallback |
 
 Custom hooks in `src/hooks/`:
@@ -138,29 +159,27 @@ Custom hooks in `src/hooks/`:
 | Hook | Purpose |
 |------|---------|
 | `useCooldown` | Countdown timer for OTP resend flows |
+| `useIntersectionObserver` | Detects when sentinel element is visible (triggers infinite scroll) |
 
 ## 7. API Integration
 
 ### 7.1 API Modules
-Each domain has its own API module in `src/lib/api/`:
+API calls are made directly inside hooks using the shared Axios instance. Each hook file groups related endpoints:
 
-| Module | Responsibility |
-|--------|---------------|
-| `auth.ts` | Register, login, OTP, logout, password reset |
-| `testimonies.ts` | CRUD, likes, replies, broadcasts |
-| `feed.ts` | Home feed, trending |
-| `profile.ts` | Profile view/edit, follow/unfollow, block |
-| `messaging.ts` | Conversations, messages, read receipts |
-| `subscription.ts` | Plans, status, payment, cancel |
-| `promotions.ts` | Campaign CRUD, activate/deactivate |
-| `team.ts` | Members, roles, permissions, activity |
-| `search.ts` | Global search |
-| `notifications.ts` | Notification list and preferences |
+| Hook File | Responsibility |
+|-----------|---------------|
+| `useAuth.ts` | Register, login, OTP, logout, password reset |
+| `useTestimonies.ts` | CRUD, likes, replies, broadcasts, feed, tags |
+| `useProfile.ts` | Profile view/edit, follow/unfollow, block, search |
+| `useMessaging.ts` | Conversations, messages, read receipts |
+| `useSubscription.ts` | Plans, status, payment, cancel |
+| `usePromotion.ts` | Campaign CRUD, activate/deactivate |
+| `useTeam.ts` | Members, roles, permissions, activity |
 
 ### 7.2 Response Handling
 - All API responses follow the backend's `{ success, data, message }` shape.
-- Extract `data` inside the API module function, not in the hook or component.
-- Surface `error.response.data.error.message` in user-facing error toasts.
+- Extract `data` with `unwrap<T>()` from `src/lib/api.ts` inside the hook's `queryFn`.
+- Surface `apiMessage(error)` in user-facing error toasts (from `src/lib/utils.ts`).
 
 ## 8. Security Rules
 
@@ -175,6 +194,7 @@ Each domain has its own API module in `src/lib/api/`:
 - Lazy-load off-screen components with `dynamic(() => import(...), { ssr: false })`.
 - Virtualise long lists (feed, messages) to avoid DOM bloat.
 - Avoid unnecessary re-renders: `useMemo` for expensive computations, `useCallback` for stable callbacks.
+- Use `useInfiniteQuery` with `useIntersectionObserver` for paginated lists instead of manual page-based pagination.
 
 ## 10. Testing
 

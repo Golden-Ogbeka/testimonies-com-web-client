@@ -5,18 +5,29 @@ import type { Paginated } from '@/types/api';
 import type { ActivityLog, AddTeamMemberPayload, CreateRolePayload, TeamMember, TeamRole, UpdateRolePayload, UpdateTeamMemberPayload } from '@/types/domain';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+export const teamKeys = {
+  members: ['team', 'members'] as const,
+  member: (id: string) => ['team', 'members', id] as const,
+  search: (q: string) => ['team', 'members', 'search', q] as const,
+  activity: (id: string) => ['team', 'members', id, 'activity'] as const,
+  allActivity: ['team', 'activity'] as const,
+  permissions: ['team', 'permissions'] as const,
+  roles: ['team', 'roles'] as const,
+  role: (id: string) => ['team', 'roles', id] as const,
+};
+
 // ─── Members ─────────────────────────────────────────────────────────────────
 
 export function useTeamMembers() {
   return useQuery({
-    queryKey: ['team', 'members'],
+    queryKey: teamKeys.members,
     queryFn: async () => unwrap<Paginated<TeamMember>>((await api.get('/user/team/members')).data),
   });
 }
 
 export function useTeamMember(id: string) {
   return useQuery({
-    queryKey: ['team', 'members', id],
+    queryKey: teamKeys.member(id),
     queryFn: async () => unwrap<TeamMember>((await api.get(`/user/team/members/${id}`)).data),
     enabled: !!id,
   });
@@ -24,7 +35,7 @@ export function useTeamMember(id: string) {
 
 export function useSearchTeamMembers(query: string) {
   return useQuery({
-    queryKey: ['team', 'members', 'search', query],
+    queryKey: teamKeys.search(query),
     queryFn: async () => unwrap<Paginated<TeamMember>>((await api.get(`/user/team/members/search?query=${encodeURIComponent(query)}`)).data),
     enabled: query.length > 1,
   });
@@ -32,7 +43,7 @@ export function useSearchTeamMembers(query: string) {
 
 export function useTeamMemberActivity(id: string) {
   return useQuery({
-    queryKey: ['team', 'members', id, 'activity'],
+    queryKey: teamKeys.activity(id),
     queryFn: async () => unwrap<Paginated<ActivityLog>>((await api.get(`/user/team/members/${id}/activity`)).data),
     enabled: !!id,
   });
@@ -40,15 +51,15 @@ export function useTeamMemberActivity(id: string) {
 
 export function useAllActivityLogs() {
   return useQuery({
-    queryKey: ['team', 'activity'],
+    queryKey: teamKeys.allActivity,
     queryFn: async () => unwrap<Paginated<ActivityLog>>((await api.get('/user/team/activity/all')).data),
   });
 }
 
 export function useTeamPermissions() {
   return useQuery({
-    queryKey: ['team', 'permissions'],
-    queryFn: async () => (await api.get('/user/team/permissions')).data,
+    queryKey: teamKeys.permissions,
+    queryFn: async () => unwrap<{ permissions: string[] }>((await api.get('/user/team/permissions')).data),
   });
 }
 
@@ -98,15 +109,15 @@ export function useAssignRole() {
   return useMutation({
     mutationFn: async ({ id, roleId }: { id: string; roleId: string }) =>
       (await api.post(`/user/team/members/${id}/assign-role`, { roleId })).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['team', 'members'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: teamKeys.members }),
   });
 }
 
 export function useLogActivity() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: Record<string, unknown>) => (await api.post('/user/team/activity/log', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['team', 'activity'] }),
+    mutationFn: async (payload: { action: string; description: string }) => (await api.post('/user/team/activity/log', payload)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: teamKeys.allActivity }),
   });
 }
 
@@ -114,14 +125,14 @@ export function useLogActivity() {
 
 export function useRoles() {
   return useQuery({
-    queryKey: ['team', 'roles'],
+    queryKey: teamKeys.roles,
     queryFn: async () => unwrap<Paginated<TeamRole>>((await api.get('/user/team/roles')).data),
   });
 }
 
 export function useRole(id: string) {
   return useQuery({
-    queryKey: ['team', 'roles', id],
+    queryKey: teamKeys.role(id),
     queryFn: async () => unwrap<TeamRole>((await api.get(`/user/team/roles/${id}`)).data),
     enabled: !!id,
   });
