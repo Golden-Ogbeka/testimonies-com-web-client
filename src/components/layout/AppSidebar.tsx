@@ -35,9 +35,9 @@ export function AppSidebar() {
 
   const handleLogout = useCallback(async () => {
     await logout.mutateAsync();
-    clearAuth();
     router.replace(ROUTES.SIGNIN);
-  }, [logout, clearAuth, router]);
+    clearAuth();
+  }, [logout, router, clearAuth]);
 
   return (
     <>

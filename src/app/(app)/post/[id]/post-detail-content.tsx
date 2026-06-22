@@ -1,6 +1,6 @@
 'use client';
 
-import { EmptyState, PageHeader, SkeletonCard } from '@/components/common';
+import { EmptyState, PageHeader, SkeletonCard, VirtualList } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import ReplyComposer from '@/components/feed/ReplyComposer';
 import ReplyItem from '@/components/feed/ReplyItem';
@@ -30,9 +30,9 @@ export default function PostDetailContent() {
               <EmptyState title='No replies yet' message='Be the first to reply.' icon={<MessageCircle className='h-8 w-8' />} />
             </div>
           )}
-          {(replies.data?.results ?? []).map((reply) => (
-            <ReplyItem key={reply._id} reply={reply} />
-          ))}
+          {(replies.data?.results ?? []).length > 0 && (
+            <VirtualList items={replies.data?.results ?? []} renderItem={(reply) => <ReplyItem key={reply._id} reply={reply} />} estimateSize={80} />
+          )}
         </div>
       </div>
     </div>

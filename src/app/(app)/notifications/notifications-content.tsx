@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, EmptyState, PageHeader, SkeletonCard, Spinner, StatusBadge, TabBar } from '@/components/common';
+import { Avatar, EmptyState, PageHeader, SkeletonCard, Spinner, StatusBadge, TabBar, VirtualList } from '@/components/common';
 import { useAcceptFollowRequest, useFollowRequests, useRejectFollowRequest } from '@/hooks/useProfile';
 import { useApproveBroadcastRequest, useBroadcastRequests, useRejectBroadcastRequest } from '@/hooks/useTestimonies';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
@@ -107,40 +107,46 @@ export default function NotificationsContent() {
             {!broadcastRequests.isLoading && broadcastCount === 0 && (
               <EmptyState title='No broadcast requests' message='No pending broadcast requests.' icon={<Radio className='h-8 w-8' />} />
             )}
-            {broadcastItems.map((req) => (
-              <div key={req._id} className='rounded-xl border border-gray-200 bg-white p-4'>
-                <div className='flex items-start justify-between'>
-                  <div>
-                    <div className='flex items-center gap-2 mb-1'>
-                      <Radio className='h-4 w-4 text-[#2C3248]' />
-                      <p className='text-sm font-semibold text-gray-900'>{req.testimony?.title ?? 'Broadcast Request'}</p>
+            <VirtualList
+              items={broadcastItems}
+              estimateSize={140}
+              renderItem={(req) => (
+                <div key={req._id} className='rounded-xl border border-gray-200 bg-white p-4 mx-4 mb-3'>
+                  <div className='flex items-start justify-between'>
+                    <div>
+                      <div className='flex items-center gap-2 mb-1'>
+                        <Radio className='h-4 w-4 text-[#2C3248]' />
+                        <p className='text-sm font-semibold text-gray-900'>{req.testimony?.title ?? 'Broadcast Request'}</p>
+                      </div>
+                      <p className='text-xs text-gray-500 line-clamp-2'>{req.testimony?.description}</p>
+                      <StatusBadge status={req.status} />
                     </div>
-                    <p className='text-xs text-gray-500 line-clamp-2'>{req.testimony?.description}</p>
-                    <StatusBadge status={req.status} />
                   </div>
+                  {(!req.status || req.status === 'pending') && (
+                    <div className='mt-3 flex gap-2'>
+                      <button onClick={() => handleApproveBroadcast(req._id)}
+                        aria-label='Approve broadcast request'
+                        className='rounded-lg bg-[#2C3248] px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#3a415a]'>
+                        Approve
+                      </button>
+                      <button onClick={() => handleRejectBroadcast(req._id)}
+                        aria-label='Reject broadcast request'
+                        className='rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50'>
+                        Reject
+                      </button>
+                    </div>
+                  )}
                 </div>
-                {(!req.status || req.status === 'pending') && (
-                  <div className='mt-3 flex gap-2'>
-                    <button onClick={() => handleApproveBroadcast(req._id)}
-                      aria-label='Approve broadcast request'
-                      className='rounded-lg bg-[#2C3248] px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#3a415a]'>
-                      Approve
-                    </button>
-                    <button onClick={() => handleRejectBroadcast(req._id)}
-                      aria-label='Reject broadcast request'
-                      className='rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50'>
-                      Reject
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-            <div ref={sentinelRef} className='flex justify-center py-4'>
-              {broadcastRequests.isFetchingNextPage && <Spinner />}
-              {!broadcastRequests.hasNextPage && broadcastCount > 0 && (
-                <p className='text-xs text-gray-400'>You've reached the end.</p>
               )}
-            </div>
+              sentinel={
+                <div ref={sentinelRef} className='flex justify-center py-4'>
+                  {broadcastRequests.isFetchingNextPage && <Spinner />}
+                  {!broadcastRequests.hasNextPage && broadcastCount > 0 && (
+                    <p className='text-xs text-gray-400'>You've reached the end.</p>
+                  )}
+                </div>
+              }
+            />
           </>
         )}
       </div>

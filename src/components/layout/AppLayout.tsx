@@ -17,8 +17,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated, router]);
 
-  if (!isAuthenticated) return null;
-
   return (
     <div className='mx-auto flex min-h-screen max-w-[1280px] bg-white'>
       <AppSidebar />

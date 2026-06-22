@@ -17,9 +17,9 @@ export default function SessionsTab() {
 
   const handleLogout = useCallback(async () => {
     await logout.mutateAsync();
-    clearAuth();
     router.replace(ROUTES.SIGNIN);
-  }, [logout, clearAuth, router]);
+    clearAuth();
+  }, [logout, router, clearAuth]);
 
   return (
     <div className='rounded-xl border border-gray-200 bg-white p-4'>

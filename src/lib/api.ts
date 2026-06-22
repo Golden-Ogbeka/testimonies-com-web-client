@@ -24,7 +24,8 @@ api.interceptors.response.use(
     const status = error?.response?.status;
     const message = error?.response?.data?.error?.message ?? error?.response?.data?.message ?? '';
 
-    if (status === 401) {
+    const isLogout = error.config?.url?.includes('/auth/logout');
+    if (status === 401 && !isLogout) {
       storage.clear();
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('auth:logout'));

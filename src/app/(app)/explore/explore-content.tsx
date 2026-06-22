@@ -1,6 +1,6 @@
 'use client';
 
-import { EmptyState, PageHeader, SearchInput, SkeletonCard, Spinner, TabBar, UserRow } from '@/components/common';
+import { EmptyState, PageHeader, SearchInput, SkeletonCard, Spinner, TabBar, UserRow, VirtualList } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useSearchUsers } from '@/hooks/useProfile';
 import { useFeed, useTestimonyTags, useTrending } from '@/hooks/useTestimonies';
@@ -28,10 +28,10 @@ function ExploreContent() {
   const { ref: sentinelRef, isIntersecting } = useIntersectionObserver();
 
   useEffect(() => {
-    if (isIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) {
+    if (tab !== 'testimonies' && isIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) {
       feed.fetchNextPage();
     }
-  }, [isIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
+  }, [tab, isIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
 
   const allFeedItems = flattenPages(feed.data);
 
@@ -91,7 +91,9 @@ function ExploreContent() {
             {filteredTestimonies.length === 0 && !feed.isLoading && (
               <EmptyState title='No testimonies found' message='Try a different keyword.' icon={<Search className='h-8 w-8' />} />
             )}
-            {filteredTestimonies.map((t) => <TestimonyCard key={t._id} testimony={t} compact />)}
+            {filteredTestimonies.length > 0 && (
+              <VirtualList items={filteredTestimonies} renderItem={(t) => <TestimonyCard key={t._id} testimony={t} compact />} estimateSize={120} />
+            )}
             {feed.hasNextPage && (
               <div ref={sentinelRef} className='flex justify-center py-4'>
                 {feed.isFetchingNextPage && <Spinner />}

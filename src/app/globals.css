@@ -1,11 +1,11 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --background: #ffffff;
   --background-secondary: #f8f9fb;
   --foreground: #1a1a2e;
   --foreground-secondary: #6b7280;
-  --primary: #2C3248;
+  --primary: #2c3248;
   --primary-light: #3a415a;
   --primary-muted: rgba(44, 50, 72, 0.06);
   --primary-border: rgba(44, 50, 72, 0.15);
@@ -71,4 +71,7 @@ body {
 
 button {
   cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
 }

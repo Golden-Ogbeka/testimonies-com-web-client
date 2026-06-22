@@ -1,6 +1,6 @@
 'use client';
 
-import { EmptyState, ErrorState, PageHeader, SkeletonCard, Spinner } from '@/components/common';
+import { EmptyState, ErrorState, PageHeader, SkeletonCard, Spinner, VirtualList } from '@/components/common';
 import { Composer } from '@/components/feed/Composer';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useFeed, useTestimonyTags, useTrending } from '@/hooks/useTestimonies';
@@ -45,9 +45,13 @@ export default function HomeContent() {
               <EmptyState title='No testimonies yet' message='Be the first to share your story.' icon={<Feather className='h-8 w-8' />} />
             </div>
           )}
-          {flattenPages(feed.data).map((item) => (
-            <TestimonyCard key={item._id} testimony={item} compact />
-          ))}
+          {!feed.isLoading && !feed.isError && flattenPages(feed.data).length > 0 && (
+            <VirtualList
+              items={flattenPages(feed.data)}
+              renderItem={(item) => <TestimonyCard key={item._id} testimony={item} compact />}
+              estimateSize={120}
+            />
+          )}
         </div>
 
         <div ref={sentinelRef} className='flex justify-center py-4'>

@@ -82,6 +82,7 @@ export default function ForgotPasswordContent() {
           {step === 'send-otp' ? (
             <form className='space-y-3' onSubmit={otpForm.handleSubmit(onSendOtp)}>
               <Input
+                label='Email'
                 placeholder='Email'
                 type='email'
                 error={otpForm.formState.errors.email?.message}

@@ -13,3 +13,4 @@ export * from './SpinnerPage';
 export * from './StatusBadge';
 export * from './TabBar';
 export * from './UserRow';
+export * from './VirtualList';

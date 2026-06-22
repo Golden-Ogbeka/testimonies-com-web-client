@@ -1,6 +1,6 @@
 'use client';
 
-import { EmptyState, PageHeader, SkeletonCard, Spinner, TabBar } from '@/components/common';
+import { EmptyState, PageHeader, SkeletonCard, Spinner, TabBar, VirtualList } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useMyReplies, useMyTestimonies, useTestimonyStats } from '@/hooks/useTestimonies';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
@@ -74,9 +74,9 @@ export default function MyTestimoniesContent() {
                 <EmptyState title='No testimonies' message='You have not posted any testimonies yet.' icon={<BookOpen className='h-8 w-8' />} />
               </div>
             )}
-            {flattenPages(myTestimonies.data).map((t) => (
-              <TestimonyCard key={t._id} testimony={t} compact />
-            ))}
+            {flattenPages(myTestimonies.data).length > 0 && (
+              <VirtualList items={flattenPages(myTestimonies.data)} renderItem={(t) => <TestimonyCard key={t._id} testimony={t} compact />} estimateSize={120} />
+            )}
             <div ref={testimoniesSentinel} className='flex justify-center py-4'>
               {myTestimonies.isFetchingNextPage && <Spinner />}
               {!myTestimonies.hasNextPage && flattenPages(myTestimonies.data).length > 0 && (
@@ -94,12 +94,14 @@ export default function MyTestimoniesContent() {
                 <EmptyState title='No replies' message='You have not replied to any testimonies yet.' icon={<Reply className='h-8 w-8' />} />
               </div>
             )}
-            {flattenPages(myReplies.data).map((reply) => (
-              <div key={reply._id} className='border-b border-gray-200 px-4 py-3 hover:bg-gray-50'>
-                <p className='text-sm text-gray-700'>{reply.content}</p>
-                <p className='mt-1 text-xs text-gray-400'>{new Date(reply.createdAt).toLocaleDateString()}</p>
-              </div>
-            ))}
+            {flattenPages(myReplies.data).length > 0 && (
+              <VirtualList items={flattenPages(myReplies.data)} renderItem={(reply) => (
+                <div key={reply._id} className='border-b border-gray-200 px-4 py-3 hover:bg-gray-50'>
+                  <p className='text-sm text-gray-700'>{reply.content}</p>
+                  <p className='mt-1 text-xs text-gray-400'>{new Date(reply.createdAt).toLocaleDateString()}</p>
+                </div>
+              )} estimateSize={80} />
+            )}
             <div ref={repliesSentinel} className='flex justify-center py-4'>
               {myReplies.isFetchingNextPage && <Spinner />}
               {!myReplies.hasNextPage && flattenPages(myReplies.data).length > 0 && (

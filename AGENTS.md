@@ -35,7 +35,7 @@ src/
 │   ├── opengraph-image.tsx
 │   └── twitter-image.tsx
 ├── components/
-│   ├── common/            # 15 reusable UI components (Button, Input, Avatar, PageHeader, TabBar, etc.)
+│   ├── common/            # 17 reusable UI components (Button, Input, Avatar, VirtualList, PageHeader, TabBar, etc.)
 │   ├── feed/              # TestimonyCard (memo), Composer, ReplyComposer, ReplyItem (memo)
 │   ├── layout/            # AppLayout, AppSidebar (includes mobile bottom nav)
 │   └── settings/          # ProfileTab, AccountTab, PrivacyTab, SessionsTab, DangerZoneTab
@@ -109,9 +109,9 @@ useEffect(() => {
 ```
 
 ### 5.4 Axios Client
-- A single Axios instance lives in `src/lib/axios.ts`.
-- Auth token and `x-api-key` are injected via request interceptors.
-- 401/403 responses trigger automatic sign-out via response interceptor.
+- A single Axios instance lives in `src/lib/axios.ts` (re-exported as `src/lib/api.ts`).
+- Auth token (`x-jwt-token`) and `x-api-key` are injected via request interceptors.
+- 401 responses trigger automatic sign-out via response interceptor, **except** for the `/user/auth/logout` endpoint (which may return 401 when the session is already invalid — no sign-out cascade needed).
 - Never create ad-hoc Axios instances outside `src/lib/`.
 
 ### 5.5 Routing & Auth Protection
@@ -132,6 +132,9 @@ useEffect(() => {
 - Show field-level error messages.
 - Disable submit buttons while a mutation is in flight.
 - Never submit sensitive data (passwords, tokens) in query strings.
+- All password inputs must include an eye toggle (Eye/EyeOff) for visibility.
+- All inputs except OTP fields must have a visible `label` prop.
+- Set `autoComplete` attributes on all auth/registration inputs to prevent Chrome autofill mismatches (e.g., `autoComplete="off"` on username inputs).
 
 ### 5.8 Real-time (Socket.io)
 - Socket client is initialised once in a provider at the app root.
@@ -145,13 +148,21 @@ Every UI pattern that appears more than once must become a reusable component in
 
 | Component | Usage |
 |-----------|-------|
+| `Avatar` | User image with fallback initials |
+| `Button` | Primary/secondary/danger variants, with `isPending` spinner |
+| `Card` | Generic bordered card container |
+| `Input` | Label-above input; password type gets Eye/EyeOff toggle; supports `autoComplete` |
 | `OtpInput` | Wraps `react-otp-input` with consistent styling |
 | `PageHeader` | Sticky header with icon + title |
 | `TabBar` | Tab navigation with optional icons and badges |
 | `SearchInput` | Search field with magnifier icon |
-| `Pagination` | (removed — replaced by infinite scroll with `useIntersectionObserver`) |
+| `VirtualList` | Window-based virtualized list using `@tanstack/react-virtual` |
 | `UserRow` | Avatar + name + username (optionally linked) |
 | `StatusBadge` | Green/gray/red pill for active/pending/rejected states |
+| `EmptyState` | Centered empty state with icon, title, and message |
+| `ErrorState` | Centered error state with retry button |
+| `SkeletonCard` | Loading skeleton placeholder |
+| `Spinner` | Configurable loading spinner |
 | `SpinnerPage` | Full-page centered spinner for suspense fallback |
 
 Custom hooks in `src/hooks/`:

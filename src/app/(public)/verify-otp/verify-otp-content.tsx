@@ -1,10 +1,9 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button, OtpInput } from '@/components/common';
-import { useAuthState } from '@/app/providers';
 import { useResendOtp, useVerifyOtp } from '@/hooks/useAuth';
 import { useCooldown } from '@/hooks/useCooldown';
 import { apiMessage } from '@/lib/utils';
@@ -15,8 +14,6 @@ const COOLDOWN = 120;
 
 export default function VerifyOtpContent() {
   const params = useSearchParams();
-  const router = useRouter();
-  const { setAuth } = useAuthState();
   const mode = useMemo(() => {
     const val = params.get('mode');
     return val === 'signup' ? 'signup' : 'signin';
@@ -35,10 +32,9 @@ export default function VerifyOtpContent() {
   const onSubmit = async () => {
     if (!code.trim() || code.length < 6) { toast.error('Enter the complete verification code'); return; }
     try {
-      const data = await verify.mutateAsync({ email, verificationCode: code });
-      setAuth(data.token, data.user);
+      await verify.mutateAsync({ email, verificationCode: code });
       toast.success('Verification successful');
-      router.replace(redirectTo);
+      window.location.href = redirectTo;
     } catch (error) {
       toast.error(apiMessage(error));
     }

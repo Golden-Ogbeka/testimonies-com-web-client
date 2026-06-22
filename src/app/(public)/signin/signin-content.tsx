@@ -50,8 +50,8 @@ export default function SignInContent() {
           </div>
 
           <form className='space-y-3' onSubmit={handleSubmit(onSubmit)}>
-            <Input placeholder='Email' error={errors.email?.message} {...register('email')} />
-            <Input type='password' placeholder='Password' error={errors.password?.message} {...register('password')} />
+            <Input label='Email' placeholder='Email' error={errors.email?.message} {...register('email')} />
+            <Input label='Password' type='password' placeholder='Password' error={errors.password?.message} {...register('password')} />
             <Button type='submit' className='w-full' size='lg' disabled={loading}>
               {loading ? 'Signing in...' : 'Sign in'}
             </Button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, Button, EmptyState, SkeletonCard, Spinner, TabBar } from '@/components/common';
+import { Avatar, Button, EmptyState, SkeletonCard, Spinner, TabBar, VirtualList } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useMe } from '@/hooks/useAuth';
 import {
@@ -45,16 +45,16 @@ export default function ProfileContent() {
   const { ref: repliesSentinel, isIntersecting: repliesIntersecting } = useIntersectionObserver();
 
   useEffect(() => {
-    if (testimoniesIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) {
+    if (tab === 'testimonies' && testimoniesIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) {
       feed.fetchNextPage();
     }
-  }, [testimoniesIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
+  }, [tab, testimoniesIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
 
   useEffect(() => {
-    if (repliesIntersecting && userReplies.hasNextPage && !userReplies.isFetchingNextPage) {
+    if (tab === 'replies' && repliesIntersecting && userReplies.hasNextPage && !userReplies.isFetchingNextPage) {
       userReplies.fetchNextPage();
     }
-  }, [repliesIntersecting, userReplies.hasNextPage, userReplies.isFetchingNextPage, userReplies.fetchNextPage]);
+  }, [tab, repliesIntersecting, userReplies.hasNextPage, userReplies.isFetchingNextPage, userReplies.fetchNextPage]);
 
   const isMe = me?._id === userId;
 
@@ -148,7 +148,9 @@ export default function ProfileContent() {
                 <EmptyState title='No testimonies' message='This user has not posted yet.' />
               </div>
             )}
-            {userTestimonies.map((t) => <TestimonyCard key={t._id} testimony={t} compact />)}
+            {userTestimonies.length > 0 && (
+              <VirtualList items={userTestimonies} renderItem={(t) => <TestimonyCard key={t._id} testimony={t} compact />} estimateSize={120} />
+            )}
             <div ref={testimoniesSentinel} className='flex justify-center py-4'>
               {feed.isFetchingNextPage && <Spinner />}
               {!feed.hasNextPage && userTestimonies.length > 0 && (

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Input } from '@/components/common';
+import { Button, Input, OtpInput } from '@/components/common';
 import { useResendEmailOtp, useUpdateEmail, useUpdatePassword, useUpdatePhone, useUpdateUsername, useVerifyEmailOtp } from '@/hooks/useProfile';
 import { apiMessage } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
@@ -55,8 +55,8 @@ export default function AccountTab() {
         </form>
         {otpSent && (
           <div className='mt-3 flex gap-2'>
-            <Input value={otpCode} onChange={(e) => setOtpCode(e.target.value)} placeholder='Enter OTP' />
-            <Button onClick={onVerifyOtp}>Verify</Button>
+            <OtpInput value={otpCode} onChange={setOtpCode} numInputs={6} />
+            <Button onClick={onVerifyOtp} disabled={otpCode.length < 6}>Verify</Button>
             <Button variant='secondary' onClick={() => resendEmailOtp.mutate()}>Resend</Button>
           </div>
         )}

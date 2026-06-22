@@ -127,7 +127,12 @@ export function useLogout() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      await api.post('/user/auth/logout');
+      if (!storage.getToken()) return;
+      try {
+        await api.post('/user/auth/logout');
+      } catch {
+        // Server session may already be invalid — local cleanup handles it
+      }
     },
     onSettled: () => {
       storage.clear();
