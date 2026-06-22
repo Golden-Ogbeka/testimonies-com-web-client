@@ -66,7 +66,7 @@ export function AppSidebar() {
                     'group flex items-center gap-4 rounded-lg px-3 py-2.5 text-sm transition-colors duration-150',
                     active
                       ? 'bg-[#2C3248]/5 text-[#2C3248] font-semibold'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
                   )}
                 >
                   <span className='relative'>
@@ -77,7 +77,7 @@ export function AppSidebar() {
                       </span>
                     )}
                   </span>
-                  <span className='hidden xl:inline'>{item.label}</span>
+                  <span className='hidden lg:inline'>{item.label}</span>
                 </Link>
               );
             })}
