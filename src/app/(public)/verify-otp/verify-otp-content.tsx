@@ -1,6 +1,6 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button, OtpInput } from '@/components/common';
@@ -14,6 +14,7 @@ const COOLDOWN = 120;
 
 export default function VerifyOtpContent() {
   const params = useSearchParams();
+  const router = useRouter();
   const mode = useMemo(() => {
     const val = params.get('mode');
     return val === 'signup' ? 'signup' : 'signin';
@@ -30,18 +31,30 @@ export default function VerifyOtpContent() {
   const cooldown = useCooldown(COOLDOWN);
 
   const onSubmit = async () => {
-    if (!code.trim() || code.length < 6) { toast.error('Enter the complete verification code'); return; }
+    if (!code.trim() || code.length < 6) {
+      toast.error('Enter the complete verification code');
+      return;
+    }
     try {
       await verify.mutateAsync({ email, verificationCode: code });
-      toast.success('Verification successful');
-      window.location.href = redirectTo;
+      if (mode === 'signin') {
+        toast.success('Verification successful');
+        window.location.href = redirectTo;
+      } else {
+        // sign up
+        toast.success('Verification successful. Sign in to continue');
+        router.push(ROUTES.SIGNIN);
+      }
     } catch (error) {
       toast.error(apiMessage(error));
     }
   };
 
   const onResend = async () => {
-    if (!email) { toast.error('Enter your email first'); return; }
+    if (!email) {
+      toast.error('Enter your email first');
+      return;
+    }
     try {
       await resendOtp.mutateAsync({ email });
       cooldown.reset();
