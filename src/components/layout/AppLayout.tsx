@@ -19,7 +19,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }, [isAuthenticated, router]);
 
   return (
-    <div className='mx-auto flex min-h-screen w-full max-w-[1280px] bg-white'>
+    <div className='flex min-h-screen bg-white'>
       <AppSidebar />
       <main className='flex min-h-screen flex-1 border-x border-gray-200'>
         <div className='mx-auto w-full max-w-[600px]'>{children}</div>
