@@ -10,7 +10,7 @@ export function AppRightSidebar() {
   const tags = useTestimonyTags(8);
 
   return (
-    <aside className='sticky top-0 hidden h-screen w-80 shrink-0 border-l border-gray-200 bg-white xl:block'>
+    <aside className='sticky top-0 hidden h-screen w-[300px] shrink-0 border-l border-gray-200 bg-white xl:block'>
       <div className='h-full overflow-y-auto p-4'>
         <div className='rounded-xl border border-gray-200 bg-white p-4 mb-4'>
           <div className='mb-3 flex items-center gap-2'>
@@ -27,8 +27,12 @@ export function AppRightSidebar() {
                 href={ROUTES.post(item._id)}
                 className='block rounded-lg p-2 transition-colors hover:bg-gray-50'
               >
-                <p className='text-sm font-semibold text-gray-900 line-clamp-1'>{item.title}</p>
-                <p className='mt-0.5 text-xs text-gray-500 line-clamp-2'>{item.description}</p>
+                <p className='text-sm font-semibold text-gray-900 line-clamp-1'>
+                  {item.title}
+                </p>
+                <p className='mt-0.5 text-xs text-gray-500 line-clamp-2'>
+                  {item.description}
+                </p>
               </Link>
             ))}
           </div>

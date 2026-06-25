@@ -53,10 +53,11 @@ function ExploreContent() {
 
   return (
     <div>
-      <div className='sticky top-0 z-10 border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-lg'>
-        <h1 className='mb-3 text-lg font-bold text-gray-900'>Explore</h1>
-        <SearchInput value={query} onChange={(v) => { setQuery(v); setTab(v ? 'people' : 'people'); }} placeholder='Search people or testimonies...' />
-      </div>
+      <PageHeader icon={Search} title='Explore'>
+        <div className='mt-3'>
+          <SearchInput value={query} onChange={(v) => { setQuery(v); setTab(v ? 'people' : 'people'); }} placeholder='Search people or testimonies...' />
+        </div>
+      </PageHeader>
 
       <TabBar
         tabs={[

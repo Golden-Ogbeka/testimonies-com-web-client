@@ -1,9 +1,9 @@
 'use client';
 
-import { Settings as SettingsIcon } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Eye, Lock, Shield, Trash2, User } from 'lucide-react';
+import { Eye, Lock, Settings, Shield, Trash2, User } from 'lucide-react';
+import { PageHeader } from '@/components/common';
 import ProfileTab from '@/components/settings/ProfileTab';
 import AccountTab from '@/components/settings/AccountTab';
 import PrivacyTab from '@/components/settings/PrivacyTab';
@@ -25,12 +25,7 @@ export default function SettingsContent() {
 
   return (
     <div>
-      <div className='sticky top-0 z-10 border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-lg'>
-        <div className='flex items-center gap-2'>
-          <SettingsIcon className='h-5 w-5 text-[#2C3248]' />
-          <h1 className='text-lg font-bold text-gray-900'>Settings</h1>
-        </div>
-      </div>
+      <PageHeader icon={Settings} title='Settings' />
 
       <div className='flex'>
         <nav className='w-48 shrink-0 border-r border-gray-200 p-3 space-y-1'>

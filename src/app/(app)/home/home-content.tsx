@@ -6,7 +6,7 @@ import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useFeed } from '@/hooks/useTestimonies';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { flattenPages } from '@/lib/utils';
-import { Feather } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { useEffect } from 'react';
 
 export default function HomeContent() {
@@ -22,7 +22,7 @@ export default function HomeContent() {
 
   return (
     <>
-      <PageHeader icon={Feather} title='Home' />
+      <PageHeader icon={Home} title='Home' />
 
       <Composer />
 
@@ -37,7 +37,7 @@ export default function HomeContent() {
         )}
         {!feed.isLoading && !feed.isError && flattenPages(feed.data).length === 0 && (
           <div className='p-4'>
-            <EmptyState title='No testimonies yet' message='Be the first to share your story.' icon={<Feather className='h-8 w-8' />} />
+              <EmptyState title='No testimonies yet' message='Be the first to share your story.' icon={<Home className='h-8 w-8' />} />
           </div>
         )}
         {!feed.isLoading && !feed.isError && flattenPages(feed.data).length > 0 && (

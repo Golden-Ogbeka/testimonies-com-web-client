@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, Button, EmptyState, SkeletonCard, Spinner, TabBar, VirtualList } from '@/components/common';
+import { Avatar, Button, EmptyState, PageHeader, SkeletonCard, Spinner, TabBar, VirtualList } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useMe } from '@/hooks/useAuth';
 import {
@@ -13,7 +13,7 @@ import { useFeed, useUserReplies } from '@/hooks/useTestimonies';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { flattenPages } from '@/lib/utils';
 import { ROUTES } from '@/constants/routes';
-import { Settings, UserMinus, UserPlus } from 'lucide-react';
+import { Settings, User, UserMinus, UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -74,6 +74,7 @@ export default function ProfileContent() {
 
   return (
     <div>
+      <PageHeader icon={User} title={`@${user.username}`} />
       <div className='relative h-48 bg-gradient-to-r from-[#2C3248]/10 to-[#2C3248]/20'>
         {user.coverPicture && (
           <Image src={user.coverPicture} alt='Profile cover image' fill className='object-cover' unoptimized priority />
