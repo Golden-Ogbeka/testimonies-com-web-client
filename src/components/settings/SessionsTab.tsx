@@ -4,11 +4,9 @@ import { Button } from '@/components/common';
 import { useAuthState } from '@/app/providers';
 import { useDeleteOtherSessions, useDeleteSession, useLogout, useSessions } from '@/hooks/useAuth';
 import { ROUTES } from '@/constants/routes';
-import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 
 export default function SessionsTab() {
-  const router = useRouter();
   const { clearAuth } = useAuthState();
   const sessions = useSessions();
   const deleteSession = useDeleteSession();
@@ -17,9 +15,9 @@ export default function SessionsTab() {
 
   const handleLogout = useCallback(async () => {
     await logout.mutateAsync();
-    router.replace(ROUTES.SIGNIN);
+    window.location.href = ROUTES.SIGNIN;
     clearAuth();
-  }, [logout, router, clearAuth]);
+  }, [logout, clearAuth]);
 
   return (
     <div className='rounded-xl border border-gray-200 bg-white p-4'>

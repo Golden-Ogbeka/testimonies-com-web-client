@@ -11,7 +11,7 @@ import {
   Search, Settings
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useCallback } from 'react';
 import { useLogout } from '@/hooks/useAuth';
 
@@ -25,7 +25,6 @@ const nav = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { user, clearAuth } = useAuthState();
   const followRequests = useFollowRequests();
   const broadcastRequests = useBroadcastRequests();
@@ -35,9 +34,9 @@ export function AppSidebar() {
 
   const handleLogout = useCallback(async () => {
     await logout.mutateAsync();
-    router.replace(ROUTES.SIGNIN);
+    window.location.href = ROUTES.SIGNIN;
     clearAuth();
-  }, [logout, router, clearAuth]);
+  }, [logout, clearAuth]);
 
   return (
     <>
