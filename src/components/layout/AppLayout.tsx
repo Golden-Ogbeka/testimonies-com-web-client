@@ -22,7 +22,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div className='flex min-h-screen bg-white'>
       <AppSidebar />
       <main className='flex min-h-screen flex-1 border-x border-gray-200'>
-        <div className='w-full mx-auto max-full'>{children}</div>
+        <div className='mx-auto w-full max-w-[600px]'>{children}</div>
       </main>
       <AppRightSidebar />
     </div>
