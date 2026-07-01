@@ -7,14 +7,15 @@ import { cn } from '@/lib/utils';
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
   error?: string;
+  containerClassName?: string;
 };
 
-export function Input({ className, label, error, type, ...rest }: InputProps) {
+export function Input({ className, label, error, type, containerClassName, ...rest }: InputProps) {
   const [visible, setVisible] = React.useState(false);
   const isPassword = type === 'password';
 
   return (
-    <div className='space-y-1'>
+    <div className={cn('space-y-1', containerClassName)}>
       {label && <label className='text-xs font-medium text-gray-600'>{label}</label>}
       <div className='relative'>
         <input

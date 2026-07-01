@@ -9,20 +9,20 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuthState();
+  const { isAuthenticated, initialized } = useAuthState();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (initialized && !isAuthenticated) {
       router.replace(ROUTES.SIGNIN);
     }
-  }, [isAuthenticated, router]);
+  }, [initialized, isAuthenticated, router]);
 
   return (
     <div className='flex min-h-screen bg-white'>
       <AppSidebar />
       <main className='flex min-h-screen flex-1 border-x border-gray-200'>
-        <div className='mx-auto w-full max-w-[600px]'>{children}</div>
+        <div className='mx-auto w-full'>{children}</div>
       </main>
       <AppRightSidebar />
     </div>

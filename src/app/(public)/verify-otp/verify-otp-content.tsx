@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { Button, OtpInput } from '@/components/common';
+import { Button, Input, OtpInput } from '@/components/common';
 import { useResendOtp, useVerifyOtp } from '@/hooks/useAuth';
 import { useCooldown } from '@/hooks/useCooldown';
 import { apiMessage } from '@/lib/utils';
@@ -79,7 +79,7 @@ export default function VerifyOtpContent() {
           </div>
 
           <div className='space-y-4'>
-            <input
+            <Input
               type='email'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -87,7 +87,6 @@ export default function VerifyOtpContent() {
               aria-label='Email address'
               disabled
               readOnly
-              className='h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-[#2C3248] focus:ring-1 focus:ring-[#2C3248]/20'
             />
 
             <div className='flex justify-center'>

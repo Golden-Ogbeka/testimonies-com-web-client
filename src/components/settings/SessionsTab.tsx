@@ -1,10 +1,10 @@
 'use client';
 
-import { Button } from '@/components/common';
+import { Button, ConfirmModal } from '@/components/common';
 import { useAuthState } from '@/app/providers';
 import { useDeleteOtherSessions, useDeleteSession, useLogout, useSessions } from '@/hooks/useAuth';
 import { ROUTES } from '@/constants/routes';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export default function SessionsTab() {
   const { clearAuth } = useAuthState();
@@ -12,6 +12,7 @@ export default function SessionsTab() {
   const deleteSession = useDeleteSession();
   const deleteOthers = useDeleteOtherSessions();
   const logout = useLogout();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = useCallback(async () => {
     await logout.mutateAsync();
@@ -40,8 +41,19 @@ export default function SessionsTab() {
         ))}
       </div>
       <div className='mt-4 space-y-2'>
-        <Button variant='danger' className='w-full' onClick={handleLogout}>Logout</Button>
+        <Button variant='danger' className='w-full' onClick={() => setShowLogoutConfirm(true)}>Logout</Button>
       </div>
+
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+        title='Logout'
+        message='Are you sure you want to log out?'
+        confirmLabel='Logout'
+        variant='danger'
+        isPending={logout.isPending}
+      />
     </div>
   );
 }

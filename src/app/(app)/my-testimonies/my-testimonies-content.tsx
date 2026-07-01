@@ -1,5 +1,6 @@
 'use client';
 
+import moment from 'moment';
 import { EmptyState, PageHeader, SkeletonCard, Spinner, TabBar, VirtualList } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useMyReplies, useMyTestimonies, useTestimonyStats } from '@/hooks/useTestimonies';
@@ -98,7 +99,7 @@ export default function MyTestimoniesContent() {
               <VirtualList items={flattenPages(myReplies.data)} renderItem={(reply) => (
                 <div key={reply._id} className='border-b border-gray-200 px-4 py-3 hover:bg-gray-50'>
                   <p className='text-sm text-gray-700'>{reply.content}</p>
-                  <p className='mt-1 text-xs text-gray-400'>{new Date(reply.createdAt).toLocaleDateString()}</p>
+                  <p className='mt-1 text-xs text-gray-400'>{moment(reply.createdAt).fromNow()}</p>
                 </div>
               )} estimateSize={80} />
             )}

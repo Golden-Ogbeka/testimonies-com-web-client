@@ -17,6 +17,7 @@ type AuthState = {
   token: string | null;
   user: User | null;
   isAuthenticated: boolean;
+  initialized: boolean;
   setAuth: (token: string, user: User) => void;
   clearAuth: () => void;
 };
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthState>({
   token: null,
   user: null,
   isAuthenticated: false,
+  initialized: false,
   setAuth: () => {},
   clearAuth: () => {},
 });
@@ -35,12 +37,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => createQueryClient());
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     const storedToken = storage.getToken();
     const storedUser = storage.getUser();
     if (storedToken) setToken(storedToken);
     if (storedUser) setUser(storedUser);
+    setInitialized(true);
 
     const handler = () => {
       setToken(null);
@@ -65,7 +69,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider value={{ token, user, isAuthenticated: !!token, setAuth, clearAuth }}>
+      <AuthContext.Provider value={{ token, user, isAuthenticated: !!token, initialized, setAuth, clearAuth }}>
         {children}
         <Toaster
           position='top-right'

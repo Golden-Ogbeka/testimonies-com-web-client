@@ -14,3 +14,6 @@ export * from './StatusBadge';
 export * from './TabBar';
 export * from './UserRow';
 export * from './VirtualList';
+export * from './ImagePreview';
+export * from './ConfirmModal';
+export * from './Textarea';

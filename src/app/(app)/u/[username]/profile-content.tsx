@@ -1,5 +1,6 @@
 'use client';
 
+import moment from 'moment';
 import { Avatar, Button, EmptyState, PageHeader, SkeletonCard, Spinner, TabBar, VirtualList } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useMe } from '@/hooks/useAuth';
@@ -36,7 +37,7 @@ export default function ProfileContent() {
   const feed = useFeed();
   const allFeedPages = flattenPages(feed.data);
   const userTestimonies = useMemo(
-    () => allFeedPages.filter((t) => t.user?._id === userId),
+    () => allFeedPages.filter((t) => t.userDetails._id === userId),
     [allFeedPages, userId]
   );
   const allUserReplies = flattenPages(userReplies.data);
@@ -76,14 +77,14 @@ export default function ProfileContent() {
     <div>
       <PageHeader icon={User} title={`@${user.username}`} />
       <div className='relative h-48 bg-gradient-to-r from-[#2C3248]/10 to-[#2C3248]/20'>
-        {user.coverPicture && (
-          <Image src={user.coverPicture} alt='Profile cover image' fill className='object-cover' unoptimized priority />
+        {user.coverImage && (
+          <Image src={user.coverImage} alt='Profile cover image' fill className='object-cover' unoptimized priority />
         )}
       </div>
 
       <div className='px-4 pb-4'>
         <div className='flex items-end justify-between -mt-14 mb-3'>
-          <Avatar src={user.picture} name={user.fullName ?? user.username} size='xl' className='ring-4 ring-white' />
+          <Avatar src={user.profileImage} name={`${user.firstName} ${user.lastName}`} size='xl' className='ring-4 ring-white' />
           <div className='flex gap-2'>
             {!isMe ? (
               <>
@@ -114,7 +115,7 @@ export default function ProfileContent() {
           </div>
         </div>
 
-        <h1 className='text-xl font-bold text-gray-900'>{user.fullName ?? user.username}</h1>
+        <h1 className='text-xl font-bold text-gray-900'>{`${user.firstName} ${user.lastName}`}</h1>
         <p className='text-sm text-gray-500'>@{user.username}</p>
         {user.verified && (
           <span className='mt-1 inline-block rounded-full bg-green-50 px-2 py-0.5 text-xs text-green-700'>Verified</span>
@@ -172,7 +173,7 @@ export default function ProfileContent() {
             {allUserReplies.map((reply) => (
               <div key={reply._id} className='border-b border-gray-200 px-4 py-3 hover:bg-gray-50'>
                 <p className='text-sm text-gray-700'>{reply.content}</p>
-                <p className='mt-1 text-xs text-gray-400'>{new Date(reply.createdAt).toLocaleDateString()}</p>
+                <p className='mt-1 text-xs text-gray-400'>{moment(reply.createdAt).fromNow()}</p>
               </div>
             ))}
             <div ref={repliesSentinel} className='flex justify-center py-4'>
@@ -193,9 +194,9 @@ export default function ProfileContent() {
             {(followers.data?.results ?? []).map((u) => (
               <Link key={u._id} href={ROUTES.profile(u.username)} prefetch={false}>
                 <div className='flex items-center gap-3 border-b border-gray-200 px-4 py-3 transition-colors hover:bg-gray-50'>
-                  <Avatar src={u.picture} name={u.fullName ?? u.username} />
+                  <Avatar src={u.profileImage} name={`${u.firstName} ${u.lastName}`} />
                   <div>
-                    <p className='text-sm font-semibold text-gray-900'>{u.fullName ?? u.username}</p>
+                    <p className='text-sm font-semibold text-gray-900'>{`${u.firstName} ${u.lastName}`}</p>
                     <p className='text-xs text-gray-500'>@{u.username}</p>
                   </div>
                 </div>
@@ -213,9 +214,9 @@ export default function ProfileContent() {
             {(following.data?.results ?? []).map((u) => (
               <Link key={u._id} href={ROUTES.profile(u.username)} prefetch={false}>
                 <div className='flex items-center gap-3 border-b border-gray-200 px-4 py-3 transition-colors hover:bg-gray-50'>
-                  <Avatar src={u.picture} name={u.fullName ?? u.username} />
+                  <Avatar src={u.profileImage} name={`${u.firstName} ${u.lastName}`} />
                   <div>
-                    <p className='text-sm font-semibold text-gray-900'>{u.fullName ?? u.username}</p>
+                    <p className='text-sm font-semibold text-gray-900'>{`${u.firstName} ${u.lastName}`}</p>
                     <p className='text-xs text-gray-500'>@{u.username}</p>
                   </div>
                 </div>

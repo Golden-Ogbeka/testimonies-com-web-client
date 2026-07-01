@@ -25,7 +25,7 @@ export default function ProfileTab() {
       <div className='rounded-xl border border-gray-200 bg-white p-4'>
         <h2 className='mb-4 text-sm font-bold text-gray-900'>Profile Picture & Cover</h2>
         <div className='mb-4 flex items-center gap-4'>
-          <Avatar src={user?.picture} name={user?.fullName ?? user?.username} size='xl' />
+          <Avatar src={user?.profileImage} name={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`} size='xl' />
           <div className='space-y-2'>
             <label className='cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50'>
               Change photo
@@ -45,7 +45,7 @@ export default function ProfileTab() {
         </div>
       </div>
 
-      {user?.kind === 'individual' ? (
+      {user?.accountType === 'individual' ? (
         <div className='rounded-xl border border-gray-200 bg-white p-4'>
           <h2 className='mb-4 text-sm font-bold text-gray-900'>Personal Info</h2>
           <form className='space-y-3' onSubmit={profileForm.handleSubmit(async (v) => {

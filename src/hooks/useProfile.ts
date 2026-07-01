@@ -182,8 +182,24 @@ export function useFollowUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/user/profile/follow/${id}`)).data,
-    onSuccess: (_data, id) => {
-      qc.invalidateQueries({ queryKey: profileKeys.profile() });
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: ['profile'] });
+      const snapshots: [string, unknown][] = [];
+      const p = qc.getQueryData(profileKeys.profile());
+      if (p) snapshots.push([JSON.stringify(profileKeys.profile()), p]);
+      const flw = qc.getQueryData(profileKeys.following(id));
+      if (flw) snapshots.push([JSON.stringify(profileKeys.following(id)), flw]);
+      const flrs = qc.getQueryData(profileKeys.followers(id));
+      if (flrs) snapshots.push([JSON.stringify(profileKeys.followers(id)), flrs]);
+      return { snapshots };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.snapshots) {
+        for (const [key, data] of context.snapshots) qc.setQueryData(JSON.parse(key), data);
+      }
+    },
+    onSettled: (_data, _err, id) => {
+      qc.invalidateQueries({ queryKey: ['profile'] });
       qc.invalidateQueries({ queryKey: profileKeys.following(id) });
       qc.invalidateQueries({ queryKey: profileKeys.followers(id) });
     },
@@ -194,8 +210,24 @@ export function useUnfollowUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => (await api.delete(`/user/profile/unfollow/${id}`)).data,
-    onSuccess: (_data, id) => {
-      qc.invalidateQueries({ queryKey: profileKeys.profile() });
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: ['profile'] });
+      const snapshots: [string, unknown][] = [];
+      const p = qc.getQueryData(profileKeys.profile());
+      if (p) snapshots.push([JSON.stringify(profileKeys.profile()), p]);
+      const flw = qc.getQueryData(profileKeys.following(id));
+      if (flw) snapshots.push([JSON.stringify(profileKeys.following(id)), flw]);
+      const flrs = qc.getQueryData(profileKeys.followers(id));
+      if (flrs) snapshots.push([JSON.stringify(profileKeys.followers(id)), flrs]);
+      return { snapshots };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.snapshots) {
+        for (const [key, data] of context.snapshots) qc.setQueryData(JSON.parse(key), data);
+      }
+    },
+    onSettled: (_data, _err, id) => {
+      qc.invalidateQueries({ queryKey: ['profile'] });
       qc.invalidateQueries({ queryKey: profileKeys.following(id) });
       qc.invalidateQueries({ queryKey: profileKeys.followers(id) });
     },

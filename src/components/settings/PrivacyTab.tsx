@@ -38,8 +38,8 @@ export default function PrivacyTab() {
           {(followRequests.data?.results ?? []).map((req) => (
             <div key={req._id} className='flex items-center justify-between rounded-lg border border-gray-200 p-3'>
               <div className='flex items-center gap-2'>
-                <Avatar src={req.requester?.picture} name={req.requester?.fullName ?? req.requester?.username} size='sm' />
-                <p className='text-sm font-medium text-gray-700'>{req.requester?.fullName ?? req.requester?.username}</p>
+                <Avatar src={req.requester?.profileImage} name={`${req.requester?.firstName ?? ''} ${req.requester?.lastName ?? ''}`} size='sm' />
+                <p className='text-sm font-medium text-gray-700'>{`${req.requester?.firstName ?? ''} ${req.requester?.lastName ?? ''}`}</p>
               </div>
               <div className='flex gap-2'>
                 <Button onClick={() => acceptFollow.mutate(req._id)} className='px-3 py-1 text-xs'>Accept</Button>
@@ -57,8 +57,8 @@ export default function PrivacyTab() {
           {(blockedUsers.data?.results ?? []).map((item) => (
             <div key={item._id} className='flex items-center justify-between rounded-lg border border-gray-200 p-3'>
               <div className='flex items-center gap-2'>
-                <Avatar src={item.blockedUser?.picture} name={item.blockedUser?.fullName ?? item.blockedUser?.username} size='sm' />
-                <p className='text-sm font-medium text-gray-700'>{item.blockedUser?.fullName ?? item.blockedUser?.username}</p>
+                <Avatar src={item.blockedUser?.profileImage} name={`${item.blockedUser?.firstName ?? ''} ${item.blockedUser?.lastName ?? ''}`} size='sm' />
+                <p className='text-sm font-medium text-gray-700'>{`${item.blockedUser?.firstName ?? ''} ${item.blockedUser?.lastName ?? ''}`}</p>
               </div>
               <Button variant='secondary' onClick={() => unblock.mutate(item.blockedUser?._id ?? '')} className='px-3 py-1 text-xs'>Unblock</Button>
             </div>

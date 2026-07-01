@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, Button } from '@/components/common';
+import { Avatar, Button, Textarea } from '@/components/common';
 import { useMe } from '@/hooks/useAuth';
 import { useReplyToTestimony } from '@/hooks/useTestimonies';
 import { apiMessage } from '@/lib/utils';
@@ -17,8 +17,14 @@ export default function ReplyComposer({ testimonyId }: { testimonyId: string }) 
 
   const submit = async () => {
     const trimmed = content.trim();
-    if (!trimmed) { setError('Reply cannot be empty'); return; }
-    if (trimmed.length > REPLY_MAX) { setError(`Reply must be under ${REPLY_MAX} characters`); return; }
+    if (!trimmed) {
+      setError('Reply cannot be empty');
+      return;
+    }
+    if (trimmed.length > REPLY_MAX) {
+      setError(`Reply must be under ${REPLY_MAX} characters`);
+      return;
+    }
     setError('');
     try {
       await sendReply.mutateAsync({ id: testimonyId, content: trimmed });
@@ -31,20 +37,36 @@ export default function ReplyComposer({ testimonyId }: { testimonyId: string }) 
   return (
     <div className='border-b border-gray-200 p-4'>
       <div className='flex gap-3'>
-        <Avatar src={me?.picture} name={me?.fullName ?? me?.username} />
+        <Avatar
+          src={me?.profileImage}
+          name={`${me?.firstName ?? ''} ${me?.lastName ?? ''}`}
+        />
         <div className='flex-1'>
-          <textarea
+          <Textarea
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              setContent(e.target.value);
+              if (error) setError('');
+            }}
+            onKeyDown={(e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                submit();
+              }
+            }}
             placeholder='Write a reply...'
             aria-label='Write a reply'
             rows={2}
-            className='w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-[#2C3248]/50 focus:ring-1 focus:ring-[#2C3248]/20'
+            error={error}
           />
-          {error && <p className='mt-1 text-xs text-red-500'>{error}</p>}
           <div className='mt-2 flex justify-end'>
             <div className='flex items-center gap-2'>
-              <span className='text-xs text-gray-400'>{content.length}/{REPLY_MAX}</span>
+              <span
+                className={`text-xs ${content.length > REPLY_MAX ? 'text-red-500' : 'text-gray-400'}`}
+              >
+                {' '}
+                {content.length}/{REPLY_MAX}
+              </span>
               <Button onClick={submit} disabled={sendReply.isPending || !content.trim()}>
                 {sendReply.isPending ? 'Replying...' : 'Reply'}
               </Button>

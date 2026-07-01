@@ -74,9 +74,9 @@ export default function NotificationsContent() {
             {(followRequests.data?.results ?? []).map((req) => (
               <div key={req._id} className='flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4'>
                 <div className='flex items-center gap-3'>
-                  <Avatar src={req.requester?.picture} name={req.requester?.fullName ?? req.requester?.username} />
+                  <Avatar src={req.requester?.profileImage} name={`${req.requester?.firstName ?? ''} ${req.requester?.lastName ?? ''}`} />
                   <div>
-                    <p className='text-sm font-semibold text-gray-900'>{req.requester?.fullName ?? req.requester?.username}</p>
+                    <p className='text-sm font-semibold text-gray-900'>{`${req.requester?.firstName ?? ''} ${req.requester?.lastName ?? ''}`}</p>
                     <p className='text-xs text-gray-500'>@{req.requester?.username} wants to follow you</p>
                   </div>
                 </div>

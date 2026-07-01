@@ -1,80 +1,85 @@
 'use client';
 
-import { Avatar } from '@/components/common';
-import { useDeleteReply, useLikeReply, useUnlikeReply, useUpdateReply } from '@/hooks/useTestimonies';
+import { Avatar, ConfirmModal } from '@/components/common';
+import { useDeleteReply, useLikeReply, useUnlikeReply } from '@/hooks/useTestimonies';
 import type { Reply } from '@/types/testimony';
 import { useMe } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
-import { Check, Heart, Pencil, Trash2, X } from 'lucide-react';
+import { Heart, Trash2 } from 'lucide-react';
+import moment from 'moment';
 import { memo, useCallback, useState } from 'react';
 
 function ReplyItem({ reply }: { reply: Reply }) {
   const { data: me } = useMe();
-  const updateReply = useUpdateReply();
   const deleteReply = useDeleteReply();
   const likeReply = useLikeReply();
   const unlikeReply = useUnlikeReply();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const [editing, setEditing] = useState(false);
-  const [editText, setEditText] = useState(reply.content);
-
-  const startEditing = useCallback(() => { setEditing(true); setEditText(reply.content); }, [reply.content]);
-  const cancelEditing = useCallback(() => setEditing(false), []);
-  const saveEdit = useCallback(async () => {
-    await updateReply.mutateAsync({ id: reply._id, content: editText });
-    setEditing(false);
-  }, [updateReply, reply._id, editText]);
-  const removeReply = useCallback(() => deleteReply.mutate(reply._id), [deleteReply, reply._id]);
+  const removeReply = useCallback(
+    () => deleteReply.mutate({ id: reply._id, testimonyId: reply.testimonyId }),
+    [deleteReply, reply._id, reply.testimonyId],
+  );
   const toggleLike = useCallback(() => {
-    if (reply.liked) { unlikeReply.mutate(reply._id); return; }
-    likeReply.mutate(reply._id);
-  }, [reply.liked, reply._id, likeReply, unlikeReply]);
+    if (reply.isLiked) {
+      unlikeReply.mutate({ id: reply._id, testimonyId: reply.testimonyId });
+      return;
+    }
+    likeReply.mutate({ id: reply._id, testimonyId: reply.testimonyId });
+  }, [reply.isLiked, reply._id, reply.testimonyId, likeReply, unlikeReply]);
 
-  if (editing) {
-    return (
-      <div className='border-b border-gray-200 px-4 py-3 hover:bg-gray-50'>
-        <div className='flex gap-2'>
-          <textarea
-            value={editText}
-            onChange={(e) => setEditText(e.target.value)}
-            rows={2}
-            aria-label='Edit reply'
-            className='flex-1 resize-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-[#2C3248]/50 focus:ring-1 focus:ring-[#2C3248]/20'
-          />
-          <div className='flex flex-col gap-1'>
-            <button onClick={saveEdit} aria-label='Save edit' className='rounded-full p-1.5 text-green-600 hover:bg-green-50'><Check className='h-4 w-4' /></button>
-            <button onClick={cancelEditing} aria-label='Cancel edit' className='rounded-full p-1.5 text-gray-400 hover:bg-gray-100'><X className='h-4 w-4' /></button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const fullName = `${reply.userDetails.firstName} ${reply.userDetails.lastName}`;
 
   return (
     <div className='border-b border-gray-200 px-4 py-3 hover:bg-gray-50'>
       <div className='flex items-start gap-3'>
-        <Avatar src={reply.user?.picture} name={reply.user?.fullName ?? reply.user?.username} size='sm' />
-        <div className='flex-1'>
+        <Avatar src={reply.userDetails.profileImage} name={fullName} size='sm' />
+        <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-2'>
-            <span className='text-sm font-semibold text-gray-900'>{reply.user?.fullName ?? reply.user?.username}</span>
-            <span className='text-xs text-gray-500'>@{reply.user?.username}</span>
+            <span className='text-sm font-semibold text-gray-900'>{fullName}</span>
+            <span className='text-xs text-gray-500'>@{reply.userDetails.username}</span>
+            <span className='text-xs text-gray-300'>·</span>
+            <span className='text-xs text-gray-500'>{moment(reply.createdAt).fromNow()}</span>
           </div>
-          <p className='mt-0.5 text-sm text-gray-700'>{reply.content}</p>
+          <p className='mt-0.5 text-sm text-gray-700 break-all'>{reply.content}</p>
           <div className='mt-2 flex items-center gap-3 text-xs text-gray-500'>
+            <button
+              onClick={toggleLike}
+              aria-label={reply.isLiked ? 'Unlike reply' : 'Like reply'}
+              className={cn(
+                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 transition-colors hover:text-[#2C3248]',
+                reply.isLiked && 'text-[#2C3248]',
+              )}
+            >
+              <Heart
+                className={cn('h-3.5 w-3.5', reply.isLiked && 'fill-[#2C3248]')}
+                strokeWidth={1.5}
+              />
+              {reply.likesCount}
+            </button>
+            {me?._id === reply.userDetails._id && (
               <button
-                onClick={toggleLike}
-                aria-label={reply.liked ? 'Unlike reply' : 'Like reply'}
-                className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 transition-colors hover:text-[#2C3248]', reply.liked && 'text-[#2C3248]')}
+                onClick={() => setShowDeleteConfirm(true)}
+                aria-label='Delete reply'
+                className='rounded-full p-1 transition-colors hover:bg-red-50 hover:text-red-500'
               >
-                <Heart className={cn('h-3.5 w-3.5', reply.liked && 'fill-[#2C3248]')} strokeWidth={1.5} />
-                {reply.likesCount ?? 0}
+                <Trash2 className='h-3.5 w-3.5' />
               </button>
-              {me?._id === reply.user?._id && (
-                <>
-                  <button onClick={startEditing} aria-label='Edit reply' className='rounded-full p-1 transition-colors hover:bg-gray-100'><Pencil className='h-3.5 w-3.5' /></button>
-                  <button onClick={removeReply} aria-label='Delete reply' className='rounded-full p-1 transition-colors hover:bg-red-50 hover:text-red-500'><Trash2 className='h-3.5 w-3.5' /></button>
-              </>
             )}
+
+            <ConfirmModal
+              isOpen={showDeleteConfirm}
+              onClose={() => setShowDeleteConfirm(false)}
+              onConfirm={() => {
+                removeReply();
+                setShowDeleteConfirm(false);
+              }}
+              title='Delete reply'
+              message='Are you sure you want to delete this reply? This action cannot be undone.'
+              confirmLabel='Delete'
+              variant='danger'
+              isPending={deleteReply.isPending}
+            />
           </div>
         </div>
       </div>

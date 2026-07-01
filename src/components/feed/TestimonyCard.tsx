@@ -1,12 +1,13 @@
 'use client';
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
+import moment from 'moment';
 import { ROUTES } from '@/constants/routes';
-import { Avatar } from '@/components/common';
+import { Avatar, ImagePreview } from '@/components/common';
 import { useLikeTestimony, useUnlikeTestimony } from '@/hooks/useTestimonies';
 import { cn } from '@/lib/utils';
 import type { Testimony } from '@/types/testimony';
-import { Heart, Lock, MessageCircle, Radio } from 'lucide-react';
+import { Heart, MessageCircle, Radio } from 'lucide-react';
 import Link from 'next/link';
 
 type Props = { testimony: Testimony; compact?: boolean };
@@ -14,37 +15,35 @@ type Props = { testimony: Testimony; compact?: boolean };
 function TestimonyCardBase({ testimony, compact }: Props) {
   const like = useLikeTestimony();
   const unlike = useUnlikeTestimony();
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const toggleLike = useCallback(() => {
-    if (testimony.liked) { unlike.mutate(testimony._id); return; }
+    if (testimony.isLiked) { unlike.mutate(testimony._id); return; }
     like.mutate(testimony._id);
-  }, [testimony.liked, testimony._id, like, unlike]);
+  }, [testimony.isLiked, testimony._id, like, unlike]);
+
+  const fullName = `${testimony.userDetails.firstName} ${testimony.userDetails.lastName}`;
 
   return (
     <div className='group border-b border-gray-200 px-4 py-3 transition-colors hover:bg-gray-50/50'>
       <div className='flex items-start gap-3'>
-        <Link href={ROUTES.profile(testimony.user?.username ?? '')}>
-          <Avatar src={testimony.user?.picture} name={testimony.user?.fullName ?? testimony.user?.username} size='md' />
+        <Link href={ROUTES.profile(testimony.userDetails.username)}>
+          <Avatar src={testimony.userDetails.profileImage} name={fullName} size='md' />
         </Link>
         <div className='min-w-0 flex-1'>
           <div className='flex items-center gap-2 flex-wrap'>
             <Link
-              href={ROUTES.profile(testimony.user?.username ?? '')}
+              href={ROUTES.profile(testimony.userDetails.username)}
               className='text-sm font-semibold text-gray-900 hover:underline'
             >
-              {testimony.user?.fullName ?? testimony.user?.username ?? 'User'}
+              {fullName}
             </Link>
-            <span className='text-xs text-gray-500'>@{testimony.user?.username ?? 'anonymous'}</span>
+            <span className='text-xs text-gray-500'>@{testimony.userDetails.username}</span>
             <span className='text-xs text-gray-300'>·</span>
-            <span className='text-xs text-gray-500'>{new Date(testimony.createdAt).toLocaleDateString()}</span>
+            <span className='text-xs text-gray-500'>{moment(testimony.createdAt).fromNow()}</span>
             {testimony.isBroadcast && (
               <span className='inline-flex items-center gap-1 rounded-full bg-[#2C3248]/5 px-2 py-0.5 text-xs text-[#2C3248]'>
                 <Radio className='h-3 w-3' />Broadcast
-              </span>
-            )}
-            {testimony.isSecret && (
-              <span className='inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500'>
-                <Lock className='h-3 w-3' />Secret
               </span>
             )}
           </div>
@@ -54,7 +53,7 @@ function TestimonyCardBase({ testimony, compact }: Props) {
               {testimony.description}
             </p>
           </Link>
-          {testimony.tags && testimony.tags.length > 0 && (
+          {testimony.tags.length > 0 && (
             <div className='mt-2 flex flex-wrap gap-1'>
               {testimony.tags.map((tag) => (
                 <span key={tag} className='rounded-full bg-[#2C3248]/5 px-2 py-0.5 text-xs text-[#2C3248]'>
@@ -63,17 +62,35 @@ function TestimonyCardBase({ testimony, compact }: Props) {
               ))}
             </div>
           )}
+          {testimony.mediaURLs.length > 0 && (
+            <div className='mt-3 flex flex-wrap gap-2'>
+              {testimony.mediaURLs.slice(0, 4).map((url, i) => (
+                <button
+                  key={url}
+                  onClick={() => setPreviewUrl(url)}
+                  aria-label='View image'
+                  className='overflow-hidden rounded-lg border border-gray-200'
+                >
+                  <img
+                    src={url}
+                    alt={`Image ${i + 1}`}
+                    className='h-20 w-20 object-cover transition-opacity hover:opacity-80'
+                  />
+                </button>
+              ))}
+            </div>
+          )}
           <div className='mt-3 flex items-center gap-6 text-xs text-gray-500'>
             <button
               onClick={toggleLike}
-              aria-label={testimony.liked ? 'Unlike testimony' : 'Like testimony'}
+              aria-label={testimony.isLiked ? 'Unlike testimony' : 'Like testimony'}
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-full px-2 py-1 transition-colors hover:text-[#2C3248]',
-                testimony.liked && 'text-[#2C3248]'
+                testimony.isLiked && 'text-[#2C3248]'
               )}
             >
-              <Heart className={cn('h-4 w-4', testimony.liked && 'fill-[#2C3248]')} strokeWidth={1.5} />
-              {testimony.likesCount ?? 0}
+              <Heart className={cn('h-4 w-4', testimony.isLiked && 'fill-[#2C3248]')} strokeWidth={1.5} />
+              {testimony.likesCount}
             </button>
             <Link
               href={ROUTES.post(testimony._id)}
@@ -85,6 +102,10 @@ function TestimonyCardBase({ testimony, compact }: Props) {
           </div>
         </div>
       </div>
+
+      {previewUrl && (
+        <ImagePreview src={previewUrl} onClose={() => setPreviewUrl(null)} />
+      )}
     </div>
   );
 }

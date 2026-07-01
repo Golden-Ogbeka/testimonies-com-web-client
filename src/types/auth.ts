@@ -3,13 +3,13 @@ export type AuthKind = 'individual' | 'organization';
 export type User = {
   _id: string;
   email: string;
-  username?: string;
-  fullName?: string;
-  firstName?: string;
-  lastName?: string;
-  picture?: string;
-  coverPicture?: string;
-  kind?: AuthKind;
+  username: string;
+  firstName: string;
+  lastName: string;
+  profileImage: string;
+  coverImage?: string;
+  accountType: AuthKind;
+  profileVisibility: 'public' | 'private' | 'secret';
   verified?: boolean;
 };
 

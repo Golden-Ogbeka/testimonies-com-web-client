@@ -50,18 +50,35 @@ export default function SignInContent() {
           </div>
 
           <form className='space-y-3' onSubmit={handleSubmit(onSubmit)}>
-            <Input label='Email' placeholder='Email' error={errors.email?.message} {...register('email')} />
-            <Input label='Password' type='password' placeholder='Password' error={errors.password?.message} {...register('password')} />
-            <Button type='submit' className='w-full' size='lg' disabled={loading}>
+            <Input
+              label='Email'
+              placeholder='Email'
+              error={errors.email?.message}
+              {...register('email')}
+            />
+            <Input
+              label='Password'
+              type='password'
+              placeholder='Password'
+              error={errors.password?.message}
+              {...register('password')}
+            />
+            <Button type='submit' className='w-full mt-5' size='lg' disabled={loading}>
               {loading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
 
           <div className='mt-6 flex items-center justify-between text-sm'>
-            <Link href={ROUTES.SIGNUP} className='font-medium text-[#2C3248] hover:text-[#3a415a] transition-colors'>
+            <Link
+              href={ROUTES.SIGNUP}
+              className='font-medium text-[#2C3248] hover:text-[#3a415a] transition-colors'
+            >
               Create account
             </Link>
-            <Link href={ROUTES.FORGOT_PASSWORD} className='font-medium text-[#2C3248] hover:text-[#3a415a] transition-colors'>
+            <Link
+              href={ROUTES.FORGOT_PASSWORD}
+              className='font-medium text-[#2C3248] hover:text-[#3a415a] transition-colors'
+            >
               Forgot password?
             </Link>
           </div>

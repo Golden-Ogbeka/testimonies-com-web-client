@@ -1,7 +1,7 @@
 'use client';
 
 import { ROUTES } from '@/constants/routes';
-import { Avatar } from '@/components/common';
+import { Avatar, ConfirmModal } from '@/components/common';
 import { useAuthState } from '@/app/providers';
 import { useFollowRequests } from '@/hooks/useProfile';
 import { useBroadcastRequests } from '@/hooks/useTestimonies';
@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useLogout } from '@/hooks/useAuth';
 
 const nav = [
@@ -29,6 +29,7 @@ export function AppSidebar() {
   const followRequests = useFollowRequests();
   const broadcastRequests = useBroadcastRequests();
   const logout = useLogout();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const notifCount = (followRequests.data?.results?.length ?? 0) + flattenPages(broadcastRequests.data).length;
 
@@ -86,12 +87,23 @@ export function AppSidebar() {
 
           {/* Logout */}
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             className='flex items-center gap-4 rounded-lg px-3 py-2.5 text-sm text-gray-600 transition-colors duration-150 hover:bg-gray-100 hover:text-gray-900 mb-2'
           >
             <LogOut className='h-5 w-5' strokeWidth={1.5} />
             <span className='hidden xl:inline'>Logout</span>
           </button>
+
+          <ConfirmModal
+            isOpen={showLogoutConfirm}
+            onClose={() => setShowLogoutConfirm(false)}
+            onConfirm={handleLogout}
+            title='Logout'
+            message='Are you sure you want to log out?'
+            confirmLabel='Logout'
+            variant='danger'
+            isPending={logout.isPending}
+          />
 
           {/* User profile */}
           {user && (
@@ -101,13 +113,13 @@ export function AppSidebar() {
               className='flex items-center gap-3 rounded-lg p-3 transition-colors duration-150 hover:bg-gray-100'
             >
               <Avatar
-                src={user.picture}
-                name={user.fullName ?? user.username}
+                src={user.profileImage}
+                name={`${user.firstName} ${user.lastName}`}
                 size='md'
               />
               <div className='hidden min-w-0 flex-1 xl:block'>
                 <p className='truncate text-sm font-semibold text-gray-900'>
-                  {user.fullName ?? user.username}
+                  {`${user.firstName} ${user.lastName}`}
                 </p>
                 <p className='truncate text-xs text-gray-500'>@{user.username}</p>
               </div>
