@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "npx simple-git-hooks"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -26,6 +27,9 @@
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },
+  "simple-git-hooks": {
+    "pre-commit": "node .pre-commit.js"
+  },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
@@ -34,6 +38,8 @@
     "@types/react-dom": "^19.2.3",
     "eslint": "^9",
     "eslint-config-next": "^16.2.9",
+    "prettier": "^3",
+    "simple-git-hooks": "^2",
     "tailwindcss": "^4",
     "typescript": "^6.0.3"
   }
