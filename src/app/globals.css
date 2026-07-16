@@ -23,6 +23,26 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
 }
 
+.theme-public {
+  --background: #fdfff8;
+  --background-secondary: #f3f7eb;
+  --foreground: #151414;
+  --foreground-secondary: #5a5a5a;
+  --primary: #151414;
+  --primary-light: #272c2b;
+  --primary-muted: #e0f8f2;
+  --primary-border: #e0eadd;
+  --accent: #5adeb7;
+  --accent-muted: #e0f8f2;
+  --accent-border: #c8eedf;
+  --card: #fdfff8;
+  --card-hover: #f3f7eb;
+  --border: #e0eadd;
+  --border-light: #d1decd;
+  --shadow-sm: 0 1px 2px rgba(21, 20, 20, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(21, 20, 20, 0.05), 0 2px 4px -2px rgba(21, 20, 20, 0.03);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-background-secondary: var(--background-secondary);
@@ -39,7 +59,11 @@
   --color-danger: var(--danger);
   --color-success: var(--success);
   --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-muted: var(--accent-muted);
+  --color-accent-border: var(--accent-border);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif), ui-serif, Georgia, serif;
   --font-mono: ui-monospace, SFMono-Regular, monospace;
 }
 
@@ -74,4 +98,24 @@ button {
 }
 button:disabled {
   cursor: not-allowed;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.motion-safe\:animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe\:animate-spin-slow,
+  .motion-safe\:animate-pulse {
+    animation: none;
+  }
 }

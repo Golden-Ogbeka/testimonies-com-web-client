@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { ROUTES, PUBLIC_PATHS, DEFAULT_REDIRECT } from '@/constants/routes';
+import { ROUTES, PUBLIC_PATHS, AUTH_PUBLIC_PATHS, DEFAULT_REDIRECT } from '@/constants/routes';
 const COOKIE_NAME = 'testimonies_token';
 
 export function proxy(request: NextRequest) {
@@ -9,6 +9,7 @@ export function proxy(request: NextRequest) {
   const token = request.cookies.get(COOKIE_NAME)?.value;
 
   const isPublic = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
+  const isAuthPage = AUTH_PUBLIC_PATHS.some((path) => pathname.startsWith(path));
   const isFileRequest = /\.[^/]+$/.test(pathname);
   const isRoot = pathname === '/';
 
@@ -16,7 +17,7 @@ export function proxy(request: NextRequest) {
 
   if (isRoot) {
     if (token) return NextResponse.redirect(new URL(ROUTES.HOME, request.url));
-    return NextResponse.redirect(new URL(ROUTES.SIGNIN, request.url));
+    return NextResponse.next();
   }
 
   if (!token && !isPublic) {
@@ -24,7 +25,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(ROUTES.signinWithReturnTo(returnTo), request.url));
   }
 
-  if (token && isPublic) {
+  if (token && isAuthPage) {
     const requested = request.nextUrl.searchParams.get('returnTo');
     const safeTarget = requested && requested.startsWith('/') ? requested : DEFAULT_REDIRECT;
     return NextResponse.redirect(new URL(safeTarget, request.url));
