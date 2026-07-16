@@ -18,26 +18,29 @@ export default function HomeContent() {
     if (isIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) {
       feed.fetchNextPage();
     }
-  }, [isIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
+  }, [isIntersecting, feed]);
 
   return (
     <>
-      <PageHeader icon={Home} title='Home' />
+      <PageHeader icon={Home} title="Home" />
 
       <Composer />
 
       <div>
-        {feed.isLoading && [1, 2, 3].map((n) => (
-          <div key={n} className='p-4'><SkeletonCard /></div>
-        ))}
+        {feed.isLoading &&
+          [1, 2, 3].map((n) => (
+            <div key={n} className="p-4">
+              <SkeletonCard />
+            </div>
+          ))}
         {feed.isError && (
-          <div className='p-4'>
-            <ErrorState message='Could not load feed.' onRetry={() => feed.refetch()} />
+          <div className="p-4">
+            <ErrorState message="Could not load feed." onRetry={() => feed.refetch()} />
           </div>
         )}
         {!feed.isLoading && !feed.isError && flattenPages(feed.data).length === 0 && (
-          <div className='p-4'>
-              <EmptyState title='No testimonies yet' message='Be the first to share your story.' icon={<Home className='h-8 w-8' />} />
+          <div className="p-4">
+            <EmptyState title="No testimonies yet" message="Be the first to share your story." icon={<Home className="h-8 w-8" />} />
           </div>
         )}
         {!feed.isLoading && !feed.isError && flattenPages(feed.data).length > 0 && (
@@ -49,10 +52,10 @@ export default function HomeContent() {
         )}
       </div>
 
-      <div ref={sentinelRef} className='flex justify-center py-4'>
+      <div ref={sentinelRef} className="flex justify-center py-4">
         {feed.isFetchingNextPage && <Spinner />}
         {!feed.hasNextPage && flattenPages(feed.data).length > 0 && (
-          <p className='text-xs text-gray-400'>You've reached the end.</p>
+          <p className="py-8 text-center text-xs text-muted">You&apos;ve reached the end.</p>
         )}
       </div>
     </>

@@ -31,18 +31,18 @@ function ExploreContent() {
     if (tab !== 'testimonies' && isIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) {
       feed.fetchNextPage();
     }
-  }, [tab, isIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
+  }, [tab, isIntersecting, feed]);
 
   const allFeedItems = flattenPages(feed.data);
 
-  const filteredTestimonies = useMemo(() =>
-    query.length > 1
-      ? allFeedItems.filter((t) =>
-          t.title.toLowerCase().includes(query.toLowerCase()) ||
-          t.description.toLowerCase().includes(query.toLowerCase())
-        )
-      : allFeedItems,
-    [query, allFeedItems]
+  const filteredTestimonies = useMemo(
+    () =>
+      query.length > 1
+        ? allFeedItems.filter(
+            (t) => t.title.toLowerCase().includes(query.toLowerCase()) || t.description.toLowerCase().includes(query.toLowerCase()),
+          )
+        : allFeedItems,
+    [query, allFeedItems],
   );
 
   const handleTagClick = (tag: string) => {
@@ -53,9 +53,16 @@ function ExploreContent() {
 
   return (
     <div>
-      <PageHeader icon={Search} title='Explore'>
-        <div className='mt-3'>
-          <SearchInput value={query} onChange={(v) => { setQuery(v); setTab(v ? 'people' : 'people'); }} placeholder='Search people or testimonies...' />
+      <PageHeader icon={Search} title="Explore">
+        <div className="mt-3">
+          <SearchInput
+            value={query}
+            onChange={(v) => {
+              setQuery(v);
+              setTab(v ? 'people' : 'people');
+            }}
+            placeholder="Search people or testimonies..."
+          />
         </div>
       </PageHeader>
 
@@ -70,16 +77,14 @@ function ExploreContent() {
         onTabChange={(t) => setTab(t as Tab)}
       />
 
-      <div className='p-4 space-y-3'>
+      <div className="p-4 space-y-3">
         {tab === 'people' && (
           <>
             {users.isLoading && <SkeletonCard />}
             {!users.isLoading && query.length > 1 && (users.data?.results ?? []).length === 0 && (
-              <EmptyState title='No users found' message='Try a different name.' icon={<Users className='h-8 w-8' />} />
+              <EmptyState title="No users found" message="Try a different name." icon={<Users className="h-8 w-8" />} />
             )}
-            {query.length <= 1 && (
-              <p className='py-8 text-center text-sm text-gray-400'>Type at least 2 characters to search people.</p>
-            )}
+            {query.length <= 1 && <p className="py-8 text-center text-sm text-gray-400">Type at least 2 characters to search people.</p>}
             {(users.data?.results ?? []).map((user) => (
               <UserRow key={user._id} user={user} href={ROUTES.profile(user.username)} />
             ))}
@@ -90,13 +95,17 @@ function ExploreContent() {
           <>
             {feed.isLoading && <SkeletonCard />}
             {filteredTestimonies.length === 0 && !feed.isLoading && (
-              <EmptyState title='No testimonies found' message='Try a different keyword.' icon={<Search className='h-8 w-8' />} />
+              <EmptyState title="No testimonies found" message="Try a different keyword." icon={<Search className="h-8 w-8" />} />
             )}
             {filteredTestimonies.length > 0 && (
-              <VirtualList items={filteredTestimonies} renderItem={(t) => <TestimonyCard key={t._id} testimony={t} compact />} estimateSize={120} />
+              <VirtualList
+                items={filteredTestimonies}
+                renderItem={(t) => <TestimonyCard key={t._id} testimony={t} compact />}
+                estimateSize={120}
+              />
             )}
             {feed.hasNextPage && (
-              <div ref={sentinelRef} className='flex justify-center py-4'>
+              <div ref={sentinelRef} className="flex justify-center py-4">
                 {feed.isFetchingNextPage && <Spinner />}
               </div>
             )}
@@ -107,21 +116,23 @@ function ExploreContent() {
           <>
             {trending.isLoading && <SkeletonCard />}
             {(trending.data?.results ?? []).length === 0 && !trending.isLoading && (
-              <EmptyState title='Nothing trending' message='Check back later.' icon={<TrendingUp className='h-8 w-8' />} />
+              <EmptyState title="Nothing trending" message="Check back later." icon={<TrendingUp className="h-8 w-8" />} />
             )}
-            {(trending.data?.results ?? []).map((t) => <TestimonyCard key={t._id} testimony={t} compact />)}
+            {(trending.data?.results ?? []).map((t) => (
+              <TestimonyCard key={t._id} testimony={t} compact />
+            ))}
           </>
         )}
 
         {tab === 'tags' && (
           <>
             {tags.isLoading && <SkeletonCard />}
-            <div className='flex flex-wrap gap-2'>
+            <div className="flex flex-wrap gap-2">
               {(tags.data?.results ?? []).map((tag) => (
                 <button
                   key={tag}
                   onClick={() => handleTagClick(tag)}
-                  className='rounded-full bg-[#2C3248]/5 px-4 py-2 text-sm font-medium text-[#2C3248] transition-colors hover:bg-[#2C3248]/10'
+                  className="bg-foreground/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-foreground/10"
                 >
                   #{tag}
                 </button>

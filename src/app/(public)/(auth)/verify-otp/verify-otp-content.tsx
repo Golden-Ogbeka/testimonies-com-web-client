@@ -8,7 +8,6 @@ import { useResendOtp, useVerifyOtp } from '@/hooks/useAuth';
 import { useCooldown } from '@/hooks/useCooldown';
 import { apiMessage } from '@/lib/utils';
 import { ROUTES, DEFAULT_REDIRECT } from '@/constants/routes';
-import { Feather } from 'lucide-react';
 
 const COOLDOWN = 120;
 
@@ -41,7 +40,6 @@ export default function VerifyOtpContent() {
         toast.success('Verification successful');
         window.location.href = redirectTo;
       } else {
-        // sign up
         toast.success('Verification successful. Sign in to continue');
         router.push(ROUTES.SIGNIN);
       }
@@ -65,61 +63,34 @@ export default function VerifyOtpContent() {
   };
 
   return (
-    <main className='flex min-h-screen flex-col bg-white'>
-      <div className='flex flex-1 items-center justify-center px-4 py-12'>
-        <div className='w-full max-w-sm'>
-          <div className='mb-8 text-center'>
-            <div className='mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#2C3248]'>
-              <Feather className='h-6 w-6 text-white' />
-            </div>
-            <h1 className='text-2xl font-bold text-gray-900'>Verify OTP</h1>
-            <p className='mt-1 text-sm text-gray-500'>
-              Enter the code sent to your email
-            </p>
-          </div>
+    <div className="flex w-full flex-col gap-4 py-8">
+      <Input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+        aria-label="Email address"
+        className="h-[50px] rounded-none border-border text-base"
+        disabled
+        readOnly
+      />
 
-          <div className='space-y-4'>
-            <Input
-              type='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder='Email'
-              aria-label='Email address'
-              disabled
-              readOnly
-            />
-
-            <div className='flex justify-center'>
-              <OtpInput value={code} onChange={setCode} numInputs={6} />
-            </div>
-
-            <Button
-              onClick={onSubmit}
-              className='w-full'
-              size='lg'
-              disabled={verify.isPending || code.length < 6}
-            >
-              {verify.isPending ? 'Verifying...' : 'Verify'}
-            </Button>
-          </div>
-
-          <div className='mt-4 text-center'>
-            <Button
-              type='button'
-              variant='ghost'
-              disabled={cooldown.isRunning || resendOtp.isPending}
-              onClick={onResend}
-              className='text-sm'
-            >
-              {resendOtp.isPending
-                ? 'Sending...'
-                : cooldown.isRunning
-                  ? `Resend OTP (${cooldown.fmt()})`
-                  : 'Resend OTP'}
-            </Button>
-          </div>
-        </div>
+      <div className="flex justify-center">
+        <OtpInput value={code} onChange={setCode} numInputs={6} />
       </div>
-    </main>
+
+      <Button
+        onClick={onSubmit}
+        className="h-[50px] w-full rounded-none bg-primary text-background hover:bg-primary-light"
+        size="lg"
+        disabled={verify.isPending || code.length < 6}
+      >
+        {verify.isPending ? 'Verifying...' : 'Verify'}
+      </Button>
+
+      <Button type="button" variant="ghost" disabled={cooldown.isRunning || resendOtp.isPending} onClick={onResend} className="text-sm">
+        {resendOtp.isPending ? 'Sending...' : cooldown.isRunning ? `Resend OTP (${cooldown.fmt()})` : 'Resend OTP'}
+      </Button>
+    </div>
   );
 }

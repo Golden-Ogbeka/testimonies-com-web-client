@@ -25,25 +25,25 @@ export default function SettingsContent() {
 
   return (
     <div>
-      <PageHeader icon={Settings} title='Settings' />
+      <PageHeader icon={Settings} title="Settings" />
 
-      <div className='flex'>
-        <nav className='w-48 shrink-0 border-r border-gray-200 p-3 space-y-1'>
+      <div className="flex flex-col md:flex-row">
+        <nav className="flex overflow-x-auto border-b border-border md:w-48 md shrink-0 md:flex-col md:border-b-0 md:border-r md:overflow-x-visible p-2 md:p-3 space-x-1 md:space-x-0 md:space-y-1">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setTab(id)}
               className={cn(
-                'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                tab === id ? 'bg-[#2C3248]/5 text-[#2C3248]' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                'flex items-center gap-2 rounded-none px-3 py-2.5 text-sm font-medium transition-colors whitespace-nowrap min-h-[44px]',
+                tab === id ? 'bg-foreground/5 text-foreground' : 'text-muted hover:bg-background-secondary hover:text-foreground',
               )}
             >
-              <Icon className='h-4 w-4' /> {label}
+              <Icon className="h-4 w-4" /> {label}
             </button>
           ))}
         </nav>
 
-        <div className='flex-1 p-6 space-y-6 max-w-xl'>
+        <div className="flex-1 p-4 sm:p-6 space-y-6 max-w-xl">
           {tab === 'profile' && <ProfileTab />}
           {tab === 'account' && <AccountTab />}
           {tab === 'privacy' && <PrivacyTab />}

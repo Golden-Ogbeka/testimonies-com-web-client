@@ -33,20 +33,16 @@ export function Avatar({ name, src, className, size = 'md' }: AvatarProps) {
         alt={name ?? 'user'}
         width={dim}
         height={dim}
-        className={cn('rounded-full object-cover ring-2 ring-gray-100', sizeMap[size], className)}
+        className={cn('rounded-full object-cover ring-2 ring-border-light', sizeMap[size], className)}
       />
     );
   }
 
   return (
     <div
-      role='img'
+      role="img"
       aria-label={name ?? 'User avatar'}
-      className={cn(
-        'flex items-center justify-center rounded-full bg-[#2C3248] font-semibold text-white',
-        sizeMap[size],
-        className
-      )}
+      className={cn('flex items-center justify-center rounded-full bg-foreground font-semibold text-background', sizeMap[size], className)}
     >
       {initial}
     </div>

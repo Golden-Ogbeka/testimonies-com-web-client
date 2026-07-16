@@ -9,10 +9,10 @@ type PageHeaderProps = {
 
 export function PageHeader({ icon: Icon, title, children }: PageHeaderProps) {
   return (
-    <div className='sticky top-0 z-10 border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-lg'>
-      <div className='flex items-center gap-2'>
-        <Icon className='h-5 w-5 text-[#2C3248]' />
-        <h1 className='text-lg font-bold text-gray-900'>{title}</h1>
+    <div className="sticky top-0 z-10 border-b border-border bg-background/80 px-5 py-4 backdrop-blur-lg">
+      <div className="flex items-center gap-2.5">
+        <Icon className="h-5 w-5 text-foreground/60" strokeWidth={1.5} />
+        <h1 className="font-serif text-xl font-extralight tracking-tight text-foreground">{title}</h1>
       </div>
       {children}
     </div>

@@ -1,26 +1,29 @@
 @import 'tailwindcss';
 
 :root {
-  --background: #ffffff;
-  --background-secondary: #f8f9fb;
-  --foreground: #1a1a2e;
-  --foreground-secondary: #6b7280;
-  --primary: #2c3248;
-  --primary-light: #3a415a;
-  --primary-muted: rgba(44, 50, 72, 0.06);
-  --primary-border: rgba(44, 50, 72, 0.15);
-  --card: #ffffff;
-  --card-hover: #f8f9fb;
-  --border: #e5e7eb;
-  --border-light: #f3f4f6;
+  --background: #fdfff8;
+  --background-secondary: #f3f7eb;
+  --foreground: #151414;
+  --foreground-secondary: #5a5a5a;
+  --primary: #151414;
+  --primary-light: #272c2b;
+  --primary-muted: #e0f8f2;
+  --primary-border: #e0eadd;
+  --accent: #5adeb7;
+  --accent-muted: #e0f8f2;
+  --accent-border: #c8eedf;
+  --card: #fdfff8;
+  --card-hover: #f3f7eb;
+  --border: #e0eadd;
+  --border-light: #d1decd;
   --danger: #dc2626;
   --danger-hover: #b91c1c;
   --success: #16a34a;
   --success-muted: rgba(22, 163, 74, 0.08);
   --muted: #9ca3af;
-  --radius: 8px;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --radius: 0px;
+  --shadow-sm: 0 1px 2px rgba(21, 20, 20, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(21, 20, 20, 0.05), 0 2px 4px -2px rgba(21, 20, 20, 0.03);
 }
 
 .theme-public {
@@ -57,7 +60,9 @@
   --color-border: var(--border);
   --color-border-light: var(--border-light);
   --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
   --color-success: var(--success);
+  --color-success-muted: var(--success-muted);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-muted: var(--accent-muted);
@@ -95,9 +100,14 @@ body {
 
 button {
   cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 button:disabled {
   cursor: not-allowed;
+}
+
+a {
+  transition: color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 @keyframes spin-slow {

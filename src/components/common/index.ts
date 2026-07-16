@@ -17,3 +17,4 @@ export * from './VirtualList';
 export * from './ImagePreview';
 export * from './ConfirmModal';
 export * from './Textarea';
+export * from './brand-logo';

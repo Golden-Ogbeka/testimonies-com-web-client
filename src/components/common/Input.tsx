@@ -16,16 +16,16 @@ export function Input({ className, label, error, type, containerClassName, ...re
 
   return (
     <div className={cn('space-y-1', containerClassName)}>
-      {label && <label className="text-xs font-medium text-gray-600">{label}</label>}
+      {label && <label className="text-xs font-medium text-foreground-secondary">{label}</label>}
       <div className="relative">
         <input
           type={isPassword && visible ? 'text' : type}
           className={cn(
-            'h-10 w-full rounded-lg border bg-white text-sm text-gray-900 outline-none transition-colors duration-150',
-            'border-gray-300 placeholder:text-gray-400',
+            'h-10 w-full rounded-none border bg-background text-sm text-foreground outline-none transition-colors duration-150',
+            'border-border placeholder:text-muted',
             'focus:border-primary focus:ring-1 focus:ring-primary/20',
             isPassword ? 'px-3 pr-10' : 'px-3',
-            error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
+            error && 'border-danger focus:border-danger focus:ring-danger/20',
             className,
           )}
           {...rest}
@@ -34,7 +34,7 @@ export function Input({ className, label, error, type, containerClassName, ...re
           <button
             type="button"
             onClick={() => setVisible((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground-secondary"
             aria-label={visible ? 'Hide password' : 'Show password'}
             tabIndex={-1}
           >
@@ -42,7 +42,7 @@ export function Input({ className, label, error, type, containerClassName, ...re
           </button>
         )}
       </div>
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-danger">{error}</p>}
     </div>
   );
 }

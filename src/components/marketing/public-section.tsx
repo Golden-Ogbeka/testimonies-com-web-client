@@ -33,7 +33,7 @@ export function PublicLinkButton({
     <Link
       href={href}
       className={cn(
-        'group inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-150 hover:scale-[1.02] active:scale-95',
+        'group inline-flex items-center justify-center rounded-none font-semibold transition-all duration-150 hover:scale-[1.02] active:scale-95',
         sizeClasses[size],
         variant === 'primary' && 'bg-foreground text-background shadow-md shadow-foreground/10 hover:bg-foreground/90',
         variant === 'secondary' && 'border border-border bg-background text-foreground hover:bg-background-secondary',
@@ -132,12 +132,7 @@ type FeatureGridProps = {
 
 export function FeatureGrid({ features, className }: FeatureGridProps) {
   return (
-    <div
-      className={cn(
-        'grid grid-cols-1 gap-0 overflow-hidden rounded-2xl border border-border bg-background shadow-sm md:grid-cols-3',
-        className,
-      )}
-    >
+    <div className={cn('grid grid-cols-1 gap-0 overflow-hidden border border-border bg-background shadow-sm md:grid-cols-3', className)}>
       {features.map((feature, idx) => {
         const IconComp = feature.icon;
         return (
@@ -152,7 +147,7 @@ export function FeatureGrid({ features, className }: FeatureGridProps) {
             <div className="space-y-5 sm:space-y-6">
               <div
                 className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-gradient-to-br transition-transform group-hover:scale-105',
+                  'flex h-12 w-12 items-center justify-center rounded-none border border-border bg-gradient-to-br transition-transform group-hover:scale-105',
                   feature.color,
                 )}
               >

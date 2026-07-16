@@ -4,16 +4,16 @@ import { api, unwrap } from '@/lib/api';
 import type { Paginated } from '@/types/api';
 import type { User } from '@/types/auth';
 import type {
-    BlockedUser,
-    DeleteProfilePayload,
-    FollowRequest,
-    UpdateEmailPayload,
-    UpdateOrgProfilePayload,
-    UpdatePasswordPayload,
-    UpdatePhonePayload,
-    UpdateProfilePayload,
-    UpdateUsernamePayload,
-    UpdateVisibilityPayload,
+  BlockedUser,
+  DeleteProfilePayload,
+  FollowRequest,
+  UpdateEmailPayload,
+  UpdateOrgProfilePayload,
+  UpdatePasswordPayload,
+  UpdatePhonePayload,
+  UpdateProfilePayload,
+  UpdateUsernamePayload,
+  UpdateVisibilityPayload,
 } from '@/types/domain';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -254,7 +254,7 @@ export function useUnblockUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => (await api.delete(`/user/profile/block/${id}`)).data,
-    onSuccess: (_data, id) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: profileKeys.blocked });
       qc.invalidateQueries({ queryKey: profileKeys.profile() });
     },

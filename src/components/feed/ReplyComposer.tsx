@@ -35,13 +35,10 @@ export default function ReplyComposer({ testimonyId }: { testimonyId: string }) 
   };
 
   return (
-    <div className='border-b border-gray-200 p-4'>
-      <div className='flex gap-3'>
-        <Avatar
-          src={me?.profileImage}
-          name={`${me?.firstName ?? ''} ${me?.lastName ?? ''}`}
-        />
-        <div className='flex-1'>
+    <div className="border-b border-border/60 px-5 py-4">
+      <div className="flex gap-3.5">
+        <Avatar src={me?.profileImage} name={`${me?.firstName ?? ''} ${me?.lastName ?? ''}`} />
+        <div className="flex-1">
           <Textarea
             value={content}
             onChange={(e) => {
@@ -54,16 +51,14 @@ export default function ReplyComposer({ testimonyId }: { testimonyId: string }) 
                 submit();
               }
             }}
-            placeholder='Write a reply...'
-            aria-label='Write a reply'
+            placeholder="Write a reply..."
+            aria-label="Write a reply"
             rows={2}
             error={error}
           />
-          <div className='mt-2 flex justify-end'>
-            <div className='flex items-center gap-2'>
-              <span
-                className={`text-xs ${content.length > REPLY_MAX ? 'text-red-500' : 'text-gray-400'}`}
-              >
+          <div className="mt-2 flex justify-end">
+            <div className="flex items-center gap-2">
+              <span className={`text-xs ${content.length > REPLY_MAX ? 'text-red-500' : 'text-muted'}`}>
                 {' '}
                 {content.length}/{REPLY_MAX}
               </span>

@@ -31,39 +31,36 @@ function ReplyItem({ reply }: { reply: Reply }) {
   const fullName = `${reply.userDetails.firstName} ${reply.userDetails.lastName}`;
 
   return (
-    <div className='border-b border-gray-200 px-4 py-3 hover:bg-gray-50'>
-      <div className='flex items-start gap-3'>
-        <Avatar src={reply.userDetails.profileImage} name={fullName} size='sm' />
-        <div className='flex-1 min-w-0'>
-          <div className='flex items-center gap-2'>
-            <span className='text-sm font-semibold text-gray-900'>{fullName}</span>
-            <span className='text-xs text-gray-500'>@{reply.userDetails.username}</span>
-            <span className='text-xs text-gray-300'>·</span>
-            <span className='text-xs text-gray-500'>{moment(reply.createdAt).fromNow()}</span>
+    <div className="border-b border-border/60 px-5 py-3.5 transition-colors duration-300 hover:bg-card-hover/40">
+      <div className="flex items-start gap-3">
+        <Avatar src={reply.userDetails.profileImage} name={fullName} size="sm" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-foreground">{fullName}</span>
+            <span className="text-xs text-muted">@{reply.userDetails.username}</span>
+            <span className="text-xs text-gray-300">·</span>
+            <span className="text-xs text-muted">{moment(reply.createdAt).fromNow()}</span>
           </div>
-          <p className='mt-0.5 text-sm text-gray-700 break-all'>{reply.content}</p>
-          <div className='mt-2 flex items-center gap-3 text-xs text-gray-500'>
+          <p className="mt-0.5 text-sm text-foreground break-all">{reply.content}</p>
+          <div className="mt-2 flex items-center gap-3 text-xs text-muted">
             <button
               onClick={toggleLike}
               aria-label={reply.isLiked ? 'Unlike reply' : 'Like reply'}
               className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 transition-colors hover:text-[#2C3248]',
-                reply.isLiked && 'text-[#2C3248]',
+                'inline-flex items-center gap-1 px-2 py-0.5 transition-colors hover:text-foreground',
+                reply.isLiked && 'text-foreground',
               )}
             >
-              <Heart
-                className={cn('h-3.5 w-3.5', reply.isLiked && 'fill-[#2C3248]')}
-                strokeWidth={1.5}
-              />
+              <Heart className={cn('h-3.5 w-3.5', reply.isLiked && 'fill-foreground')} strokeWidth={1.5} />
               {reply.likesCount}
             </button>
             {me?._id === reply.userDetails._id && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                aria-label='Delete reply'
-                className='rounded-full p-1 transition-colors hover:bg-red-50 hover:text-red-500'
+                aria-label="Delete reply"
+                className="p-1 transition-colors hover:bg-red-50 hover:text-red-500"
               >
-                <Trash2 className='h-3.5 w-3.5' />
+                <Trash2 className="h-3.5 w-3.5" />
               </button>
             )}
 
@@ -74,10 +71,10 @@ function ReplyItem({ reply }: { reply: Reply }) {
                 removeReply();
                 setShowDeleteConfirm(false);
               }}
-              title='Delete reply'
-              message='Are you sure you want to delete this reply? This action cannot be undone.'
-              confirmLabel='Delete'
-              variant='danger'
+              title="Delete reply"
+              message="Are you sure you want to delete this reply? This action cannot be undone."
+              confirmLabel="Delete"
+              variant="danger"
               isPending={deleteReply.isPending}
             />
           </div>

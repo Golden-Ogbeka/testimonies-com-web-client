@@ -3,10 +3,7 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 
-const ReactQueryDevtools = dynamic(
-  () => import('@tanstack/react-query-devtools').then((mod) => mod.ReactQueryDevtools),
-  { ssr: false }
-);
+const ReactQueryDevtools = dynamic(() => import('@tanstack/react-query-devtools').then((mod) => mod.ReactQueryDevtools), { ssr: false });
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { Toaster } from 'sonner';
 import { createQueryClient } from '@/lib/query-client';
@@ -33,19 +30,18 @@ const AuthContext = createContext<AuthState>({
 
 export const useAuthState = () => useContext(AuthContext);
 
+function getInitialAuth() {
+  if (typeof window === 'undefined') return { token: null, user: null };
+  return { token: storage.getToken(), user: storage.getUser() };
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => createQueryClient());
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [initialized, setInitialized] = useState(false);
+  const [token, setToken] = useState<string | null>(() => getInitialAuth().token);
+  const [user, setUser] = useState<User | null>(() => getInitialAuth().user);
+  const initialized = true;
 
   useEffect(() => {
-    const storedToken = storage.getToken();
-    const storedUser = storage.getUser();
-    if (storedToken) setToken(storedToken);
-    if (storedUser) setUser(storedUser);
-    setInitialized(true);
-
     const handler = () => {
       setToken(null);
       setUser(null);
@@ -72,7 +68,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthContext.Provider value={{ token, user, isAuthenticated: !!token, initialized, setAuth, clearAuth }}>
         {children}
         <Toaster
-          position='top-right'
+          position="top-right"
           toastOptions={{
             style: {
               background: '#fff',
@@ -81,9 +77,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             },
           }}
         />
-        {process.env.NODE_ENV === 'development' && (
-          <ReactQueryDevtools initialIsOpen={false} />
-        )}
+        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
       </AuthContext.Provider>
     </QueryClientProvider>
   );

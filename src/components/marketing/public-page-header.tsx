@@ -1,33 +1,18 @@
-import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { PublicBadge } from './public-badge';
 
 type PublicPageHeaderProps = {
   eyebrow: string;
   title: string;
   description?: string;
   meta?: string;
-  icon?: LucideIcon;
-  badgeVariant?: 'default' | 'accent';
   align?: 'left' | 'center';
   className?: string;
 };
 
-export function PublicPageHeader({
-  eyebrow,
-  title,
-  description,
-  meta,
-  icon,
-  badgeVariant = 'default',
-  align = 'left',
-  className,
-}: PublicPageHeaderProps) {
+export function PublicPageHeader({ eyebrow, title, description, meta, align = 'left', className }: PublicPageHeaderProps) {
   return (
     <header className={cn('mb-12 sm:mb-16', align === 'center' && 'mx-auto max-w-3xl text-center', className)}>
-      <PublicBadge icon={icon} variant={badgeVariant}>
-        {eyebrow}
-      </PublicBadge>
+      <p className="mb-4 text-xs font-bold uppercase tracking-wider text-foreground/50">{eyebrow}</p>
       <h1
         className={cn(
           'font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl',

@@ -20,11 +20,11 @@ export function OtpInput({ value, onChange, numInputs = 6 }: OtpInputProps) {
           gap: '6px',
           justifyContent: 'center',
         }}
-        renderSeparator={<span className="text-gray-300">-</span>}
+        renderSeparator={<span className="text-border-light">-</span>}
         renderInput={(props) => (
           <input
             {...props}
-            className="h-12 min-w-0 flex-1 rounded-lg border border-gray-300 bg-white text-center text-lg font-semibold text-gray-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+            className="h-12 min-w-0 flex-1 rounded-none border border-border bg-background text-center text-lg font-semibold text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
           />
         )}
       />

@@ -54,8 +54,8 @@ export default function AboutPage() {
               <div className="space-y-5">
                 <h2 className="font-serif text-2xl font-bold text-foreground">What We Believe In</h2>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
-                  <div className="rounded-2xl border border-border bg-background p-5 transition-all duration-300 hover:bg-background-secondary sm:p-6">
-                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-primary-muted">
+                  <div className="border border-border bg-background p-5 transition-all duration-300 hover:bg-background-secondary sm:p-6">
+                    <div className="mb-4 flex h-10 w-10 items-center justify-center border border-border bg-primary-muted">
                       <Heart className="h-5 w-5 text-foreground" />
                     </div>
                     <h3 className="font-serif text-lg font-bold text-foreground">Encouraging Community</h3>
@@ -64,8 +64,8 @@ export default function AboutPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-border bg-background p-5 transition-all duration-300 hover:bg-background-secondary sm:p-6">
-                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-primary-muted">
+                  <div className="border border-border bg-background p-5 transition-all duration-300 hover:bg-background-secondary sm:p-6">
+                    <div className="mb-4 flex h-10 w-10 items-center justify-center border border-border bg-primary-muted">
                       <Users className="h-5 w-5 text-foreground" />
                     </div>
                     <h3 className="font-serif text-lg font-bold text-foreground">Global Reach</h3>

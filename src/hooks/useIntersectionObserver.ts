@@ -8,13 +8,10 @@ export function useIntersectionObserver(options?: IntersectionObserverInit) {
 
   useEffect(() => {
     if (!node) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsIntersecting(entry.isIntersecting),
-      { threshold: 0, ...options }
-    );
+    const observer = new IntersectionObserver(([entry]) => setIsIntersecting(entry.isIntersecting), { threshold: 0, ...options });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [node, options?.rootMargin, options?.threshold, options?.root]);
+  }, [node, options]);
 
   return { ref: setNode, isIntersecting };
 }

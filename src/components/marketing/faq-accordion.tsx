@@ -28,7 +28,7 @@ export function FaqAccordion({ items, className }: FaqAccordionProps) {
           <div
             key={faq.question}
             className={cn(
-              'overflow-hidden rounded-2xl border border-border bg-background transition-all duration-200',
+              'overflow-hidden border border-border bg-background transition-all duration-200',
               isOpen ? 'border-foreground/30 shadow-sm' : 'hover:border-foreground/20',
             )}
           >

@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import { BookOpen, Heart, MessageSquare, Shield, Sparkles } from 'lucide-react';
+import { BookOpen, Heart, MessageSquare, Shield } from 'lucide-react';
 import {
   FeatureGrid,
   IllustrationFrame,
-  PublicBadge,
   PublicContainer,
   PublicCta,
   PublicLinkButton,
@@ -34,10 +33,6 @@ export default function LandingPage() {
         <PublicContainer>
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="flex flex-col items-start space-y-6 sm:space-y-8 lg:col-span-7">
-              <PublicBadge icon={Sparkles} variant="accent">
-                Documenting Miracles Daily
-              </PublicBadge>
-
               <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground leading-[1.05] sm:text-5xl lg:text-7xl">
                 Share His <br />
                 <span className="text-accent underline decoration-wavy decoration-2 underline-offset-8">Goodness</span> to the World.
