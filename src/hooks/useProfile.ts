@@ -19,6 +19,7 @@ import type {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const profileKeys = {
+  root: ['profile'] as const,
   profile: (id?: string) => ['profile', id ?? 'me'] as const,
   followers: (id: string) => ['profile', id, 'followers'] as const,
   following: (id: string) => ['profile', id, 'following'] as const,
@@ -26,6 +27,13 @@ export const profileKeys = {
   followRequests: ['profile', 'follow-requests'] as const,
   blocked: ['profile', 'blocked'] as const,
 };
+
+function invalidateProfile(qc: ReturnType<typeof useQueryClient>) {
+  return () => {
+    qc.invalidateQueries({ queryKey: profileKeys.profile() });
+    qc.invalidateQueries({ queryKey: authKeys.me });
+  };
+}
 
 // ─── Read ────────────────────────────────────────────────────────────────────
 
@@ -81,10 +89,7 @@ export function useUpdateUserProfile() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateProfilePayload) => (await api.patch('/user/profile/user', payload)).data,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: profileKeys.profile() });
-      qc.invalidateQueries({ queryKey: authKeys.me });
-    },
+    onSuccess: invalidateProfile(qc),
   });
 }
 
@@ -92,10 +97,7 @@ export function useUpdateOrgProfile() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateOrgProfilePayload) => (await api.patch('/user/profile/organization', payload)).data,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: profileKeys.profile() });
-      qc.invalidateQueries({ queryKey: authKeys.me });
-    },
+    onSuccess: invalidateProfile(qc),
   });
 }
 
@@ -103,7 +105,7 @@ export function useUpdateEmail() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateEmailPayload) => (await api.patch('/user/profile/email', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
+    onSuccess: invalidateProfile(qc),
   });
 }
 
@@ -117,7 +119,7 @@ export function useVerifyEmailOtp() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (verificationCode: string) => (await api.post('/user/profile/email/verify-otp', { verificationCode })).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
+    onSuccess: invalidateProfile(qc),
   });
 }
 
@@ -125,7 +127,7 @@ export function useUpdateUsername() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateUsernamePayload) => (await api.patch('/user/profile/username', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
+    onSuccess: invalidateProfile(qc),
   });
 }
 
@@ -133,13 +135,15 @@ export function useUpdatePhone() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdatePhonePayload) => (await api.patch('/user/profile/phone', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
+    onSuccess: invalidateProfile(qc),
   });
 }
 
 export function useUpdatePassword() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdatePasswordPayload) => (await api.patch('/user/profile/password', payload)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: authKeys.me }),
   });
 }
 
@@ -147,16 +151,15 @@ export function useUpdateProfileVisibility() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateVisibilityPayload) => (await api.patch('/user/profile/visibility', payload)).data,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: profileKeys.profile() });
-      qc.invalidateQueries({ queryKey: authKeys.me });
-    },
+    onSuccess: invalidateProfile(qc),
   });
 }
 
 export function useDeleteProfile() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: DeleteProfilePayload) => (await api.delete('/user/profile/', { data: payload })).data,
+    onSuccess: invalidateProfile(qc),
   });
 }
 
@@ -170,7 +173,7 @@ export function useUploadProfilePicture() {
       formData.append('profilePhoto', file);
       return (await api.patch('/user/profile/picture', formData, { headers: { 'Content-Type': 'multipart/form-data' } })).data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
+    onSuccess: invalidateProfile(qc),
   });
 }
 
@@ -182,7 +185,7 @@ export function useUploadCoverPicture() {
       formData.append('coverImage', file);
       return (await api.patch('/user/profile/cover-picture', formData, { headers: { 'Content-Type': 'multipart/form-data' } })).data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
+    onSuccess: invalidateProfile(qc),
   });
 }
 
@@ -193,7 +196,7 @@ export function useFollowUser() {
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/user/profile/follow/${id}`)).data,
     onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: ['profile'] });
+      await qc.cancelQueries({ queryKey: profileKeys.root });
       const snapshots: [string, unknown][] = [];
       const p = qc.getQueryData(profileKeys.profile());
       if (p) snapshots.push([JSON.stringify(profileKeys.profile()), p]);
@@ -209,7 +212,7 @@ export function useFollowUser() {
       }
     },
     onSettled: (_data, _err, id) => {
-      qc.invalidateQueries({ queryKey: ['profile'] });
+      qc.invalidateQueries({ queryKey: profileKeys.root });
       qc.invalidateQueries({ queryKey: profileKeys.following(id) });
       qc.invalidateQueries({ queryKey: profileKeys.followers(id) });
     },
@@ -221,7 +224,7 @@ export function useUnfollowUser() {
   return useMutation({
     mutationFn: async (id: string) => (await api.delete(`/user/profile/unfollow/${id}`)).data,
     onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: ['profile'] });
+      await qc.cancelQueries({ queryKey: profileKeys.root });
       const snapshots: [string, unknown][] = [];
       const p = qc.getQueryData(profileKeys.profile());
       if (p) snapshots.push([JSON.stringify(profileKeys.profile()), p]);
@@ -237,7 +240,7 @@ export function useUnfollowUser() {
       }
     },
     onSettled: (_data, _err, id) => {
-      qc.invalidateQueries({ queryKey: ['profile'] });
+      qc.invalidateQueries({ queryKey: profileKeys.root });
       qc.invalidateQueries({ queryKey: profileKeys.following(id) });
       qc.invalidateQueries({ queryKey: profileKeys.followers(id) });
     },

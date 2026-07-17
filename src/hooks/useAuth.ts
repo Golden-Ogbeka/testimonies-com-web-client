@@ -29,10 +29,8 @@ export function useMe() {
       const data = await unwrap<User>((await api.get('/user/profile')).data);
       if (data) {
         storage.setUser(data);
-        if (setAuth) {
-          const token = storage.getToken();
-          if (token) setAuth(token, data);
-        }
+        const token = storage.getToken();
+        if (token) setAuth(token, data);
       }
       return data;
     },

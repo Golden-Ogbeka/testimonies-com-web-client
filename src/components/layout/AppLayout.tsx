@@ -5,10 +5,12 @@ import { AppSidebar } from './AppSidebar';
 import { AppRightSidebar } from './AppRightSidebar';
 import type { ReactNode } from 'react';
 import { useAuthState } from '@/app/providers';
+import { useMe } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export function AppLayout({ children }: { children: ReactNode }) {
+  useMe();
   const { isAuthenticated, initialized } = useAuthState();
   const router = useRouter();
 

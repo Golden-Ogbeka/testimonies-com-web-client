@@ -14,8 +14,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { UserListItem } from './user-list-item';
 
 type Tab = 'testimonies' | 'replies' | 'followers' | 'following';
+
+const PROFILE_TABS = [
+  { id: 'testimonies' as const, label: 'Testimonies' },
+  { id: 'replies' as const, label: 'Replies' },
+  { id: 'followers' as const, label: 'Followers' },
+  { id: 'following' as const, label: 'Following' },
+];
 
 export default function ProfileContent() {
   const { username } = useParams<{ username: string }>();
@@ -78,7 +86,7 @@ export default function ProfileContent() {
         )}
       </div>
 
-      <div className="px-4 pb-4">
+      <div className="relative z-10 px-4 pb-4">
         <div className="flex items-end justify-between -mt-14 mb-3">
           <Avatar src={user.profileImage} name={`${user.firstName} ${user.lastName}`} size="xl" className="ring-4 ring-background" />
           <div className="flex gap-2">
@@ -133,16 +141,7 @@ export default function ProfileContent() {
         </div>
       </div>
 
-      <TabBar
-        tabs={[
-          { id: 'testimonies', label: 'Testimonies' },
-          { id: 'replies', label: 'Replies' },
-          { id: 'followers', label: 'Followers' },
-          { id: 'following', label: 'Following' },
-        ]}
-        activeTab={tab}
-        onTabChange={(t) => setTab(t as Tab)}
-      />
+      <TabBar tabs={PROFILE_TABS} activeTab={tab} onTabChange={(t) => setTab(t as Tab)} />
 
       <div>
         {tab === 'testimonies' && (
@@ -177,7 +176,7 @@ export default function ProfileContent() {
             {allUserReplies.map((reply) => (
               <div key={reply._id} className="border-b border-border px-4 py-3 hover:bg-card-hover">
                 <p className="text-sm text-foreground">{reply.content}</p>
-                <p className="mt-1 text-xs text-gray-400">{moment(reply.createdAt).fromNow()}</p>
+                <p className="mt-1 text-xs text-muted">{moment(reply.createdAt).fromNow()}</p>
               </div>
             ))}
             <div ref={repliesSentinel} className="flex justify-center py-4">
@@ -195,21 +194,13 @@ export default function ProfileContent() {
                 <EmptyState title="No followers" message="" />
               </div>
             )}
-            {(followers.data ?? []).map((req) => {
-              const u = req.followerDetails;
-              if (!u) return null;
-              return (
-                <Link key={req._id} href={ROUTES.profile(u.username)} prefetch={false}>
-                  <div className="flex items-center gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-card-hover">
-                    <Avatar src={u.profileImage} name={`${u.firstName} ${u.lastName}`} />
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{`${u.firstName} ${u.lastName}`}</p>
-                      <p className="text-xs text-muted">@{u.username}</p>
-                    </div>
-                  </div>
+            {(followers.data ?? [])
+              .filter((req) => req.followerDetails != null)
+              .map((req) => (
+                <Link key={req._id} href={ROUTES.profile(req.followerDetails!.username)} prefetch={false}>
+                  <UserListItem user={req.followerDetails!} />
                 </Link>
-              );
-            })}
+              ))}
           </>
         )}
 
@@ -221,21 +212,13 @@ export default function ProfileContent() {
                 <EmptyState title="Not following anyone" message="" />
               </div>
             )}
-            {(following.data ?? []).map((req) => {
-              const u = req.leaderDetails;
-              if (!u) return null;
-              return (
-                <Link key={req._id} href={ROUTES.profile(u.username)} prefetch={false}>
-                  <div className="flex items-center gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-card-hover">
-                    <Avatar src={u.profileImage} name={`${u.firstName} ${u.lastName}`} />
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{`${u.firstName} ${u.lastName}`}</p>
-                      <p className="text-xs text-muted">@{u.username}</p>
-                    </div>
-                  </div>
+            {(following.data ?? [])
+              .filter((req) => req.leaderDetails != null)
+              .map((req) => (
+                <Link key={req._id} href={ROUTES.profile(req.leaderDetails!.username)} prefetch={false}>
+                  <UserListItem user={req.leaderDetails!} />
                 </Link>
-              );
-            })}
+              ))}
           </>
         )}
       </div>

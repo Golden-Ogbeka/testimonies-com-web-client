@@ -5,8 +5,10 @@ import type { Paginated } from '@/types/api';
 import type { User } from '@/types/auth';
 import type { BroadcastRequest, Reply, Testimony, TestimonyStats } from '@/types/testimony';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import { authKeys } from './useAuth';
 
 export const testimonyKeys = {
+  root: ['testimony'] as const,
   feed: ['testimony', 'feed'] as const,
   trending: ['testimony', 'trending'] as const,
   detail: (id: string) => ['testimony', id] as const,
@@ -131,11 +133,11 @@ export function useCreateTestimony() {
       return (await api.post('/user/testimony', formData, { headers: { 'Content-Type': 'multipart/form-data' } })).data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['testimony', 'feed'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'trending'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'tags'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'stats'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'mine'] });
+      qc.invalidateQueries({ queryKey: testimonyKeys.feed });
+      qc.invalidateQueries({ queryKey: testimonyKeys.trending });
+      qc.invalidateQueries({ queryKey: testimonyKeys.tags() });
+      qc.invalidateQueries({ queryKey: testimonyKeys.stats });
+      qc.invalidateQueries({ queryKey: testimonyKeys.myTestimonies });
     },
   });
 }
@@ -145,9 +147,9 @@ export function useDeleteAllTestimonies() {
   return useMutation({
     mutationFn: async (password: string) => (await api.post('/user/testimony/user/delete-all-testimonies', { password })).data,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['testimony', 'feed'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'mine'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'stats'] });
+      qc.invalidateQueries({ queryKey: testimonyKeys.feed });
+      qc.invalidateQueries({ queryKey: testimonyKeys.myTestimonies });
+      qc.invalidateQueries({ queryKey: testimonyKeys.stats });
     },
   });
 }
@@ -157,8 +159,8 @@ export function useDeleteAllReplies() {
   return useMutation({
     mutationFn: async (password: string) => (await api.post('/user/testimony/user/delete-all-replies', { password })).data,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['testimony', 'feed'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'my-replies'] });
+      qc.invalidateQueries({ queryKey: testimonyKeys.feed });
+      qc.invalidateQueries({ queryKey: testimonyKeys.myReplies });
     },
   });
 }
@@ -191,10 +193,10 @@ function togglePaginatedTestimonyLike(qc: ReturnType<typeof useQueryClient>, key
 }
 
 function optimisticToggleTestimonyLike(qc: ReturnType<typeof useQueryClient>, id: string) {
-  toggleInfiniteTestimonyLike(qc, ['testimony', 'feed'], id);
-  toggleInfiniteTestimonyLike(qc, ['testimony', 'mine'], id);
-  togglePaginatedTestimonyLike(qc, ['testimony', 'trending'], id);
-  qc.setQueryData<Testimony>(['testimony', id], (old) => {
+  toggleInfiniteTestimonyLike(qc, testimonyKeys.feed, id);
+  toggleInfiniteTestimonyLike(qc, testimonyKeys.myTestimonies, id);
+  togglePaginatedTestimonyLike(qc, testimonyKeys.trending, id);
+  qc.setQueryData<Testimony>(testimonyKeys.detail(id), (old) => {
     if (!old) return old;
     return { ...old, isLiked: !old.isLiked, likesCount: old.likesCount + (old.isLiked ? -1 : 1) };
   });
@@ -202,12 +204,12 @@ function optimisticToggleTestimonyLike(qc: ReturnType<typeof useQueryClient>, id
 
 function snapshotTestimonyLikeQueries(qc: ReturnType<typeof useQueryClient>) {
   const snapshots: [string, unknown][] = [];
-  const qFeed = qc.getQueryData<InfiniteData<Paginated<Testimony>>>(['testimony', 'feed']);
-  if (qFeed) snapshots.push([JSON.stringify(['testimony', 'feed']), qFeed]);
-  const qTrending = qc.getQueryData<Paginated<Testimony>>(['testimony', 'trending']);
-  if (qTrending) snapshots.push([JSON.stringify(['testimony', 'trending']), qTrending]);
-  const qMine = qc.getQueryData<InfiniteData<Paginated<Testimony>>>(['testimony', 'mine']);
-  if (qMine) snapshots.push([JSON.stringify(['testimony', 'mine']), qMine]);
+  const qFeed = qc.getQueryData<InfiniteData<Paginated<Testimony>>>(testimonyKeys.feed);
+  if (qFeed) snapshots.push([JSON.stringify(testimonyKeys.feed), qFeed]);
+  const qTrending = qc.getQueryData<Paginated<Testimony>>(testimonyKeys.trending);
+  if (qTrending) snapshots.push([JSON.stringify(testimonyKeys.trending), qTrending]);
+  const qMine = qc.getQueryData<InfiniteData<Paginated<Testimony>>>(testimonyKeys.myTestimonies);
+  if (qMine) snapshots.push([JSON.stringify(testimonyKeys.myTestimonies), qMine]);
   return snapshots;
 }
 
@@ -216,7 +218,7 @@ export function useLikeTestimony() {
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/user/testimony/${id}/like`)).data,
     onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: ['testimony'] });
+      await qc.cancelQueries({ queryKey: testimonyKeys.root });
       const snapshots = snapshotTestimonyLikeQueries(qc);
       optimisticToggleTestimonyLike(qc, id);
       return { snapshots };
@@ -229,8 +231,8 @@ export function useLikeTestimony() {
       }
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['testimony', 'feed'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'stats'] });
+      qc.invalidateQueries({ queryKey: testimonyKeys.feed });
+      qc.invalidateQueries({ queryKey: testimonyKeys.stats });
     },
   });
 }
@@ -240,7 +242,7 @@ export function useUnlikeTestimony() {
   return useMutation({
     mutationFn: async (id: string) => (await api.delete(`/user/testimony/${id}/like`)).data,
     onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: ['testimony'] });
+      await qc.cancelQueries({ queryKey: testimonyKeys.root });
       const snapshots = snapshotTestimonyLikeQueries(qc);
       optimisticToggleTestimonyLike(qc, id);
       return { snapshots };
@@ -253,8 +255,8 @@ export function useUnlikeTestimony() {
       }
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['testimony', 'feed'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'stats'] });
+      qc.invalidateQueries({ queryKey: testimonyKeys.feed });
+      qc.invalidateQueries({ queryKey: testimonyKeys.stats });
     },
   });
 }
@@ -267,9 +269,9 @@ export function useReplyToTestimony() {
     mutationFn: async ({ id, content }: { id: string; content: string }) =>
       (await api.post(`/user/testimony/${id}/reply`, { content })).data,
     onMutate: async ({ id, content }) => {
-      await qc.cancelQueries({ queryKey: ['testimony'] });
+      await qc.cancelQueries({ queryKey: testimonyKeys.root });
       const snapshotReplies = qc.getQueryData<Paginated<Reply>>(testimonyKeys.replies(id));
-      const me = qc.getQueryData<User>(['auth', 'me']);
+      const me = qc.getQueryData<User>(authKeys.me);
       const tempReply: Reply = {
         _id: `temp-${Date.now()}`,
         testimonyId: id,
@@ -293,7 +295,7 @@ export function useReplyToTestimony() {
         if (!old) return old;
         return { ...old, repliesCount: old.repliesCount + 1 };
       });
-      qc.setQueryData<InfiniteData<Paginated<Testimony>>>(['testimony', 'feed'], (old) => {
+      qc.setQueryData<InfiniteData<Paginated<Testimony>>>(testimonyKeys.feed, (old) => {
         if (!old) return old;
         return {
           ...old,
@@ -303,14 +305,14 @@ export function useReplyToTestimony() {
           })),
         };
       });
-      qc.setQueryData<Paginated<Testimony>>(['testimony', 'trending'], (old) => {
+      qc.setQueryData<Paginated<Testimony>>(testimonyKeys.trending, (old) => {
         if (!old) return old;
         return {
           ...old,
           results: old.results.map((t) => (t._id === id ? { ...t, repliesCount: t.repliesCount + 1 } : t)),
         };
       });
-      qc.setQueryData<InfiniteData<Paginated<Testimony>>>(['testimony', 'mine'], (old) => {
+      qc.setQueryData<InfiniteData<Paginated<Testimony>>>(testimonyKeys.myTestimonies, (old) => {
         if (!old) return old;
         return {
           ...old,
@@ -342,8 +344,8 @@ export function useReplyToTestimony() {
     onSettled: (_data, _err, vars) => {
       qc.invalidateQueries({ queryKey: testimonyKeys.replies(vars.id) });
       qc.invalidateQueries({ queryKey: testimonyKeys.detail(vars.id) });
-      qc.invalidateQueries({ queryKey: ['testimony', 'feed'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'stats'] });
+      qc.invalidateQueries({ queryKey: testimonyKeys.feed });
+      qc.invalidateQueries({ queryKey: testimonyKeys.stats });
     },
   });
 }
@@ -383,25 +385,25 @@ export function useDeleteReply() {
   return useMutation({
     mutationFn: async ({ id }: { id: string; testimonyId: string }) => (await api.delete(`/user/testimony/reply/${id}`)).data,
     onMutate: async ({ id, testimonyId }) => {
-      await qc.cancelQueries({ queryKey: ['testimony'] });
-      const snapshotMyReplies = qc.getQueryData<InfiniteData<Paginated<Reply>>>(['testimony', 'my-replies']);
-      const snapshotReplies = qc.getQueryData<Paginated<Reply>>(['testimony', testimonyId, 'replies']);
-      qc.setQueryData<InfiniteData<Paginated<Reply>>>(['testimony', 'my-replies'], (old) => {
+      await qc.cancelQueries({ queryKey: testimonyKeys.root });
+      const snapshotMyReplies = qc.getQueryData<InfiniteData<Paginated<Reply>>>(testimonyKeys.myReplies);
+      const snapshotReplies = qc.getQueryData<Paginated<Reply>>(testimonyKeys.replies(testimonyId));
+      qc.setQueryData<InfiniteData<Paginated<Reply>>>(testimonyKeys.myReplies, (old) => {
         if (!old) return old;
         return {
           ...old,
           pages: old.pages.map((p) => ({ ...p, results: p.results.filter((r) => r._id !== id) })),
         };
       });
-      qc.setQueryData<Paginated<Reply>>(['testimony', testimonyId, 'replies'], (old) => {
+      qc.setQueryData<Paginated<Reply>>(testimonyKeys.replies(testimonyId), (old) => {
         if (!old) return old;
         return { ...old, results: old.results.filter((r) => r._id !== id), totalResults: Math.max(0, old.totalResults - 1) };
       });
-      qc.setQueryData<Testimony>(['testimony', testimonyId], (old) => {
+      qc.setQueryData<Testimony>(testimonyKeys.detail(testimonyId), (old) => {
         if (!old) return old;
         return { ...old, repliesCount: Math.max(0, old.repliesCount - 1) };
       });
-      qc.setQueryData<InfiniteData<Paginated<Testimony>>>(['testimony', 'feed'], (old) => {
+      qc.setQueryData<InfiniteData<Paginated<Testimony>>>(testimonyKeys.feed, (old) => {
         if (!old) return old;
         return {
           ...old,
@@ -411,7 +413,7 @@ export function useDeleteReply() {
           })),
         };
       });
-      qc.setQueryData<Paginated<Testimony>>(['testimony', 'trending'], (old) => {
+      qc.setQueryData<Paginated<Testimony>>(testimonyKeys.trending, (old) => {
         if (!old) return old;
         return {
           ...old,
@@ -421,25 +423,25 @@ export function useDeleteReply() {
       return { snapshotMyReplies, snapshotReplies, testimonyId };
     },
     onError: (_err, _vars, context) => {
-      if (context?.snapshotMyReplies) qc.setQueryData(['testimony', 'my-replies'], context.snapshotMyReplies);
-      if (context?.snapshotReplies) qc.setQueryData(['testimony', context.testimonyId, 'replies'], context.snapshotReplies);
+      if (context?.snapshotMyReplies) qc.setQueryData(testimonyKeys.myReplies, context.snapshotMyReplies);
+      if (context?.snapshotReplies) qc.setQueryData(testimonyKeys.replies(context.testimonyId), context.snapshotReplies);
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['testimony', 'feed'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'my-replies'] });
+      qc.invalidateQueries({ queryKey: testimonyKeys.feed });
+      qc.invalidateQueries({ queryKey: testimonyKeys.myReplies });
     },
   });
 }
 
 function optimisticToggleReplyLike(qc: ReturnType<typeof useQueryClient>, testimonyId: string, id: string) {
-  qc.setQueryData<Paginated<Reply>>(['testimony', testimonyId, 'replies'], (old) => {
+  qc.setQueryData<Paginated<Reply>>(testimonyKeys.replies(testimonyId), (old) => {
     if (!old) return old;
     return {
       ...old,
       results: old.results.map((r) => (r._id === id ? { ...r, isLiked: !r.isLiked, likesCount: r.likesCount + (r.isLiked ? -1 : 1) } : r)),
     };
   });
-  qc.setQueryData<InfiniteData<Paginated<Reply>>>(['testimony', 'my-replies'], (old) => {
+  qc.setQueryData<InfiniteData<Paginated<Reply>>>(testimonyKeys.myReplies, (old) => {
     if (!old) return old;
     return {
       ...old,
@@ -458,13 +460,13 @@ export function useLikeReply() {
   return useMutation({
     mutationFn: async ({ id }: { id: string; testimonyId: string }) => (await api.post(`/user/testimony/reply/${id}/like`)).data,
     onMutate: async ({ id, testimonyId }) => {
-      await qc.cancelQueries({ queryKey: ['testimony', testimonyId, 'replies'] });
-      await qc.cancelQueries({ queryKey: ['testimony', 'my-replies'] });
+      await qc.cancelQueries({ queryKey: testimonyKeys.replies(testimonyId) });
+      await qc.cancelQueries({ queryKey: testimonyKeys.myReplies });
       const snapshots: [string, unknown][] = [];
-      const replyData = qc.getQueryData<Paginated<Reply>>(['testimony', testimonyId, 'replies']);
-      if (replyData) snapshots.push([JSON.stringify(['testimony', testimonyId, 'replies']), replyData]);
-      const myReplyData = qc.getQueryData<InfiniteData<Paginated<Reply>>>(['testimony', 'my-replies']);
-      if (myReplyData) snapshots.push([JSON.stringify(['testimony', 'my-replies']), myReplyData]);
+      const replyData = qc.getQueryData<Paginated<Reply>>(testimonyKeys.replies(testimonyId));
+      if (replyData) snapshots.push([JSON.stringify(testimonyKeys.replies(testimonyId)), replyData]);
+      const myReplyData = qc.getQueryData<InfiniteData<Paginated<Reply>>>(testimonyKeys.myReplies);
+      if (myReplyData) snapshots.push([JSON.stringify(testimonyKeys.myReplies), myReplyData]);
       optimisticToggleReplyLike(qc, testimonyId, id);
       return { snapshots };
     },
@@ -476,8 +478,8 @@ export function useLikeReply() {
       }
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['testimony', 'feed'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'my-replies'] });
+      qc.invalidateQueries({ queryKey: testimonyKeys.feed });
+      qc.invalidateQueries({ queryKey: testimonyKeys.myReplies });
     },
   });
 }
@@ -487,13 +489,13 @@ export function useUnlikeReply() {
   return useMutation({
     mutationFn: async ({ id }: { id: string; testimonyId: string }) => (await api.delete(`/user/testimony/reply/${id}/like`)).data,
     onMutate: async ({ id, testimonyId }) => {
-      await qc.cancelQueries({ queryKey: ['testimony', testimonyId, 'replies'] });
-      await qc.cancelQueries({ queryKey: ['testimony', 'my-replies'] });
+      await qc.cancelQueries({ queryKey: testimonyKeys.replies(testimonyId) });
+      await qc.cancelQueries({ queryKey: testimonyKeys.myReplies });
       const snapshots: [string, unknown][] = [];
-      const replyData = qc.getQueryData<Paginated<Reply>>(['testimony', testimonyId, 'replies']);
-      if (replyData) snapshots.push([JSON.stringify(['testimony', testimonyId, 'replies']), replyData]);
-      const myReplyData = qc.getQueryData<InfiniteData<Paginated<Reply>>>(['testimony', 'my-replies']);
-      if (myReplyData) snapshots.push([JSON.stringify(['testimony', 'my-replies']), myReplyData]);
+      const replyData = qc.getQueryData<Paginated<Reply>>(testimonyKeys.replies(testimonyId));
+      if (replyData) snapshots.push([JSON.stringify(testimonyKeys.replies(testimonyId)), replyData]);
+      const myReplyData = qc.getQueryData<InfiniteData<Paginated<Reply>>>(testimonyKeys.myReplies);
+      if (myReplyData) snapshots.push([JSON.stringify(testimonyKeys.myReplies), myReplyData]);
       optimisticToggleReplyLike(qc, testimonyId, id);
       return { snapshots };
     },
@@ -505,8 +507,8 @@ export function useUnlikeReply() {
       }
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['testimony', 'feed'] });
-      qc.invalidateQueries({ queryKey: ['testimony', 'my-replies'] });
+      qc.invalidateQueries({ queryKey: testimonyKeys.feed });
+      qc.invalidateQueries({ queryKey: testimonyKeys.myReplies });
     },
   });
 }
@@ -527,7 +529,7 @@ export function useApproveBroadcastRequest() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/user/testimony/broadcast/requests/${id}/approve`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['testimony', 'broadcast'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: testimonyKeys.broadcastRequests }),
   });
 }
 
@@ -535,6 +537,6 @@ export function useRejectBroadcastRequest() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/user/testimony/broadcast/requests/${id}/reject`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['testimony', 'broadcast'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: testimonyKeys.broadcastRequests }),
   });
 }
