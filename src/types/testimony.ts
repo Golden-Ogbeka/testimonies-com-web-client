@@ -42,10 +42,12 @@ export type Reply = {
 };
 
 export type TestimonyStats = {
-  totalTestimonies: number;
-  totalReplies: number;
-  totalLikesReceived: number;
-  totalViewsReceived: number;
+  testimoniesCount: number;
+  repliesCount: number;
+  likesReceivedCount: number;
+  viewsReceivedCount: number;
+  likesGivenCount: number;
+  viewsGivenCount: number;
 };
 
 export type BroadcastRequest = {

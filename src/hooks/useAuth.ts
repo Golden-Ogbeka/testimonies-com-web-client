@@ -4,7 +4,7 @@ import { api, unwrap } from '@/lib/api';
 import { storage } from '@/lib/storage';
 import { useAuthState } from '@/app/providers';
 import type { AuthResponse, OtpPayload, User } from '@/types/auth';
-import type { Paginated } from '@/types/api';
+import type { Paginated, SessionItem } from '@/types/api';
 import type { SignUpPayload } from '@/types/domain';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ROUTES } from '@/constants/routes';
@@ -14,11 +14,7 @@ export const authKeys = {
   sessions: ['auth', 'sessions'] as const,
 };
 
-function persistAuth(
-  data: AuthResponse,
-  qc: ReturnType<typeof useQueryClient>,
-  setAuth?: (t: string, u: User) => void,
-) {
+function persistAuth(data: AuthResponse, qc: ReturnType<typeof useQueryClient>, setAuth?: (t: string, u: User) => void) {
   storage.setToken(data.token);
   storage.setUser(data.user);
   if (setAuth) setAuth(data.token, data.user);
@@ -46,39 +42,32 @@ export function useMe() {
 
 export function useSignIn() {
   return useMutation({
-    mutationFn: async (payload: { email: string; password: string }) =>
-      (await api.post('/user/auth/signin', payload)).data,
+    mutationFn: async (payload: { email: string; password: string }) => (await api.post('/user/auth/signin', payload)).data,
   });
 }
 
 export function useSignInSendOtp() {
   return useMutation({
-    mutationFn: async (payload: { email: string }) =>
-      (await api.post('/user/auth/signin/send-otp', payload)).data,
+    mutationFn: async (payload: { email: string }) => (await api.post('/user/auth/signin/send-otp', payload)).data,
   });
 }
 
 export function useSignUpIndividual() {
   return useMutation({
-    mutationFn: async (payload: SignUpPayload) =>
-      (await api.post('/user/auth/signup/individual', payload)).data,
+    mutationFn: async (payload: SignUpPayload) => (await api.post('/user/auth/signup/individual', payload)).data,
   });
 }
 
 export function useSignUpOrganization() {
   return useMutation({
-    mutationFn: async (payload: SignUpPayload) =>
-      (await api.post('/user/auth/signup/organization', payload)).data,
+    mutationFn: async (payload: SignUpPayload) => (await api.post('/user/auth/signup/organization', payload)).data,
   });
 }
 
 export function useSendOtp(mode: 'signup' | 'signin' | 'reset-password') {
   return useMutation({
     mutationFn: async (payload: { email: string }) => {
-      const path =
-        mode === 'reset-password'
-          ? '/user/auth/reset-password'
-          : `/user/auth/${mode}/send-otp`;
+      const path = mode === 'reset-password' ? '/user/auth/reset-password' : `/user/auth/${mode}/send-otp`;
       return (await api.post(path, payload)).data;
     },
   });
@@ -86,8 +75,7 @@ export function useSendOtp(mode: 'signup' | 'signin' | 'reset-password') {
 
 export function useResendOtp(mode: 'signup' | 'signin' | 'reset-password') {
   return useMutation({
-    mutationFn: async (payload: { email: string }) =>
-      (await api.post(`/user/auth/${mode}/resend-otp`, payload)).data,
+    mutationFn: async (payload: { email: string }) => (await api.post(`/user/auth/${mode}/resend-otp`, payload)).data,
   });
 }
 
@@ -95,31 +83,22 @@ export function useVerifyOtp(mode: 'signup' | 'signin') {
   const qc = useQueryClient();
   const { setAuth } = useAuthState();
   return useMutation({
-    mutationFn: async (payload: OtpPayload) =>
-      unwrap<AuthResponse>(
-        (await api.post(`/user/auth/${mode}/verify-otp`, payload)).data,
-      ),
+    mutationFn: async (payload: OtpPayload) => unwrap<AuthResponse>((await api.post(`/user/auth/${mode}/verify-otp`, payload)).data),
     onSuccess: (data) => (mode === 'signin' ? persistAuth(data, qc, setAuth) : null),
   });
 }
 
 export function useResetPasswordUpdate() {
   return useMutation({
-    mutationFn: async (payload: {
-      email: string;
-      verificationCode: string;
-      newPassword: string;
-    }) => (await api.post('/user/auth/reset-password/update', payload)).data,
+    mutationFn: async (payload: { email: string; verificationCode: string; newPassword: string }) =>
+      (await api.post('/user/auth/reset-password/update', payload)).data,
   });
 }
 
 export function useSessions() {
   return useQuery({
     queryKey: authKeys.sessions,
-    queryFn: async () =>
-      unwrap<
-        Paginated<{ _id: string; createdAt?: string; ip?: string; userAgent?: string }>
-      >((await api.get('/user/auth/sessions')).data),
+    queryFn: async () => unwrap<Paginated<SessionItem>>((await api.get('/user/auth/sessions')).data),
     enabled: !!storage.getToken(),
   });
 }
@@ -127,8 +106,7 @@ export function useSessions() {
 export function useDeleteSession() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (sessionId: string) =>
-      (await api.delete(`/user/auth/session/${sessionId}`)).data,
+    mutationFn: async (sessionId: string) => (await api.delete(`/user/auth/session/${sessionId}`)).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: authKeys.sessions }),
   });
 }

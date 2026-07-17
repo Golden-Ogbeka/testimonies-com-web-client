@@ -58,7 +58,8 @@ export function useReplies(id: string) {
 export function useMyTestimonies() {
   return useInfiniteQuery({
     queryKey: testimonyKeys.myTestimonies,
-    queryFn: async ({ pageParam = 1 }) => unwrap<Paginated<Testimony>>((await api.get(`/user/testimony/user/my-testimonies?page=${pageParam}`)).data),
+    queryFn: async ({ pageParam = 1 }) =>
+      unwrap<Paginated<Testimony>>((await api.get(`/user/testimony/user/my-testimonies?page=${pageParam}`)).data),
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
     initialPageParam: 1,
   });
@@ -67,7 +68,8 @@ export function useMyTestimonies() {
 export function useMyReplies() {
   return useInfiniteQuery({
     queryKey: testimonyKeys.myReplies,
-    queryFn: async ({ pageParam = 1 }) => unwrap<Paginated<Reply>>((await api.get(`/user/testimony/user/my-replies?page=${pageParam}`)).data),
+    queryFn: async ({ pageParam = 1 }) =>
+      unwrap<Paginated<Reply>>((await api.get(`/user/testimony/user/my-replies?page=${pageParam}`)).data),
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
     initialPageParam: 1,
   });
@@ -76,7 +78,8 @@ export function useMyReplies() {
 export function useUserReplies(userId: string) {
   return useInfiniteQuery({
     queryKey: testimonyKeys.userReplies(userId),
-    queryFn: async ({ pageParam = 1 }) => unwrap<Paginated<Reply>>((await api.get(`/user/testimony/user-replies/${userId}?page=${pageParam}`)).data),
+    queryFn: async ({ pageParam = 1 }) =>
+      unwrap<Paginated<Reply>>((await api.get(`/user/testimony/user-replies/${userId}?page=${pageParam}`)).data),
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
     initialPageParam: 1,
     enabled: !!userId,
@@ -93,7 +96,7 @@ export function useTestimonyStats() {
 export function useTestimonyTags(limit?: number) {
   return useQuery({
     queryKey: testimonyKeys.tags(limit),
-    queryFn: async () => unwrap<Paginated<string>>((await api.get(`/user/testimony/tag/all${limit ? `?limit=${limit}` : ''}`)).data),
+    queryFn: async () => unwrap<string[]>((await api.get(`/user/testimony/tag/all${limit ? `?limit=${limit}` : ''}`)).data),
   });
 }
 
@@ -102,7 +105,15 @@ export function useTestimonyTags(limit?: number) {
 export function useCreateTestimony() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { title: string; description: string; tags?: string[]; mediaFiles?: File[]; isBroadcast?: boolean; broadcastOrganizationId?: string; isSecret?: boolean }) => {
+    mutationFn: async (payload: {
+      title: string;
+      description: string;
+      tags?: string[];
+      mediaFiles?: File[];
+      isBroadcast?: boolean;
+      broadcastOrganizationId?: string;
+      isSecret?: boolean;
+    }) => {
       if (!payload.mediaFiles?.length) {
         const { mediaFiles: _mf, ...rest } = payload;
         void _mf;
@@ -162,9 +173,7 @@ function toggleInfiniteTestimonyLike(qc: ReturnType<typeof useQueryClient>, key:
       pages: old.pages.map((page) => ({
         ...page,
         results: page.results.map((t) =>
-          t._id === id
-            ? { ...t, isLiked: !t.isLiked, likesCount: t.likesCount + (t.isLiked ? -1 : 1) }
-            : t
+          t._id === id ? { ...t, isLiked: !t.isLiked, likesCount: t.likesCount + (t.isLiked ? -1 : 1) } : t,
         ),
       })),
     };
@@ -176,11 +185,7 @@ function togglePaginatedTestimonyLike(qc: ReturnType<typeof useQueryClient>, key
     if (!old) return old;
     return {
       ...old,
-      results: old.results.map((t) =>
-        t._id === id
-          ? { ...t, isLiked: !t.isLiked, likesCount: t.likesCount + (t.isLiked ? -1 : 1) }
-          : t
-      ),
+      results: old.results.map((t) => (t._id === id ? { ...t, isLiked: !t.isLiked, likesCount: t.likesCount + (t.isLiked ? -1 : 1) } : t)),
     };
   });
 }
@@ -294,9 +299,7 @@ export function useReplyToTestimony() {
           ...old,
           pages: old.pages.map((p) => ({
             ...p,
-            results: p.results.map((t) =>
-              t._id === id ? { ...t, repliesCount: t.repliesCount + 1 } : t
-            ),
+            results: p.results.map((t) => (t._id === id ? { ...t, repliesCount: t.repliesCount + 1 } : t)),
           })),
         };
       });
@@ -304,9 +307,7 @@ export function useReplyToTestimony() {
         if (!old) return old;
         return {
           ...old,
-          results: old.results.map((t) =>
-            t._id === id ? { ...t, repliesCount: t.repliesCount + 1 } : t
-          ),
+          results: old.results.map((t) => (t._id === id ? { ...t, repliesCount: t.repliesCount + 1 } : t)),
         };
       });
       qc.setQueryData<InfiniteData<Paginated<Testimony>>>(['testimony', 'mine'], (old) => {
@@ -315,14 +316,21 @@ export function useReplyToTestimony() {
           ...old,
           pages: old.pages.map((p) => ({
             ...p,
-            results: p.results.map((t) =>
-              t._id === id ? { ...t, repliesCount: t.repliesCount + 1 } : t
-            ),
+            results: p.results.map((t) => (t._id === id ? { ...t, repliesCount: t.repliesCount + 1 } : t)),
           })),
         };
       });
       qc.setQueryData<Paginated<Reply>>(testimonyKeys.replies(id), (old) => {
-        if (!old) return { results: [tempReply], totalResults: 1, resultsPerPage: 20, currentPage: 1, totalPages: 1, nextPage: null, prevPage: null };
+        if (!old)
+          return {
+            results: [tempReply],
+            totalResults: 1,
+            resultsPerPage: 20,
+            currentPage: 1,
+            totalPages: 1,
+            nextPage: null,
+            prevPage: null,
+          };
         return { ...old, results: [tempReply, ...old.results], totalResults: old.totalResults + 1 };
       });
       return { snapshotReplies, snapshotTestimony, id };
@@ -399,9 +407,7 @@ export function useDeleteReply() {
           ...old,
           pages: old.pages.map((p) => ({
             ...p,
-            results: p.results.map((t) =>
-              t._id === testimonyId ? { ...t, repliesCount: Math.max(0, t.repliesCount - 1) } : t
-            ),
+            results: p.results.map((t) => (t._id === testimonyId ? { ...t, repliesCount: Math.max(0, t.repliesCount - 1) } : t)),
           })),
         };
       });
@@ -409,9 +415,7 @@ export function useDeleteReply() {
         if (!old) return old;
         return {
           ...old,
-          results: old.results.map((t) =>
-            t._id === testimonyId ? { ...t, repliesCount: Math.max(0, t.repliesCount - 1) } : t
-          ),
+          results: old.results.map((t) => (t._id === testimonyId ? { ...t, repliesCount: Math.max(0, t.repliesCount - 1) } : t)),
         };
       });
       return { snapshotMyReplies, snapshotReplies, testimonyId };
@@ -432,11 +436,7 @@ function optimisticToggleReplyLike(qc: ReturnType<typeof useQueryClient>, testim
     if (!old) return old;
     return {
       ...old,
-      results: old.results.map((r) =>
-        r._id === id
-          ? { ...r, isLiked: !r.isLiked, likesCount: r.likesCount + (r.isLiked ? -1 : 1) }
-          : r
-      ),
+      results: old.results.map((r) => (r._id === id ? { ...r, isLiked: !r.isLiked, likesCount: r.likesCount + (r.isLiked ? -1 : 1) } : r)),
     };
   });
   qc.setQueryData<InfiniteData<Paginated<Reply>>>(['testimony', 'my-replies'], (old) => {
@@ -446,9 +446,7 @@ function optimisticToggleReplyLike(qc: ReturnType<typeof useQueryClient>, testim
       pages: old.pages.map((page) => ({
         ...page,
         results: page.results.map((r) =>
-          r._id === id
-            ? { ...r, isLiked: !r.isLiked, likesCount: r.likesCount + (r.isLiked ? -1 : 1) }
-            : r
+          r._id === id ? { ...r, isLiked: !r.isLiked, likesCount: r.likesCount + (r.isLiked ? -1 : 1) } : r,
         ),
       })),
     };
@@ -518,7 +516,8 @@ export function useUnlikeReply() {
 export function useBroadcastRequests() {
   return useInfiniteQuery({
     queryKey: testimonyKeys.broadcastRequests,
-    queryFn: async ({ pageParam = 1 }) => unwrap<Paginated<BroadcastRequest>>((await api.get(`/user/testimony/broadcast/requests?page=${pageParam}`)).data),
+    queryFn: async ({ pageParam = 1 }) =>
+      unwrap<Paginated<BroadcastRequest>>((await api.get(`/user/testimony/broadcast/requests?page=${pageParam}`)).data),
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
     initialPageParam: 1,
   });

@@ -40,10 +40,10 @@ export default function MyTestimoniesContent() {
       {stats.data && (
         <div className="grid grid-cols-4 divide-x divide-border border-b border-border">
           {[
-            { label: 'Testimonies', value: stats.data.totalTestimonies, icon: BookOpen },
-            { label: 'Replies', value: stats.data.totalReplies, icon: Reply },
-            { label: 'Likes', value: stats.data.totalLikesReceived, icon: Heart },
-            { label: 'Views', value: stats.data.totalViewsReceived, icon: Eye },
+            { label: 'Testimonies', value: stats.data.testimoniesCount, icon: BookOpen },
+            { label: 'Replies', value: stats.data.repliesCount, icon: Reply },
+            { label: 'Likes', value: stats.data.likesReceivedCount, icon: Heart },
+            { label: 'Views', value: stats.data.viewsReceivedCount, icon: Eye },
           ].map(({ label, value, icon: Icon }) => (
             <div key={label} className="py-3 text-center">
               <div className="flex items-center justify-center gap-1">
@@ -139,10 +139,10 @@ export default function MyTestimoniesContent() {
         {tab === 'stats' && stats.data && (
           <div className="grid grid-cols-2 gap-4 p-4">
             {[
-              { label: 'Total Testimonies', value: stats.data.totalTestimonies },
-              { label: 'Total Replies', value: stats.data.totalReplies },
-              { label: 'Likes Received', value: stats.data.totalLikesReceived },
-              { label: 'Views Received', value: stats.data.totalViewsReceived },
+              { label: 'Total Testimonies', value: stats.data.testimoniesCount },
+              { label: 'Total Replies', value: stats.data.repliesCount },
+              { label: 'Likes Received', value: stats.data.likesReceivedCount },
+              { label: 'Views Received', value: stats.data.viewsReceivedCount },
             ].map(({ label, value }) => (
               <div key={label} className="overflow-hidden rounded-none border border-border bg-background p-4 text-center sm:p-6">
                 <p className="truncate text-2xl font-bold text-foreground sm:text-3xl">{value ?? 0}</p>

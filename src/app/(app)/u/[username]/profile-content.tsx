@@ -119,14 +119,14 @@ export default function ProfileContent() {
             aria-label="View followers"
             className="min-h-[44px] py-2 hover:text-foreground transition-colors"
           >
-            <span className="font-bold text-foreground">{followers.data?.results?.length ?? 0}</span> Followers
+            <span className="font-bold text-foreground">{followers.data?.length ?? 0}</span> Followers
           </button>
           <button
             onClick={() => setTab('following')}
             aria-label="View following"
             className="min-h-[44px] py-2 hover:text-foreground transition-colors"
           >
-            <span className="font-bold text-foreground">{following.data?.results?.length ?? 0}</span> Following
+            <span className="font-bold text-foreground">{following.data?.length ?? 0}</span> Following
           </button>
         </div>
       </div>
@@ -188,44 +188,52 @@ export default function ProfileContent() {
         {tab === 'followers' && (
           <>
             {followers.isLoading && <SkeletonCard />}
-            {(followers.data?.results ?? []).length === 0 && !followers.isLoading && (
+            {(followers.data ?? []).length === 0 && !followers.isLoading && (
               <div className="p-4">
                 <EmptyState title="No followers" message="" />
               </div>
             )}
-            {(followers.data?.results ?? []).map((u) => (
-              <Link key={u._id} href={ROUTES.profile(u.username)} prefetch={false}>
-                <div className="flex items-center gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-card-hover">
-                  <Avatar src={u.profileImage} name={`${u.firstName} ${u.lastName}`} />
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{`${u.firstName} ${u.lastName}`}</p>
-                    <p className="text-xs text-muted">@{u.username}</p>
+            {(followers.data ?? []).map((req) => {
+              const u = req.followerDetails;
+              if (!u) return null;
+              return (
+                <Link key={req._id} href={ROUTES.profile(u.username)} prefetch={false}>
+                  <div className="flex items-center gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-card-hover">
+                    <Avatar src={u.profileImage} name={`${u.firstName} ${u.lastName}`} />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{`${u.firstName} ${u.lastName}`}</p>
+                      <p className="text-xs text-muted">@{u.username}</p>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </>
         )}
 
         {tab === 'following' && (
           <>
             {following.isLoading && <SkeletonCard />}
-            {(following.data?.results ?? []).length === 0 && !following.isLoading && (
+            {(following.data ?? []).length === 0 && !following.isLoading && (
               <div className="p-4">
                 <EmptyState title="Not following anyone" message="" />
               </div>
             )}
-            {(following.data?.results ?? []).map((u) => (
-              <Link key={u._id} href={ROUTES.profile(u.username)} prefetch={false}>
-                <div className="flex items-center gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-card-hover">
-                  <Avatar src={u.profileImage} name={`${u.firstName} ${u.lastName}`} />
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{`${u.firstName} ${u.lastName}`}</p>
-                    <p className="text-xs text-muted">@{u.username}</p>
+            {(following.data ?? []).map((req) => {
+              const u = req.leaderDetails;
+              if (!u) return null;
+              return (
+                <Link key={req._id} href={ROUTES.profile(u.username)} prefetch={false}>
+                  <div className="flex items-center gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-card-hover">
+                    <Avatar src={u.profileImage} name={`${u.firstName} ${u.lastName}`} />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{`${u.firstName} ${u.lastName}`}</p>
+                      <p className="text-xs text-muted">@{u.username}</p>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </>
         )}
       </div>

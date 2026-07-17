@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Lora } from 'next/font/google';
-import Script from 'next/script';
 import './globals.css';
 import { Providers } from './providers';
 
@@ -31,11 +30,24 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const stripExtAttrsScript = `
+(function(){
+  document.querySelectorAll('[bis_skin_checked]').forEach(function(el){el.removeAttribute('bis_skin_checked')});
+  new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      if(m.type==='attributes'&&m.attributeName==='bis_skin_checked'&&m.target instanceof Element){
+        m.target.removeAttribute('bis_skin_checked');
+      }
+    });
+  }).observe(document.documentElement,{attributes:true,subtree:true});
+})();
+`;
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${lora.variable} font-sans antialiased`} suppressHydrationWarning>
-        <Script id="strip-ext-attrs" strategy="beforeInteractive" src="/strip-ext-attrs.js" />
+        <script dangerouslySetInnerHTML={{ __html: stripExtAttrsScript }} />
         <Providers>{children}</Providers>
       </body>
     </html>

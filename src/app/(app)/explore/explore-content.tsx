@@ -4,6 +4,7 @@ import { EmptyState, PageHeader, SearchInput, SkeletonCard, Spinner, TabBar, Use
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useSearchUsers } from '@/hooks/useProfile';
 import { useFeed, useTestimonyTags, useTrending } from '@/hooks/useTestimonies';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { flattenPages } from '@/lib/utils';
 import { Hash, Search, TrendingUp, Users } from 'lucide-react';
@@ -19,8 +20,9 @@ function ExploreContent() {
   const initialTag = searchParams.get('tag') ?? '';
   const [tab, setTab] = useState<Tab>(initialTag ? 'tags' : 'people');
   const [query, setQuery] = useState(initialTag);
+  const debouncedQuery = useDebounce(query);
 
-  const users = useSearchUsers(query);
+  const users = useSearchUsers(debouncedQuery);
   const trending = useTrending();
   const tags = useTestimonyTags(20);
   const feed = useFeed();
@@ -55,14 +57,7 @@ function ExploreContent() {
     <div>
       <PageHeader icon={Search} title="Explore">
         <div className="mt-3">
-          <SearchInput
-            value={query}
-            onChange={(v) => {
-              setQuery(v);
-              setTab(v ? 'people' : 'people');
-            }}
-            placeholder="Search people or testimonies..."
-          />
+          <SearchInput value={query} onChange={(v) => setQuery(v)} placeholder="Search people or testimonies..." />
         </div>
       </PageHeader>
 
@@ -81,11 +76,13 @@ function ExploreContent() {
         {tab === 'people' && (
           <>
             {users.isLoading && <SkeletonCard />}
-            {!users.isLoading && query.length > 1 && (users.data?.results ?? []).length === 0 && (
+            {!users.isLoading && debouncedQuery.length > 1 && (users.data?.users ?? []).length === 0 && (
               <EmptyState title="No users found" message="Try a different name." icon={<Users className="h-8 w-8" />} />
             )}
-            {query.length <= 1 && <p className="py-8 text-center text-sm text-gray-400">Type at least 2 characters to search people.</p>}
-            {(users.data?.results ?? []).map((user) => (
+            {debouncedQuery.length <= 1 && (
+              <p className="py-8 text-center text-sm text-gray-400">Type at least 2 characters to search people.</p>
+            )}
+            {(users.data?.users ?? []).map((user) => (
               <UserRow key={user._id} user={user} href={ROUTES.profile(user.username)} />
             ))}
           </>
@@ -128,7 +125,7 @@ function ExploreContent() {
           <>
             {tags.isLoading && <SkeletonCard />}
             <div className="flex flex-wrap gap-2">
-              {(tags.data?.results ?? []).map((tag) => (
+              {(tags.data ?? []).map((tag) => (
                 <button
                   key={tag}
                   onClick={() => handleTagClick(tag)}

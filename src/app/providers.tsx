@@ -4,7 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 
 const ReactQueryDevtools = dynamic(() => import('@tanstack/react-query-devtools').then((mod) => mod.ReactQueryDevtools), { ssr: false });
-import { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, useRef } from 'react';
 import { Toaster } from 'sonner';
 import { createQueryClient } from '@/lib/query-client';
 import { storage } from '@/lib/storage';
@@ -30,18 +30,26 @@ const AuthContext = createContext<AuthState>({
 
 export const useAuthState = () => useContext(AuthContext);
 
-function getInitialAuth() {
+function readAuth() {
   if (typeof window === 'undefined') return { token: null, user: null };
   return { token: storage.getToken(), user: storage.getUser() };
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => createQueryClient());
-  const [token, setToken] = useState<string | null>(() => getInitialAuth().token);
-  const [user, setUser] = useState<User | null>(() => getInitialAuth().user);
+
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const initialized = true;
 
+  const hydrated = useRef(false);
   useEffect(() => {
+    if (!hydrated.current) {
+      hydrated.current = true;
+      const initial = readAuth();
+      setToken(initial.token);
+      setUser(initial.user);
+    }
     const handler = () => {
       setToken(null);
       setUser(null);

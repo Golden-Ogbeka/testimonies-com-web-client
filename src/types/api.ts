@@ -6,6 +6,28 @@ export type Paginated<T> = {
   nextPage: number | null;
   prevPage: number | null;
   totalPages: number;
+  hasNextPage?: boolean;
+  hasPrevPage?: boolean;
 };
 
+export type SearchUsersResponse = {
+  users: import('./auth').User[];
+  organizations: Record<string, unknown>[];
+};
 
+export type SessionItem = {
+  _id: string;
+  userId?: string;
+  expiresAt?: string;
+  ipAddress?: string;
+  city?: string;
+  region?: string;
+  country?: string;
+  userAgent?: string;
+  deviceType?: string;
+  deviceOS?: string;
+  deviceOSVersion?: string;
+  deviceModel?: string;
+  deviceManufacturer?: string;
+  createdAt?: string;
+};

@@ -33,9 +33,9 @@ export default function SessionsTab() {
         {(sessions.data?.results ?? []).map((s) => (
           <div key={s._id} className="flex items-center justify-between rounded-none border border-border p-3">
             <div>
-              <p className="text-sm font-medium text-foreground">{(s as { userAgent?: string }).userAgent ?? 'Unknown device'}</p>
+              <p className="text-sm font-medium text-foreground">{s.userAgent ?? 'Unknown device'}</p>
               <p className="text-xs text-muted">
-                {(s as { ip?: string }).ip ?? 'Unknown IP'} &middot; {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : ''}
+                {s.ipAddress ?? 'Unknown IP'} &middot; {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : ''}
               </p>
             </div>
             <button

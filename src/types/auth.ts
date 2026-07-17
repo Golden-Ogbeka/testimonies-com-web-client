@@ -11,6 +11,8 @@ export type User = {
   accountType: AuthKind;
   profileVisibility: 'public' | 'private' | 'secret';
   verified?: boolean;
+  followerCount?: number;
+  followingCount?: number;
 };
 
 export type AuthResponse = {

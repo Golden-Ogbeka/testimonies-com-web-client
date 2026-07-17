@@ -28,14 +28,14 @@ export function AppRightSidebar() {
           </div>
         </div>
 
-        {(tags.data?.results ?? []).length > 0 && (
+        {(tags.data ?? []).length > 0 && (
           <div className="rounded-none bg-background-secondary/50 p-4">
             <div className="mb-3 flex items-center gap-2">
               <Hash className="h-4 w-4 text-foreground/50" strokeWidth={1.5} />
               <h3 className="text-xs font-semibold tracking-wide text-foreground/60 uppercase">Popular Tags</h3>
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {(tags.data?.results ?? []).map((tag) => (
+              {(tags.data ?? []).map((tag) => (
                 <Link
                   key={tag}
                   href={ROUTES.exploreTag(tag)}

@@ -46,11 +46,11 @@ export default function PrivacyTab() {
             <div key={req._id} className="flex items-center justify-between rounded-none border border-border p-3">
               <div className="flex items-center gap-2">
                 <Avatar
-                  src={req.requester?.profileImage}
-                  name={`${req.requester?.firstName ?? ''} ${req.requester?.lastName ?? ''}`}
+                  src={req.followerDetails?.profileImage}
+                  name={`${req.followerDetails?.firstName ?? ''} ${req.followerDetails?.lastName ?? ''}`}
                   size="sm"
                 />
-                <p className="text-sm font-medium text-foreground">{`${req.requester?.firstName ?? ''} ${req.requester?.lastName ?? ''}`}</p>
+                <p className="text-sm font-medium text-foreground">{`${req.followerDetails?.firstName ?? ''} ${req.followerDetails?.lastName ?? ''}`}</p>
               </div>
               <div className="flex gap-2">
                 <Button onClick={() => acceptFollow.mutate(req._id)} className="px-3 py-1 text-xs">
@@ -67,19 +67,19 @@ export default function PrivacyTab() {
 
       <div className="rounded-none border border-border bg-background p-4">
         <h2 className="mb-4 text-sm font-bold text-foreground">Blocked Users</h2>
-        {(blockedUsers.data?.results ?? []).length === 0 && <p className="text-sm text-muted">No blocked users</p>}
+        {(blockedUsers.data ?? []).length === 0 && <p className="text-sm text-muted">No blocked users</p>}
         <div className="space-y-2">
-          {(blockedUsers.data?.results ?? []).map((item) => (
+          {(blockedUsers.data ?? []).map((item) => (
             <div key={item._id} className="flex items-center justify-between rounded-none border border-border p-3">
               <div className="flex items-center gap-2">
                 <Avatar
-                  src={item.blockedUser?.profileImage}
-                  name={`${item.blockedUser?.firstName ?? ''} ${item.blockedUser?.lastName ?? ''}`}
+                  src={item.userToBlockDetails?.profileImage}
+                  name={`${item.userToBlockDetails?.firstName ?? ''} ${item.userToBlockDetails?.lastName ?? ''}`}
                   size="sm"
                 />
-                <p className="text-sm font-medium text-foreground">{`${item.blockedUser?.firstName ?? ''} ${item.blockedUser?.lastName ?? ''}`}</p>
+                <p className="text-sm font-medium text-foreground">{`${item.userToBlockDetails?.firstName ?? ''} ${item.userToBlockDetails?.lastName ?? ''}`}</p>
               </div>
-              <Button variant="secondary" onClick={() => unblock.mutate(item.blockedUser?._id ?? '')} className="px-3 py-1 text-xs">
+              <Button variant="secondary" onClick={() => unblock.mutate(item.userToBlockId ?? '')} className="px-3 py-1 text-xs">
                 Unblock
               </Button>
             </div>
