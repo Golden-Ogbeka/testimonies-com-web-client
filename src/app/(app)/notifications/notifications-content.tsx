@@ -31,7 +31,7 @@ export default function NotificationsContent() {
     }
   }, [isIntersecting, broadcastRequests]);
 
-  const followCount = followRequests.data?.results?.length ?? 0;
+  const followCount = followRequests.data?.followRequests?.length ?? 0;
   const broadcastItems = flattenPages(broadcastRequests.data);
   const broadcastCount = broadcastItems.length;
 
@@ -95,7 +95,7 @@ export default function NotificationsContent() {
                 icon={<UserPlus className="h-8 w-8" />}
               />
             )}
-            {(followRequests.data?.results ?? []).map((req) => (
+            {(followRequests.data?.followRequests ?? []).map((req) => (
               <div key={req._id} className="flex items-center justify-between rounded-none border border-border bg-background p-4">
                 <div className="flex items-center gap-3">
                   <Avatar

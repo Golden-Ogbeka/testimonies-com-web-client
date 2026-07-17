@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Input, OtpInput } from '@/components/common';
+import { useAuthState } from '@/app/providers';
 import {
   useResendEmailOtp,
   useUpdateEmail,
@@ -17,6 +18,7 @@ import { updateEmailSchema, updateUsernameSchema, updatePhoneSchema, updatePassw
 import { useState } from 'react';
 
 export default function AccountTab() {
+  const { user } = useAuthState();
   const emailForm = useForm({ resolver: zodResolver(updateEmailSchema), defaultValues: { email: '' } });
   const usernameForm = useForm({ resolver: zodResolver(updateUsernameSchema), defaultValues: { username: '' } });
   const phoneForm = useForm({ resolver: zodResolver(updatePhoneSchema), defaultValues: { phoneNumber: '' } });
@@ -87,6 +89,7 @@ export default function AccountTab() {
     <>
       <div className="rounded-none border border-border bg-background p-4">
         <h2 className="mb-4 text-sm font-bold text-foreground">Email</h2>
+        {user?.email && <p className="mb-3 text-sm text-muted">Current: {user.email}</p>}
         <form className="space-y-3" onSubmit={emailForm.handleSubmit(onEmailSubmit)}>
           <Input
             label="New email"
@@ -114,6 +117,7 @@ export default function AccountTab() {
 
       <div className="rounded-none border border-border bg-background p-4">
         <h2 className="mb-4 text-sm font-bold text-foreground">Username</h2>
+        {user?.username && <p className="mb-3 text-sm text-muted">Current: @{user.username}</p>}
         <form className="space-y-3" onSubmit={usernameForm.handleSubmit(onUsernameSubmit)}>
           <Input
             label="New username"
@@ -129,6 +133,7 @@ export default function AccountTab() {
 
       <div className="rounded-none border border-border bg-background p-4">
         <h2 className="mb-4 text-sm font-bold text-foreground">Phone</h2>
+        {user?.phoneNumber && <p className="mb-3 text-sm text-muted">Current: {user.phoneNumber}</p>}
         <form className="space-y-3" onSubmit={phoneForm.handleSubmit(onPhoneSubmit)}>
           <Input
             label="Phone number"

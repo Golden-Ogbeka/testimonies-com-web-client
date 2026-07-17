@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, Button, Input } from '@/components/common';
+import { Avatar, Button, Input, Textarea } from '@/components/common';
 import { useAuthState } from '@/app/providers';
 import { useUpdateOrgProfile, useUpdateUserProfile, useUploadCoverPicture, useUploadProfilePicture } from '@/hooks/useProfile';
 import { apiMessage } from '@/lib/utils';
@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { updateProfileSchema, updateOrgProfileSchema } from '@/lib/validations';
+import { useEffect } from 'react';
 
 export default function ProfileTab() {
   const { user } = useAuthState();
@@ -25,6 +26,22 @@ export default function ProfileTab() {
     resolver: zodResolver(updateOrgProfileSchema),
     defaultValues: { businessName: '', businessAddress: '', businessWebsite: '', businessBio: '' },
   });
+
+  useEffect(() => {
+    if (user) {
+      profileForm.reset({
+        firstName: user.firstName ?? '',
+        lastName: user.lastName ?? '',
+        bio: user.bio,
+      });
+      orgForm.reset({
+        businessName: user.businessName ?? '',
+        businessAddress: user.businessAddress ?? '',
+        businessWebsite: user.businessWebsite ?? '',
+        businessBio: user.businessBio ?? '',
+      });
+    }
+  }, [user, profileForm, orgForm]);
 
   return (
     <>
@@ -73,39 +90,7 @@ export default function ProfileTab() {
         </div>
       </div>
 
-      {user?.accountType === 'individual' ? (
-        <div className="rounded-none border border-border bg-background p-4">
-          <h2 className="mb-4 text-sm font-bold text-foreground">Personal Info</h2>
-          <form
-            className="space-y-3"
-            onSubmit={profileForm.handleSubmit(async (v) => {
-              try {
-                await updateProfile.mutateAsync(v);
-                toast.success('Profile updated');
-              } catch (err) {
-                toast.error(apiMessage(err));
-              }
-            })}
-          >
-            <Input
-              label="First name"
-              placeholder="First name"
-              error={profileForm.formState.errors.firstName?.message}
-              {...profileForm.register('firstName')}
-            />
-            <Input
-              label="Last name"
-              placeholder="Last name"
-              error={profileForm.formState.errors.lastName?.message}
-              {...profileForm.register('lastName')}
-            />
-            <Input label="Bio" placeholder="Bio" error={profileForm.formState.errors.bio?.message} {...profileForm.register('bio')} />
-            <Button type="submit" disabled={updateProfile.isPending}>
-              Save
-            </Button>
-          </form>
-        </div>
-      ) : (
+      {user?.accountType === 'organization' ? (
         <div className="rounded-none border border-border bg-background p-4">
           <h2 className="mb-4 text-sm font-bold text-foreground">Organization Info</h2>
           <form
@@ -137,13 +122,52 @@ export default function ProfileTab() {
               error={orgForm.formState.errors.businessWebsite?.message}
               {...orgForm.register('businessWebsite')}
             />
-            <Input
+            <Textarea
               label="Business bio"
-              placeholder="Business bio"
+              placeholder="Describe your organization"
+              maxLength={500}
               error={orgForm.formState.errors.businessBio?.message}
               {...orgForm.register('businessBio')}
             />
             <Button type="submit" disabled={updateOrg.isPending}>
+              Save
+            </Button>
+          </form>
+        </div>
+      ) : (
+        <div className="rounded-none border border-border bg-background p-4">
+          <h2 className="mb-4 text-sm font-bold text-foreground">Personal Info</h2>
+          <form
+            className="space-y-3"
+            onSubmit={profileForm.handleSubmit(async (v) => {
+              try {
+                await updateProfile.mutateAsync(v);
+                toast.success('Profile updated');
+              } catch (err) {
+                toast.error(apiMessage(err));
+              }
+            })}
+          >
+            <Input
+              label="First name"
+              placeholder="First name"
+              error={profileForm.formState.errors.firstName?.message}
+              {...profileForm.register('firstName')}
+            />
+            <Input
+              label="Last name"
+              placeholder="Last name"
+              error={profileForm.formState.errors.lastName?.message}
+              {...profileForm.register('lastName')}
+            />
+            <Textarea
+              label="Bio"
+              placeholder="Tell us about yourself"
+              maxLength={500}
+              error={profileForm.formState.errors.bio?.message}
+              {...profileForm.register('bio')}
+            />
+            <Button type="submit" disabled={updateProfile.isPending}>
               Save
             </Button>
           </form>

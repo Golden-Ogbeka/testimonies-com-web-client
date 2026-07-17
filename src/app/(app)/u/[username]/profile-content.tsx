@@ -73,7 +73,9 @@ export default function ProfileContent() {
     <div>
       <PageHeader icon={User} title={`@${user.username}`} />
       <div className="relative h-48 bg-gradient-to-r from-foreground/10 to-foreground/20">
-        {user.coverImage && <Image src={user.coverImage} alt="Profile cover image" fill className="object-cover" unoptimized priority />}
+        {user.coverImageURL && (
+          <Image src={user.coverImageURL} alt="Profile cover image" fill className="object-cover" unoptimized priority />
+        )}
       </div>
 
       <div className="px-4 pb-4">

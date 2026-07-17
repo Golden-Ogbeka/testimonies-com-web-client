@@ -1,27 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Eye, Lock, Settings, Shield, Trash2, User } from 'lucide-react';
+import { Settings, Shield, Trash2, User, Eye } from 'lucide-react';
 import { PageHeader } from '@/components/common';
 import ProfileTab from '@/components/settings/ProfileTab';
 import AccountTab from '@/components/settings/AccountTab';
 import PrivacyTab from '@/components/settings/PrivacyTab';
-import SessionsTab from '@/components/settings/SessionsTab';
 import DangerZoneTab from '@/components/settings/DangerZoneTab';
 
-type SideTab = 'profile' | 'account' | 'privacy' | 'sessions' | 'danger';
+type SideTab = 'profile' | 'account' | 'privacy' | 'danger';
 
 const tabs: { id: SideTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'account', label: 'Account', icon: Shield },
   { id: 'privacy', label: 'Privacy', icon: Eye },
-  { id: 'sessions', label: 'Sessions', icon: Lock },
   { id: 'danger', label: 'Danger Zone', icon: Trash2 },
 ];
 
-export default function SettingsContent() {
-  const [tab, setTab] = useState<SideTab>('profile');
+function SettingsContentInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tab = (searchParams.get('tab') as SideTab) || 'profile';
+
+  const setTab = (id: SideTab) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', id);
+    router.push(`/settings?${params.toString()}`, { scroll: false });
+  };
 
   return (
     <div>
@@ -47,10 +54,17 @@ export default function SettingsContent() {
           {tab === 'profile' && <ProfileTab />}
           {tab === 'account' && <AccountTab />}
           {tab === 'privacy' && <PrivacyTab />}
-          {tab === 'sessions' && <SessionsTab />}
           {tab === 'danger' && <DangerZoneTab />}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SettingsContent() {
+  return (
+    <Suspense fallback={null}>
+      <SettingsContentInner />
+    </Suspense>
   );
 }

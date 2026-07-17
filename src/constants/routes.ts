@@ -9,6 +9,10 @@ export const ROUTES = {
   NOTIFICATIONS: '/notifications',
   MY_TESTIMONIES: '/my-testimonies',
   SETTINGS: '/settings',
+  SETTINGS_PROFILE: '/settings?tab=profile',
+  SETTINGS_ACCOUNT: '/settings?tab=account',
+  SETTINGS_PRIVACY: '/settings?tab=privacy',
+  SETTINGS_DANGER: '/settings?tab=danger',
 
   // Brand/public pages
   LANDING: '/',

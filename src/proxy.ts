@@ -15,23 +15,31 @@ export function proxy(request: NextRequest) {
 
   if (isFileRequest) return NextResponse.next();
 
+  let response: NextResponse;
+
   if (isRoot) {
-    if (token) return NextResponse.redirect(new URL(ROUTES.HOME, request.url));
-    return NextResponse.next();
-  }
-
-  if (!token && !isPublic) {
+    if (token) {
+      response = NextResponse.redirect(new URL(ROUTES.HOME, request.url));
+    } else {
+      response = NextResponse.next();
+    }
+  } else if (!token && !isPublic) {
     const returnTo = `${pathname}${search}`;
-    return NextResponse.redirect(new URL(ROUTES.signinWithReturnTo(returnTo), request.url));
-  }
-
-  if (token && isAuthPage) {
+    response = NextResponse.redirect(new URL(ROUTES.signinWithReturnTo(returnTo), request.url));
+  } else if (token && isAuthPage) {
     const requested = request.nextUrl.searchParams.get('returnTo');
     const safeTarget = requested && requested.startsWith('/') ? requested : DEFAULT_REDIRECT;
-    return NextResponse.redirect(new URL(safeTarget, request.url));
+    response = NextResponse.redirect(new URL(safeTarget, request.url));
+  } else {
+    response = NextResponse.next();
   }
 
-  return NextResponse.next();
+  if (process.env.NODE_ENV === 'development') {
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+  }
+
+  return response;
 }
 
 export const config = {

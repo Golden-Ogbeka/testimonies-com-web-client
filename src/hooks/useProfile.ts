@@ -1,12 +1,12 @@
 'use client';
 
 import { api, unwrap } from '@/lib/api';
-import type { Paginated, SearchUsersResponse } from '@/types/api';
+import type { FollowRequestsResponse, SearchUsersResponse } from '@/types/api';
+import { authKeys } from '@/hooks/useAuth';
 import type { User } from '@/types/auth';
 import type {
   BlockedUser,
   DeleteProfilePayload,
-  FollowRequest,
   FollowRequestListItem,
   UpdateEmailPayload,
   UpdateOrgProfilePayload,
@@ -56,7 +56,7 @@ export function useFollowing(id: string) {
 export function useFollowRequests() {
   return useQuery({
     queryKey: profileKeys.followRequests,
-    queryFn: async () => unwrap<Paginated<FollowRequest>>((await api.get('/user/profile/follow-requests')).data),
+    queryFn: async () => unwrap<FollowRequestsResponse>((await api.get('/user/profile/follow-requests')).data),
   });
 }
 
@@ -81,7 +81,10 @@ export function useUpdateUserProfile() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateProfilePayload) => (await api.patch('/user/profile/user', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: profileKeys.profile() });
+      qc.invalidateQueries({ queryKey: authKeys.me });
+    },
   });
 }
 
@@ -89,7 +92,10 @@ export function useUpdateOrgProfile() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateOrgProfilePayload) => (await api.patch('/user/profile/organization', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: profileKeys.profile() });
+      qc.invalidateQueries({ queryKey: authKeys.me });
+    },
   });
 }
 
@@ -141,7 +147,10 @@ export function useUpdateProfileVisibility() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateVisibilityPayload) => (await api.patch('/user/profile/visibility', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.profile() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: profileKeys.profile() });
+      qc.invalidateQueries({ queryKey: authKeys.me });
+    },
   });
 }
 

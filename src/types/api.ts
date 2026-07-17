@@ -15,6 +15,16 @@ export type SearchUsersResponse = {
   organizations: Record<string, unknown>[];
 };
 
+export type FollowRequestsResponse = {
+  followRequests: import('./domain').FollowRequest[];
+  totalResults: number;
+  resultsPerPage: number;
+  currentPage: number;
+  nextPage: number | null;
+  prevPage: number | null;
+  totalPages: number;
+};
+
 export type SessionItem = {
   _id: string;
   userId?: string;

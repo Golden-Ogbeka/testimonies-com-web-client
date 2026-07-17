@@ -28,7 +28,7 @@ export function AppSidebar() {
   const logout = useLogout();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const notifCount = (followRequests.data?.results?.length ?? 0) + flattenPages(broadcastRequests.data).length;
+  const notifCount = (followRequests.data?.followRequests?.length ?? 0) + flattenPages(broadcastRequests.data).length;
 
   const handleLogout = useCallback(async () => {
     await logout.mutateAsync();
@@ -83,7 +83,7 @@ export function AppSidebar() {
             className="flex items-center gap-4 rounded-none px-3 py-2.5 text-sm text-foreground-secondary transition-colors duration-150 hover:bg-background-secondary hover:text-foreground mb-2"
           >
             <LogOut className="h-5 w-5" strokeWidth={1.5} />
-            <span className="hidden xl:inline">Logout</span>
+            <span className="hidden md:inline">Logout</span>
           </button>
 
           <ConfirmModal
@@ -105,7 +105,7 @@ export function AppSidebar() {
               className="flex items-center gap-3 rounded-none p-3 transition-colors duration-150 hover:bg-background-secondary"
             >
               <Avatar src={user.profileImage} name={`${user.firstName} ${user.lastName}`} size="md" />
-              <div className="hidden min-w-0 flex-1 xl:block">
+              <div className="hidden min-w-0 flex-1 md:block">
                 <p className="truncate text-sm font-semibold text-foreground">{`${user.firstName} ${user.lastName}`}</p>
                 <p className="truncate text-xs text-muted">@{user.username}</p>
               </div>
