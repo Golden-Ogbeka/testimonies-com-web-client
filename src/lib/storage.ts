@@ -17,7 +17,7 @@ export const storage = {
   getAuthKind(): AuthKind | null {
     if (!canUseStorage) return null;
     const value = localStorage.getItem(STORAGE_KEYS.authKind);
-    if (value === 'individual' || value === 'organization') return value;
+    if (value === 'user' || value === 'organization') return value;
     return null;
   },
   setAuthKind(kind: AuthKind): void {

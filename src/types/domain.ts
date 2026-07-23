@@ -160,12 +160,28 @@ export type UpdateVisibilityPayload = {
 
 export type FollowRequest = {
   _id: string;
-  requester?: import('./auth').User;
+  leaderId?: string;
+  followerId?: string;
+  status?: string;
+  followerDetails?: import('./auth').User;
+  leaderDetails?: import('./auth').User;
   createdAt?: string;
 };
 
 export type BlockedUser = {
   _id: string;
-  blockedUser?: import('./auth').User;
+  userToBlockId?: string;
+  userBlockingId?: string;
+  userToBlockDetails?: import('./auth').User;
+  createdAt?: string;
+};
+
+export type FollowRequestListItem = {
+  _id: string;
+  leaderId?: string;
+  followerId?: string;
+  status?: string;
+  followerDetails?: import('./auth').User;
+  leaderDetails?: import('./auth').User;
   createdAt?: string;
 };

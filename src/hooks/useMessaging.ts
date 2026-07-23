@@ -9,6 +9,8 @@ const msgKeys = {
   contacts: ['messaging', 'contacts'] as const,
   history: ['messaging', 'history'] as const,
   conversation: (userId: string) => ['messaging', 'conversation', userId] as const,
+  search: (keyword: string, page: number) => ['messaging', 'search', keyword, page] as const,
+  user: (id: string) => ['messaging', 'user', id] as const,
 };
 
 export function useContacts() {
@@ -39,7 +41,8 @@ export function useSendMessage() {
     mutationFn: async (payload: { recipientId: string; recipientType: 'user' | 'organization'; content: string }) =>
       (await api.post('/user/messaging/send', payload)).data,
     onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: ['messaging'] });
+      qc.invalidateQueries({ queryKey: msgKeys.contacts });
+      qc.invalidateQueries({ queryKey: msgKeys.history });
       qc.invalidateQueries({ queryKey: msgKeys.conversation(vars.recipientId) });
     },
   });
@@ -49,7 +52,10 @@ export function useEditMessage() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, content }: { id: string; content: string }) => (await api.put(`/user/messaging/message/${id}`, { content })).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['messaging'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: msgKeys.contacts });
+      qc.invalidateQueries({ queryKey: msgKeys.history });
+    },
   });
 }
 
@@ -57,7 +63,10 @@ export function useDeleteMessage() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => (await api.delete(`/user/messaging/message/${id}`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['messaging'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: msgKeys.contacts });
+      qc.invalidateQueries({ queryKey: msgKeys.history });
+    },
   });
 }
 
@@ -65,7 +74,10 @@ export function useMarkConversationRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (userId: string) => (await api.patch(`/user/messaging/conversation/${userId}/read`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['messaging'] }),
+    onSuccess: (_, userId) => {
+      qc.invalidateQueries({ queryKey: msgKeys.conversation(userId) });
+      qc.invalidateQueries({ queryKey: msgKeys.contacts });
+    },
   });
 }
 
@@ -73,21 +85,24 @@ export function useMarkAllConversationsRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => (await api.patch('/user/messaging/conversations/read-all')).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['messaging'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: msgKeys.contacts });
+      qc.invalidateQueries({ queryKey: msgKeys.history });
+    },
   });
 }
 
 export function useGetUserForMessaging(id: string) {
   return useQuery({
-    queryKey: ['messaging', 'user', id],
-    queryFn: async () => (await api.get(`/user/messaging/user/${id}`)).data,
+    queryKey: msgKeys.user(id),
+    queryFn: async () => unwrap<{ _id: string; username: string; fullName?: string }>((await api.get(`/user/messaging/user/${id}`)).data),
     enabled: !!id,
   });
 }
 
 export function useSearchMessages(keyword: string, page = 1) {
   return useQuery({
-    queryKey: ['messaging', 'search', keyword, page],
+    queryKey: msgKeys.search(keyword, page),
     queryFn: async () => unwrap<Paginated<Message>>((await api.get(`/user/messaging/search?q=${encodeURIComponent(keyword)}&page=${page}`)).data),
     enabled: keyword.length > 1,
   });
@@ -97,6 +112,9 @@ export function useMarkMessageRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => (await api.patch(`/user/messaging/message/${id}/read`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['messaging'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: msgKeys.contacts });
+      qc.invalidateQueries({ queryKey: msgKeys.history });
+    },
   });
 }

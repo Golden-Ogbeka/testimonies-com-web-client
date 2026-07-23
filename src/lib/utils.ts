@@ -15,3 +15,7 @@ export function apiMessage(error: unknown): string {
   }
   return 'Something went wrong. Please try again.';
 }
+
+export function flattenPages<T>(data?: { pages?: Array<{ results?: T[] }> }): T[] {
+  return data?.pages?.flatMap((p) => p.results ?? []) ?? [];
+}

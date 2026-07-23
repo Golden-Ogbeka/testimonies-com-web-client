@@ -5,6 +5,7 @@ import { storage } from '@/lib/storage';
 export const api = axios.create({
   baseURL: env.apiBaseUrl,
   withCredentials: true,
+  timeout: 15_000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -24,7 +25,8 @@ api.interceptors.response.use(
     const status = error?.response?.status;
     const message = error?.response?.data?.error?.message ?? error?.response?.data?.message ?? '';
 
-    if (status === 401) {
+    const isLogout = error.config?.url?.includes('/auth/logout');
+    if (status === 401 && !isLogout) {
       storage.clear();
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('auth:logout'));
@@ -38,7 +40,7 @@ api.interceptors.response.use(
     enhancedError.response = error?.response;
     enhancedError.status = status;
     return Promise.reject(enhancedError);
-  }
+  },
 );
 
 export function unwrap<T>(payload: unknown): T {

@@ -1,29 +1,37 @@
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import { AppSidebar } from './AppSidebar';
+import { AppRightSidebar } from './AppRightSidebar';
 import type { ReactNode } from 'react';
 import { useAuthState } from '@/app/providers';
+import { useMe } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { SpinnerPage } from '@/components/common';
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuthState();
+  useMe();
+  const { isAuthenticated, initialized } = useAuthState();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace('/signin');
+    if (initialized && !isAuthenticated) {
+      router.replace(ROUTES.SIGNIN);
     }
-  }, [isAuthenticated, router]);
+  }, [initialized, isAuthenticated, router]);
 
-  if (!isAuthenticated) return null;
+  if (!initialized || !isAuthenticated) {
+    return <SpinnerPage />;
+  }
 
   return (
-    <div className='mx-auto flex min-h-screen max-w-[1280px] bg-white'>
+    <div className="flex min-h-screen bg-background">
       <AppSidebar />
-      <main className='min-h-screen flex-1 border-x border-gray-200'>
-        {children}
+      <main className="flex min-h-screen flex-1 border-x border-border pb-16 lg:pb-0">
+        <div className="mx-auto w-full">{children}</div>
       </main>
+      <AppRightSidebar />
     </div>
   );
 }
