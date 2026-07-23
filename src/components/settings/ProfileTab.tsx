@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
-import { Avatar, Button, Input, Textarea } from '@/components/common';
 import { useAuthState } from '@/app/providers';
+import { Avatar, Button, Input, Textarea } from '@/components/common';
 import { useUpdateOrgProfile, useUpdateUserProfile, useUploadCoverPicture, useUploadProfilePicture } from '@/hooks/useProfile';
 import { apiMessage } from '@/lib/utils';
-import { useForm } from 'react-hook-form';
+import { updateOrgProfileSchema, updateProfileSchema } from '@/lib/validations';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Image from 'next/image';
+import { useEffect, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { updateProfileSchema, updateOrgProfileSchema } from '@/lib/validations';
 import { ImageUploadButton } from './image-upload-button';
 
 export default function ProfileTab() {
@@ -74,7 +75,7 @@ export default function ProfileTab() {
         <div className="relative mb-10">
           <div className="relative h-36 w-full overflow-hidden rounded-lg bg-gradient-to-r from-foreground/10 to-foreground/20">
             {user?.coverImageURL ? (
-              <img src={user.coverImageURL} alt="Cover" className="h-full w-full object-cover" />
+              <Image src={user.coverImageURL} alt="Cover photo" fill className="object-cover" unoptimized priority />
             ) : (
               <div className="flex h-full items-center justify-center text-xs text-muted">No cover image</div>
             )}

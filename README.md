@@ -4,17 +4,17 @@ A Twitter-like browser experience for sharing testimonies of God's goodness. Bui
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 16 (App Router, Turbopack) |
-| Language | TypeScript 6 (strict — no `any`) |
-| Styling | Tailwind CSS v4 |
-| Data Fetching | TanStack Query v5 |
-| HTTP Client | Axios with interceptors |
-| Forms | React Hook Form + Zod |
-| Icons | Lucide React |
-| Toasts | Sonner |
-| OTP Input | react-otp-input |
+| Layer         | Technology                         |
+| ------------- | ---------------------------------- |
+| Framework     | Next.js 16 (App Router, Turbopack) |
+| Language      | TypeScript 6 (strict — no `any`)   |
+| Styling       | Tailwind CSS v4                    |
+| Data Fetching | TanStack Query v5                  |
+| HTTP Client   | Axios with interceptors            |
+| Forms         | React Hook Form + Zod              |
+| Icons         | Lucide React                       |
+| Toasts        | Sonner                             |
+| OTP Input     | react-otp-input                    |
 
 ## Getting Started
 
@@ -38,13 +38,13 @@ The backend (Express + MongoDB) must be running on port 5000 for API calls.
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start dev server with Turbopack |
-| `npm run build` | Production build (TypeScript check + compile) |
-| `npm start` | Start production server |
-| `npm run lint` | Run ESLint 9 |
-| `npx tsc --noEmit` | Standalone TypeScript check |
+| Command            | Description                                   |
+| ------------------ | --------------------------------------------- |
+| `npm run dev`      | Start dev server with Turbopack               |
+| `npm run build`    | Production build (TypeScript check + compile) |
+| `npm start`        | Start production server                       |
+| `npm run lint`     | Run ESLint 9                                  |
+| `npx tsc --noEmit` | Standalone TypeScript check                   |
 
 ## Project Structure
 
@@ -95,20 +95,20 @@ The following modules are wired in the backend but the routes are commented out.
 
 ## Routes
 
-| Path | Auth | Description |
-|------|------|-------------|
-| `/` | — | Root redirect (`/home` or `/signin`) |
-| `/signin` | Public | Email + password sign in |
-| `/signup` | Public | Individual or organization registration |
-| `/verify-otp` | Public | OTP verification (signin/signup mode) |
-| `/forgot-password` | Public | Password reset via email OTP |
-| `/home` | Protected | Main feed with composer |
-| `/explore` | Protected | Search people, testimonies, trending, tags |
-| `/notifications` | Protected | Follow and broadcast requests |
-| `/my-testimonies` | Protected | User's own testimonies |
-| `/post/[id]` | Protected | Testimony detail with replies |
-| `/u/[username]` | Protected | User profile |
-| `/settings` | Protected | Profile, account, privacy, sessions, danger zone |
+| Path               | Auth      | Description                                      |
+| ------------------ | --------- | ------------------------------------------------ |
+| `/`                | —         | Root redirect (`/home` or `/signin`)             |
+| `/signin`          | Public    | Email + password sign in                         |
+| `/signup`          | Public    | Individual or organization registration          |
+| `/verify-otp`      | Public    | OTP verification (signin/signup mode)            |
+| `/forgot-password` | Public    | Password reset via email OTP                     |
+| `/home`            | Protected | Main feed with composer                          |
+| `/explore`         | Protected | Search people, testimonies, trending, tags       |
+| `/notifications`   | Protected | Follow and broadcast requests                    |
+| `/my-testimonies`  | Protected | User's own testimonies                           |
+| `/post/[id]`       | Protected | Testimony detail with replies                    |
+| `/u/[username]`    | Protected | User profile                                     |
+| `/settings`        | Protected | Profile, account, privacy, sessions, danger zone |
 
 ## API Integration
 
@@ -122,11 +122,11 @@ The following modules are wired in the backend but the routes are commented out.
 
 ## Environment Variables
 
-| Variable | Required | Default | Purpose |
-|----------|----------|---------|---------|
-| `NEXT_PUBLIC_API_BASE_URL` | Yes | — | Backend API base URL |
-| `NEXT_PUBLIC_API_KEY` | Yes | — | API key for `x-api-key` header |
-| `NEXT_PUBLIC_SITE_URL` | Yes | — | Site URL for OG/Twitter cards |
+| Variable                   | Required | Default | Purpose                        |
+| -------------------------- | -------- | ------- | ------------------------------ |
+| `NEXT_PUBLIC_API_BASE_URL` | Yes      | —       | Backend API base URL           |
+| `NEXT_PUBLIC_API_KEY`      | Yes      | —       | API key for `x-api-key` header |
+| `NEXT_PUBLIC_SITE_URL`     | Yes      | —       | Site URL for OG/Twitter cards  |
 
 ## Conventions
 
@@ -135,7 +135,7 @@ The following modules are wired in the backend but the routes are commented out.
 - All routes reference the single `ROUTES` constants file
 - No `any` types — use `unknown` and narrow, or define a proper type
 - Tailwind utility classes only — no inline styles or CSS modules
-- Light theme only (white background, `#2C3248` primary, gray borders)
+- Light theme only (white background, `#1f2947` primary, gray borders)
 - Mutations invalidate relevant query keys on success
 - Forms validate with Zod schemas and disable submit during loading
 

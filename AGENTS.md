@@ -7,6 +7,7 @@ Next.js web client for Testimonies.com — a Twitter-like browser experience for
 ## 2. Technology Stack
 
 ### 2.1 Core
+
 - **Framework**: Next.js 16+ (App Router)
 - **Language**: TypeScript 6 (strict — no `any`)
 - **Styling**: Tailwind CSS v4
@@ -16,6 +17,7 @@ Next.js web client for Testimonies.com — a Twitter-like browser experience for
 - **State**: React Query for server state; React context/useState for local UI state
 
 ### 2.2 Development
+
 - **Package Manager**: npm
 - **Linting**: ESLint 9
 - **Formatting**: Prettier (format on save)
@@ -59,11 +61,13 @@ src/
 ## 5. Development Rules
 
 ### 5.1 TypeScript
+
 - Strict mode is always on. Never use `any` — use `unknown` and narrow, or define a proper type.
 - Define interfaces for all API response shapes and component props.
 - Use `type` for unions/intersections, `interface` for object shapes.
 
 ### 5.2 Components
+
 - Use functional components only with `'use client'` when hooks or browser APIs are needed.
 - Keep components small and single-responsibility.
 - Extract reusable UI into `src/components/common/`.
@@ -71,6 +75,7 @@ src/
 - Always handle loading, empty, and error states explicitly.
 
 ### 5.3 Data Fetching
+
 - All server data goes through React Query hooks in `src/hooks/`.
 - List endpoints use `useInfiniteQuery` with `getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined` and `initialPageParam: 1`.
 - Consume infinite query data with `flattenPages(data)` from `src/lib/utils.ts`.
@@ -83,8 +88,7 @@ src/
 export const useFeed = () =>
   useInfiniteQuery({
     queryKey: ['testimony', 'feed'],
-    queryFn: async ({ pageParam = 1 }) =>
-      unwrap<Paginated<Testimony>>((await api.get(`/user/testimony?page=${pageParam}`)).data),
+    queryFn: async ({ pageParam = 1 }) => unwrap<Paginated<Testimony>>((await api.get(`/user/testimony?page=${pageParam}`)).data),
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
     initialPageParam: 1,
   });
@@ -97,24 +101,27 @@ const feed = useFeed();
 const { ref, isIntersecting } = useIntersectionObserver();
 
 useEffect(() => {
-  if (isIntersecting && feed.hasNextPage && !feed.isFetchingNextPage)
-    feed.fetchNextPage();
+  if (isIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) feed.fetchNextPage();
 }, [isIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
 
 // Render
-{flattenPages(feed.data).map(item => <Item key={item._id} item={item} />)}
-<div ref={ref} className='flex justify-center py-4'>
+{
+  flattenPages(feed.data).map((item) => <Item key={item._id} item={item} />);
+}
+<div ref={ref} className="flex justify-center py-4">
   {feed.isFetchingNextPage && <Spinner />}
-</div>
+</div>;
 ```
 
 ### 5.4 Axios Client
+
 - A single Axios instance lives in `src/lib/axios.ts` (re-exported as `src/lib/api.ts`).
 - Auth token (`x-jwt-token`) and `x-api-key` are injected via request interceptors.
 - 401 responses trigger automatic sign-out via response interceptor, **except** for the `/user/auth/logout` endpoint (which may return 401 when the session is already invalid — no sign-out cascade needed).
 - Never create ad-hoc Axios instances outside `src/lib/`.
 
 ### 5.5 Routing & Auth Protection
+
 - Use Next.js middleware (`src/middleware.ts`) for route protection.
 - Authenticated routes are grouped under `(app)/`.
 - Unauthenticated routes are grouped under `(public)/`.
@@ -122,12 +129,14 @@ useEffect(() => {
 - Profile route is at `/(app)/u/[username]` to benefit from auth middleware.
 
 ### 5.6 Styling
+
 - Use Tailwind utility classes exclusively — no inline styles, no CSS modules.
-- Follow the design system: `#2C3248` primary (solid fills), white backgrounds, gray secondary, red danger.
+- Follow the design system: `#1f2947` primary (solid fills), white backgrounds, gray secondary, red danger.
 - Light theme only (white background, subtle gray borders).
 - Use rounded borders (`rounded-lg`, `rounded-xl`, `rounded-full`).
 
 ### 5.7 Forms
+
 - Validate all inputs client-side before submission.
 - Show field-level error messages.
 - Disable submit buttons while a mutation is in flight.
@@ -137,6 +146,7 @@ useEffect(() => {
 - Set `autoComplete` attributes on all auth/registration inputs to prevent Chrome autofill mismatches (e.g., `autoComplete="off"` on username inputs).
 
 ### 5.8 Real-time (Socket.io)
+
 - Socket client is initialised once in a provider at the app root.
 - Connect only when authenticated; disconnect on logout.
 - Use socket events only for messaging and live feed updates.
@@ -146,48 +156,50 @@ useEffect(() => {
 
 Every UI pattern that appears more than once must become a reusable component in `src/components/common/`:
 
-| Component | Usage |
-|-----------|-------|
-| `Avatar` | User image with fallback initials |
-| `Button` | Primary/secondary/danger variants, with `isPending` spinner |
-| `Card` | Generic bordered card container |
-| `Input` | Label-above input; password type gets Eye/EyeOff toggle; supports `autoComplete` |
-| `OtpInput` | Wraps `react-otp-input` with consistent styling |
-| `PageHeader` | Sticky header with icon + title |
-| `TabBar` | Tab navigation with optional icons and badges |
-| `SearchInput` | Search field with magnifier icon |
-| `VirtualList` | Window-based virtualized list using `@tanstack/react-virtual` |
-| `UserRow` | Avatar + name + username (optionally linked) |
-| `StatusBadge` | Green/gray/red pill for active/pending/rejected states |
-| `EmptyState` | Centered empty state with icon, title, and message |
-| `ErrorState` | Centered error state with retry button |
-| `SkeletonCard` | Loading skeleton placeholder |
-| `Spinner` | Configurable loading spinner |
-| `SpinnerPage` | Full-page centered spinner for suspense fallback |
+| Component      | Usage                                                                            |
+| -------------- | -------------------------------------------------------------------------------- |
+| `Avatar`       | User image with fallback initials                                                |
+| `Button`       | Primary/secondary/danger variants, with `isPending` spinner                      |
+| `Card`         | Generic bordered card container                                                  |
+| `Input`        | Label-above input; password type gets Eye/EyeOff toggle; supports `autoComplete` |
+| `OtpInput`     | Wraps `react-otp-input` with consistent styling                                  |
+| `PageHeader`   | Sticky header with icon + title                                                  |
+| `TabBar`       | Tab navigation with optional icons and badges                                    |
+| `SearchInput`  | Search field with magnifier icon                                                 |
+| `VirtualList`  | Window-based virtualized list using `@tanstack/react-virtual`                    |
+| `UserRow`      | Avatar + name + username (optionally linked)                                     |
+| `StatusBadge`  | Green/gray/red pill for active/pending/rejected states                           |
+| `EmptyState`   | Centered empty state with icon, title, and message                               |
+| `ErrorState`   | Centered error state with retry button                                           |
+| `SkeletonCard` | Loading skeleton placeholder                                                     |
+| `Spinner`      | Configurable loading spinner                                                     |
+| `SpinnerPage`  | Full-page centered spinner for suspense fallback                                 |
 
 Custom hooks in `src/hooks/`:
 
-| Hook | Purpose |
-|------|---------|
-| `useCooldown` | Countdown timer for OTP resend flows |
+| Hook                      | Purpose                                                             |
+| ------------------------- | ------------------------------------------------------------------- |
+| `useCooldown`             | Countdown timer for OTP resend flows                                |
 | `useIntersectionObserver` | Detects when sentinel element is visible (triggers infinite scroll) |
 
 ## 7. API Integration
 
 ### 7.1 API Modules
+
 API calls are made directly inside hooks using the shared Axios instance. Each hook file groups related endpoints:
 
-| Hook File | Responsibility |
-|-----------|---------------|
-| `useAuth.ts` | Register, login, OTP, logout, password reset |
-| `useTestimonies.ts` | CRUD, likes, replies, broadcasts, feed, tags |
-| `useProfile.ts` | Profile view/edit, follow/unfollow, block, search |
-| `useMessaging.ts` | Conversations, messages, read receipts |
-| `useSubscription.ts` | Plans, status, payment, cancel |
-| `usePromotion.ts` | Campaign CRUD, activate/deactivate |
-| `useTeam.ts` | Members, roles, permissions, activity |
+| Hook File            | Responsibility                                    |
+| -------------------- | ------------------------------------------------- |
+| `useAuth.ts`         | Register, login, OTP, logout, password reset      |
+| `useTestimonies.ts`  | CRUD, likes, replies, broadcasts, feed, tags      |
+| `useProfile.ts`      | Profile view/edit, follow/unfollow, block, search |
+| `useMessaging.ts`    | Conversations, messages, read receipts            |
+| `useSubscription.ts` | Plans, status, payment, cancel                    |
+| `usePromotion.ts`    | Campaign CRUD, activate/deactivate                |
+| `useTeam.ts`         | Members, roles, permissions, activity             |
 
 ### 7.2 Response Handling
+
 - All API responses follow the backend's `{ success, data, message }` shape.
 - Extract `data` with `unwrap<T>()` from `src/lib/api.ts` inside the hook's `queryFn`.
 - Surface `apiMessage(error)` in user-facing error toasts (from `src/lib/utils.ts`).

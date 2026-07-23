@@ -17,7 +17,16 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl ?? 'http://localhost:3000'),
   title: { template: '%s — Testimonies', default: 'Testimonies — Share His Goodness' },
   description: "Share your testimony of God's goodness and inspire the world.",
-  icons: { icon: '/favicon.svg' },
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/icons/icon-192.png',
+  },
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Testimonies',
+  },
   openGraph: {
     type: 'website',
     siteName: 'Testimonies',
@@ -32,7 +41,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#fafbfc',
+  themeColor: '#1f2947',
   width: 'device-width',
   initialScale: 1,
 };

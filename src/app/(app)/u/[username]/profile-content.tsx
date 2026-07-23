@@ -8,8 +8,8 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useFollowers, useFollowing, useFollowUser, useProfileByUsername, useUnfollowUser } from '@/hooks/useProfile';
 import { useUserReplies, useUserTestimonies } from '@/hooks/useTestimonies';
 import { flattenPages } from '@/lib/utils';
+import { formatDistanceToNowStrict } from 'date-fns';
 import { Settings, User, UserMinus, UserPlus } from 'lucide-react';
-import moment from 'moment';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -197,7 +197,7 @@ export default function ProfileContent() {
             {allUserReplies.map((reply) => (
               <div key={reply._id} className="border-b border-border px-4 py-3 hover:bg-card-hover">
                 <p className="text-sm text-foreground">{reply.content}</p>
-                <p className="mt-1 text-xs text-muted">{moment(reply.createdAt).fromNow()}</p>
+                <p className="mt-1 text-xs text-muted">{formatDistanceToNowStrict(new Date(reply.createdAt), { addSuffix: true })}</p>
               </div>
             ))}
             <div ref={repliesSentinel} className="flex justify-center py-4">

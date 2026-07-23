@@ -5,8 +5,8 @@ import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useMyReplies, useMyTestimonies, useTestimonyStats } from '@/hooks/useTestimonies';
 import { flattenPages } from '@/lib/utils';
+import { formatDistanceToNowStrict } from 'date-fns';
 import { BookOpen, Eye, Heart, Reply } from 'lucide-react';
-import moment from 'moment';
 import { useEffect, useState } from 'react';
 
 type Tab = 'testimonies' | 'replies' | 'stats';
@@ -121,7 +121,9 @@ export default function MyTestimoniesContent() {
                 renderItem={(reply) => (
                   <div key={reply._id} className="border-b border-border px-4 py-3 hover:bg-card-hover">
                     <p className="text-sm text-foreground">{reply.content}</p>
-                    <p className="mt-1 text-xs text-gray-400">{moment(reply.createdAt).fromNow()}</p>
+                    <p className="mt-1 text-xs text-gray-400">
+                      {formatDistanceToNowStrict(new Date(reply.createdAt), { addSuffix: true })}
+                    </p>
                   </div>
                 )}
                 estimateSize={80}

@@ -1,14 +1,15 @@
 'use client';
 
-import { memo, useCallback, useState } from 'react';
-import moment from 'moment';
-import { ROUTES } from '@/constants/routes';
 import { Avatar, ImagePreview } from '@/components/common';
+import { ROUTES } from '@/constants/routes';
 import { useLikeTestimony, useUnlikeTestimony } from '@/hooks/useTestimonies';
 import { cn } from '@/lib/utils';
 import type { Testimony } from '@/types/testimony';
+import { formatDistanceToNowStrict } from 'date-fns';
 import { Heart, MessageCircle, Radio } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { memo, useCallback, useState } from 'react';
 
 type Props = { testimony: Testimony; compact?: boolean };
 
@@ -40,7 +41,7 @@ function TestimonyCardBase({ testimony, compact }: Props) {
             </Link>
             <span className="text-xs text-muted">@{testimony.userDetails.username}</span>
             <span className="text-xs text-gray-300">·</span>
-            <span className="text-xs text-muted">{moment(testimony.createdAt).fromNow()}</span>
+            <span className="text-xs text-muted">{formatDistanceToNowStrict(new Date(testimony.createdAt), { addSuffix: true })}</span>
             {testimony.isBroadcast && (
               <span className="inline-flex items-center gap-1 bg-foreground/5 px-2 py-0.5 text-xs text-foreground">
                 <Radio className="h-3 w-3" />
@@ -72,9 +73,16 @@ function TestimonyCardBase({ testimony, compact }: Props) {
                   key={url}
                   onClick={() => setPreviewUrl(url)}
                   aria-label="View image"
-                  className="overflow-hidden rounded-none border border-border"
+                  className="relative overflow-hidden rounded-none border border-border"
                 >
-                  <img src={url} alt={`Image ${i + 1}`} className="h-20 w-20 object-cover transition-opacity hover:opacity-80" />
+                  <Image
+                    src={url}
+                    alt={`Image ${i + 1}`}
+                    width={80}
+                    height={80}
+                    className="h-20 w-20 object-cover transition-opacity hover:opacity-80"
+                    unoptimized
+                  />
                 </button>
               ))}
             </div>

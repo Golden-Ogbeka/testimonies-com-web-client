@@ -1,12 +1,12 @@
 'use client';
 
 import { Avatar, ConfirmModal } from '@/components/common';
-import { useDeleteReply, useLikeReply, useUnlikeReply } from '@/hooks/useTestimonies';
-import type { Reply } from '@/types/testimony';
 import { useMe } from '@/hooks/useAuth';
+import { useDeleteReply, useLikeReply, useUnlikeReply } from '@/hooks/useTestimonies';
 import { cn } from '@/lib/utils';
+import type { Reply } from '@/types/testimony';
+import { formatDistanceToNowStrict } from 'date-fns';
 import { Heart, Trash2 } from 'lucide-react';
-import moment from 'moment';
 import { memo, useCallback, useState } from 'react';
 
 function ReplyItem({ reply }: { reply: Reply }) {
@@ -39,7 +39,7 @@ function ReplyItem({ reply }: { reply: Reply }) {
             <span className="text-sm font-semibold text-foreground">{fullName}</span>
             <span className="text-xs text-muted">@{reply.userDetails.username}</span>
             <span className="text-xs text-gray-300">·</span>
-            <span className="text-xs text-muted">{moment(reply.createdAt).fromNow()}</span>
+            <span className="text-xs text-muted">{formatDistanceToNowStrict(new Date(reply.createdAt), { addSuffix: true })}</span>
           </div>
           <p className="mt-0.5 text-sm text-foreground break-all">{reply.content}</p>
           <div className="mt-2 flex items-center gap-3 text-xs text-muted">

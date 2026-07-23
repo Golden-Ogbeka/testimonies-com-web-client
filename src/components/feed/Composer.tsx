@@ -155,7 +155,7 @@ export function Composer() {
             <button
               onClick={() => fileRef.current?.click()}
               aria-label="Attach media"
-              className="flex p-2 items-center gap-1 text-muted hover:bg-background-secondary hover:text-foreground transition-colors"
+              className="flex p-2 items-center gap-1 text-muted hover:bg-background-secondary hover:text-foreground transition-colors duration-100"
               disabled={files.length >= 4}
             >
               <ImageIcon className="h-4 w-4" />
