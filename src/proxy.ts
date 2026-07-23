@@ -34,9 +34,12 @@ export function proxy(request: NextRequest) {
     response = NextResponse.next();
   }
 
-  if (process.env.NODE_ENV === 'development') {
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  // Disable caching for redirect responses to prevent browser redirect caching loops
+  const isRedirect = response.headers.has('location') || (response.status >= 300 && response.status < 400);
+  if (isRedirect) {
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
   }
 
   return response;

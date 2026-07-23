@@ -8,6 +8,7 @@ import { useAuthState } from '@/app/providers';
 import { useMe } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { SpinnerPage } from '@/components/common';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   useMe();
@@ -19,6 +20,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
       router.replace(ROUTES.SIGNIN);
     }
   }, [initialized, isAuthenticated, router]);
+
+  if (!initialized || !isAuthenticated) {
+    return <SpinnerPage />;
+  }
 
   return (
     <div className="flex min-h-screen bg-background">

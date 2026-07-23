@@ -1,8 +1,9 @@
 'use client';
 
-import { ROUTES } from '@/constants/routes';
-import { Avatar, BrandLogo, ConfirmModal } from '@/components/common';
 import { useAuthState } from '@/app/providers';
+import { Avatar, BrandLogo, ConfirmModal } from '@/components/common';
+import { ROUTES } from '@/constants/routes';
+import { useLogout } from '@/hooks/useAuth';
 import { useFollowRequests } from '@/hooks/useProfile';
 import { useBroadcastRequests } from '@/hooks/useTestimonies';
 import { cn, flattenPages } from '@/lib/utils';
@@ -10,7 +11,6 @@ import { Bell, BookOpen, Home, LogOut, Search, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useState } from 'react';
-import { useLogout } from '@/hooks/useAuth';
 
 const nav = [
   { href: ROUTES.HOME, label: 'Home', icon: Home },
@@ -22,7 +22,7 @@ const nav = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { user, clearAuth } = useAuthState();
+  const { user } = useAuthState();
   const followRequests = useFollowRequests();
   const broadcastRequests = useBroadcastRequests();
   const logout = useLogout();
@@ -30,11 +30,9 @@ export function AppSidebar() {
 
   const notifCount = (followRequests.data?.followRequests?.length ?? 0) + flattenPages(broadcastRequests.data).length;
 
-  const handleLogout = useCallback(async () => {
-    await logout.mutateAsync();
-    window.location.href = ROUTES.SIGNIN;
-    clearAuth();
-  }, [logout, clearAuth]);
+  const handleLogout = useCallback(() => {
+    logout.mutate();
+  }, [logout]);
 
   return (
     <>

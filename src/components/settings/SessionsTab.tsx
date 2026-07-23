@@ -1,24 +1,19 @@
 'use client';
 
 import { Button, ConfirmModal } from '@/components/common';
-import { useAuthState } from '@/app/providers';
 import { useDeleteOtherSessions, useDeleteSession, useLogout, useSessions } from '@/hooks/useAuth';
-import { ROUTES } from '@/constants/routes';
 import { useCallback, useState } from 'react';
 
 export default function SessionsTab() {
-  const { clearAuth } = useAuthState();
   const sessions = useSessions();
   const deleteSession = useDeleteSession();
   const deleteOthers = useDeleteOtherSessions();
   const logout = useLogout();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const handleLogout = useCallback(async () => {
-    await logout.mutateAsync();
-    window.location.href = ROUTES.SIGNIN;
-    clearAuth();
-  }, [logout, clearAuth]);
+  const handleLogout = useCallback(() => {
+    logout.mutate();
+  }, [logout]);
 
   return (
     <div className="rounded-none border border-border bg-background p-4">

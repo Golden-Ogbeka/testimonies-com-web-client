@@ -1,13 +1,13 @@
 'use client';
 
+import { useAuthState } from '@/app/providers';
+import { ROUTES } from '@/constants/routes';
 import { api, unwrap } from '@/lib/api';
 import { storage } from '@/lib/storage';
-import { useAuthState } from '@/app/providers';
-import type { AuthResponse, OtpPayload, User } from '@/types/auth';
 import type { Paginated, SessionItem } from '@/types/api';
+import type { AuthResponse, OtpPayload, User } from '@/types/auth';
 import type { SignUpPayload } from '@/types/domain';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ROUTES } from '@/constants/routes';
 
 export const authKeys = {
   me: ['auth', 'me'] as const,
@@ -22,16 +22,13 @@ function persistAuth(data: AuthResponse, qc: ReturnType<typeof useQueryClient>, 
 }
 
 export function useMe() {
-  const { setAuth } = useAuthState();
   return useQuery({
     queryKey: authKeys.me,
     queryFn: async () => {
       const data = await unwrap<User>((await api.get('/user/profile')).data);
-      if (data) {
-        storage.setUser(data);
-        const token = storage.getToken();
-        if (token) setAuth(token, data);
-      }
+      // Keep storage in sync but don't touch React auth state —
+      // that would cause a provider re-render on every background refetch.
+      if (data) storage.setUser(data);
       return data;
     },
     enabled: !!storage.getToken(),
@@ -126,13 +123,12 @@ export function useLogout() {
         await api.post('/user/auth/logout');
       } catch {
         // Server session may already be invalid — local cleanup handles it
-      } finally {
-        window.location.href = ROUTES.SIGNIN;
       }
     },
     onSettled: () => {
       storage.clear();
       qc.clear();
+      window.location.href = ROUTES.SIGNIN;
     },
   });
 }
