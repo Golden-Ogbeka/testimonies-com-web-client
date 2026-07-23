@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import { Avatar, Button } from '@/components/common';
 import { useAuthState } from '@/app/providers';
 import {
@@ -34,8 +34,8 @@ export default function PrivacyTab() {
 
   const currentVisibility = user?.profileVisibility ?? 'public';
 
-  const handleVisibilityChange = useMemo(
-    () => async (v: Visibility) => {
+  const handleVisibilityChange = useCallback(
+    async (v: Visibility) => {
       if (v === currentVisibility) return;
       try {
         await updateVisibility.mutateAsync({ profileVisibility: v });
@@ -47,8 +47,8 @@ export default function PrivacyTab() {
     [currentVisibility, updateVisibility],
   );
 
-  const handleAcceptFollow = useMemo(
-    () => async (id: string) => {
+  const handleAcceptFollow = useCallback(
+    async (id: string) => {
       try {
         await acceptFollow.mutateAsync(id);
         toast.success('Follow request accepted');
@@ -59,8 +59,8 @@ export default function PrivacyTab() {
     [acceptFollow],
   );
 
-  const handleRejectFollow = useMemo(
-    () => async (id: string) => {
+  const handleRejectFollow = useCallback(
+    async (id: string) => {
       try {
         await rejectFollow.mutateAsync(id);
         toast.success('Follow request rejected');
@@ -71,8 +71,8 @@ export default function PrivacyTab() {
     [rejectFollow],
   );
 
-  const handleUnblock = useMemo(
-    () => async (id: string) => {
+  const handleUnblock = useCallback(
+    async (id: string) => {
       try {
         await unblock.mutateAsync(id);
         toast.success('User unblocked');
@@ -90,12 +90,14 @@ export default function PrivacyTab() {
     <>
       <div className="rounded-none border border-border bg-background p-4">
         <h2 className="mb-4 text-sm font-bold text-foreground">Profile Visibility</h2>
-        <div className="space-y-2">
+        <div className="space-y-2" role="radiogroup" aria-label="Profile visibility">
           {VISIBILITY_OPTIONS.map(({ value, description }) => {
             const isActive = value === currentVisibility;
             return (
               <button
                 key={value}
+                role="radio"
+                aria-checked={isActive}
                 onClick={() => handleVisibilityChange(value)}
                 disabled={updateVisibility.isPending || isActive}
                 className={`flex w-full items-center justify-between rounded-none border px-4 py-3 text-sm transition-colors ${
@@ -127,10 +129,15 @@ export default function PrivacyTab() {
                   <p className="text-sm font-medium text-foreground">{name || 'User'}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={() => handleAcceptFollow(req._id)} className="px-3 py-1 text-xs">
+                  <Button onClick={() => handleAcceptFollow(req._id)} disabled={acceptFollow.isPending} className="px-3 py-1 text-xs">
                     Accept
                   </Button>
-                  <Button variant="secondary" onClick={() => handleRejectFollow(req._id)} className="px-3 py-1 text-xs">
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleRejectFollow(req._id)}
+                    disabled={rejectFollow.isPending}
+                    className="px-3 py-1 text-xs"
+                  >
                     Reject
                   </Button>
                 </div>
@@ -156,7 +163,12 @@ export default function PrivacyTab() {
                   <Avatar src={details?.profileImage} name={name} size="sm" />
                   <p className="text-sm font-medium text-foreground">{name}</p>
                 </div>
-                <Button variant="secondary" onClick={() => handleUnblock(item.userToBlockId ?? '')} className="px-3 py-1 text-xs">
+                <Button
+                  variant="secondary"
+                  onClick={() => handleUnblock(item.userToBlockId ?? '')}
+                  disabled={unblock.isPending}
+                  className="px-3 py-1 text-xs"
+                >
                   Unblock
                 </Button>
               </div>

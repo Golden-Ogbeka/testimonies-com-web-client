@@ -5,6 +5,7 @@ import { storage } from '@/lib/storage';
 export const api = axios.create({
   baseURL: env.apiBaseUrl,
   withCredentials: true,
+  timeout: 15_000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -39,7 +40,7 @@ api.interceptors.response.use(
     enhancedError.response = error?.response;
     enhancedError.status = status;
     return Promise.reject(enhancedError);
-  }
+  },
 );
 
 export function unwrap<T>(payload: unknown): T {

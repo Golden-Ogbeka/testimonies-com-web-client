@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import { useAuthState } from '@/app/providers';
 import { useDeleteProfile } from '@/hooks/useProfile';
 import { useDeleteAllReplies, useDeleteAllTestimonies } from '@/hooks/useTestimonies';
@@ -22,22 +22,22 @@ export default function DangerZoneTab() {
   const deleteTestimoniesForm = useForm({ resolver: zodResolver(deleteAllContentSchema), defaultValues: { password: '' } });
   const deleteRepliesForm = useForm({ resolver: zodResolver(deleteAllContentSchema), defaultValues: { password: '' } });
 
-  const handleDeleteTestimonies = useMemo(
-    () => async (password: string) => {
+  const handleDeleteTestimonies = useCallback(
+    async (password: string) => {
       await deleteAllTestimonies.mutateAsync(password);
     },
     [deleteAllTestimonies],
   );
 
-  const handleDeleteReplies = useMemo(
-    () => async (password: string) => {
+  const handleDeleteReplies = useCallback(
+    async (password: string) => {
       await deleteAllReplies.mutateAsync(password);
     },
     [deleteAllReplies],
   );
 
-  const handleDeleteAccount = useMemo(
-    () => async (password: string) => {
+  const handleDeleteAccount = useCallback(
+    async (password: string) => {
       await deleteProfile.mutateAsync({ password });
       clearAuth();
       router.replace(ROUTES.SIGNIN);

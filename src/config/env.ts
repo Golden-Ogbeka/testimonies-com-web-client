@@ -3,4 +3,3 @@ export const env = {
   apiKey: process.env.NEXT_PUBLIC_API_KEY ?? 'TEST_TI_MONEY_APP_SECRET',
   appName: 'Testimonies',
 };
-

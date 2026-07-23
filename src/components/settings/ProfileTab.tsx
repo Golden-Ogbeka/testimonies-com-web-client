@@ -98,6 +98,7 @@ export default function ProfileTab() {
                 mutation={uploadPhoto}
                 successMsg="Photo updated"
                 label=""
+                ariaLabel="Upload profile photo"
                 className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background transition-opacity hover:opacity-80 disabled:opacity-50"
               />
             </div>

@@ -44,6 +44,7 @@ export type User = {
   // Virtual / computed fields
   accountType: AuthKind;
   verified?: boolean;
+  isFollowing?: boolean;
   followerCount?: number;
   followingCount?: number;
 };

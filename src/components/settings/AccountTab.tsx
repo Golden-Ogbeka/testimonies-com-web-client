@@ -95,6 +95,7 @@ export default function AccountTab() {
             label="New email"
             placeholder="New email"
             type="email"
+            autoComplete="email"
             error={emailForm.formState.errors.email?.message}
             {...emailForm.register('email')}
           />
@@ -105,10 +106,10 @@ export default function AccountTab() {
         {otpSent && (
           <div className="mt-3 flex gap-2">
             <OtpInput value={otpCode} onChange={setOtpCode} numInputs={6} />
-            <Button onClick={onVerifyOtp} disabled={otpCode.length < 6}>
+            <Button onClick={onVerifyOtp} disabled={otpCode.length < 6 || verifyEmailOtp.isPending}>
               Verify
             </Button>
-            <Button variant="secondary" onClick={() => resendEmailOtp.mutate()}>
+            <Button variant="secondary" onClick={() => resendEmailOtp.mutate()} disabled={resendEmailOtp.isPending}>
               Resend
             </Button>
           </div>
@@ -122,6 +123,7 @@ export default function AccountTab() {
           <Input
             label="New username"
             placeholder="New username"
+            autoComplete="username"
             error={usernameForm.formState.errors.username?.message}
             {...usernameForm.register('username')}
           />
@@ -138,6 +140,7 @@ export default function AccountTab() {
           <Input
             label="Phone number"
             placeholder="+1234567890"
+            autoComplete="tel"
             error={phoneForm.formState.errors.phoneNumber?.message}
             {...phoneForm.register('phoneNumber')}
           />
@@ -154,6 +157,7 @@ export default function AccountTab() {
             label="Current password"
             type="password"
             placeholder="Current password"
+            autoComplete="current-password"
             error={passwordForm.formState.errors.oldPassword?.message}
             {...passwordForm.register('oldPassword')}
           />
@@ -161,6 +165,7 @@ export default function AccountTab() {
             label="New password"
             type="password"
             placeholder="New password"
+            autoComplete="new-password"
             error={passwordForm.formState.errors.newPassword?.message}
             {...passwordForm.register('newPassword')}
           />
@@ -168,6 +173,7 @@ export default function AccountTab() {
             label="Confirm new password"
             type="password"
             placeholder="Confirm new password"
+            autoComplete="new-password"
             error={passwordForm.formState.errors.confirmNewPassword?.message}
             {...passwordForm.register('confirmNewPassword')}
           />

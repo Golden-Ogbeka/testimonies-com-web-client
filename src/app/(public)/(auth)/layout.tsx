@@ -10,13 +10,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <section className="relative flex flex-1 flex-col items-center px-6 pb-10 pt-16 text-center lg:overflow-y-auto">
         <div className="flex w-full max-w-[30rem] grow flex-col items-center justify-center">
           <div className="flex flex-col items-center">
-            <BrandLogo href={ROUTES.LANDING} size={100} className="max-h-[48px] w-auto" priority />
-            <h1 className="mt-6 font-serif text-[36px] font-extralight leading-none text-foreground sm:text-[44px]">
-              Welcome to Testimonies
-            </h1>
+            <BrandLogo href={ROUTES.LANDING} size={250} className="max-h-[48px] w-auto" priority />
           </div>
 
-          <div className="mt-16 flex w-full sm:mt-20">
+          <div className="mt-7 flex w-full sm:mt-20">
             <div className="flex w-full grow flex-col text-left">{children}</div>
           </div>
         </div>

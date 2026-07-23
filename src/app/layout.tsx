@@ -26,14 +26,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#fdfff8',
+  themeColor: '#fbfbfb',
   width: 'device-width',
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
         <Script id="strip-ext-attrs" strategy="beforeInteractive" src="/strip-ext-attrs.js" />
       </head>

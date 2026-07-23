@@ -3,14 +3,13 @@
 import { EmptyState, PageHeader, SearchInput, SkeletonCard, Spinner, TabBar, UserRow } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useSearchUsers } from '@/hooks/useProfile';
-import { useFeed, useTestimonyTags, useTrending, testimonyKeys } from '@/hooks/useTestimonies';
+import { useFeed, useTestimonyTags, useTrending } from '@/hooks/useTestimonies';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { flattenPages } from '@/lib/utils';
 import { ArrowLeft, Hash, Search, TrendingUp, Users } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { ROUTES } from '@/constants/routes';
 import type { LucideIcon } from 'lucide-react';
 
@@ -25,7 +24,6 @@ const EXPLORE_TABS: { id: Tab; label: string; icon: LucideIcon }[] = [
 function ExploreContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const qc = useQueryClient();
   const urlTag = searchParams.get('tag') ?? '';
   const [localTab, setLocalTab] = useState<Tab>(urlTag ? 'tags' : 'people');
   const [query, setQuery] = useState(urlTag);
@@ -52,13 +50,7 @@ function ExploreContent() {
     if (selectedTag && isIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) {
       feed.fetchNextPage();
     }
-  }, [selectedTag, isIntersecting, feed]);
-
-  useEffect(() => {
-    if (selectedTag) {
-      qc.resetQueries({ queryKey: testimonyKeys.feed });
-    }
-  }, [selectedTag, qc]);
+  }, [selectedTag, isIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
 
   const handleTagClick = (tag: string) => {
     router.push(ROUTES.exploreTag(tag));
@@ -66,7 +58,6 @@ function ExploreContent() {
 
   const handleClearTag = () => {
     setQuery('');
-    setLocalTab('people');
     router.push(ROUTES.EXPLORE);
   };
 

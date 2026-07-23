@@ -49,13 +49,13 @@ export default function ProfileContent() {
     if (tab === 'testimonies' && testimoniesIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) {
       feed.fetchNextPage();
     }
-  }, [tab, testimoniesIntersecting, feed]);
+  }, [tab, testimoniesIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
 
   useEffect(() => {
     if (tab === 'replies' && repliesIntersecting && userReplies.hasNextPage && !userReplies.isFetchingNextPage) {
       userReplies.fetchNextPage();
     }
-  }, [tab, repliesIntersecting, userReplies]);
+  }, [tab, repliesIntersecting, userReplies.hasNextPage, userReplies.isFetchingNextPage, userReplies.fetchNextPage]);
 
   const isMe = me?._id === userId;
 
@@ -91,15 +91,7 @@ export default function ProfileContent() {
           <Avatar src={user.profileImage} name={`${user.firstName} ${user.lastName}`} size="xl" className="ring-4 ring-background" />
           <div className="flex gap-2">
             {!isMe ? (
-              <>
-                <Button
-                  variant="secondary"
-                  onClick={() => follow.mutate(user._id)}
-                  disabled={follow.isPending}
-                  className="flex items-center gap-1.5"
-                >
-                  <UserPlus className="h-4 w-4" /> Follow
-                </Button>
+              user.isFollowing ? (
                 <Button
                   variant="ghost"
                   onClick={() => unfollow.mutate(user._id)}
@@ -108,7 +100,16 @@ export default function ProfileContent() {
                 >
                   <UserMinus className="h-4 w-4" /> Unfollow
                 </Button>
-              </>
+              ) : (
+                <Button
+                  variant="secondary"
+                  onClick={() => follow.mutate(user._id)}
+                  disabled={follow.isPending}
+                  className="flex items-center gap-1.5"
+                >
+                  <UserPlus className="h-4 w-4" /> Follow
+                </Button>
+              )
             ) : (
               <Link href={ROUTES.SETTINGS}>
                 <Button variant="secondary" className="flex items-center gap-1.5">
@@ -146,7 +147,8 @@ export default function ProfileContent() {
       <div>
         {tab === 'testimonies' && (
           <>
-            {userTestimonies.length === 0 && (
+            {feed.isLoading && <SkeletonCard />}
+            {!feed.isLoading && userTestimonies.length === 0 && (
               <div className="p-4">
                 <EmptyState title="No testimonies" message="This user has not posted yet." />
               </div>
