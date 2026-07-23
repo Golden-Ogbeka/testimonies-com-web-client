@@ -1,11 +1,10 @@
 'use client';
 
 import { Avatar, EmptyState, PageHeader, SkeletonCard, Spinner, StatusBadge, TabBar, VirtualList } from '@/components/common';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useAcceptFollowRequest, useFollowRequests, useRejectFollowRequest } from '@/hooks/useProfile';
 import { useApproveBroadcastRequest, useBroadcastRequests, useRejectBroadcastRequest } from '@/hooks/useTestimonies';
-import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
-import { flattenPages } from '@/lib/utils';
-import { apiMessage } from '@/lib/utils';
+import { apiMessage, flattenPages } from '@/lib/utils';
 import { Bell, Check, Radio, UserPlus, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -29,7 +28,7 @@ export default function NotificationsContent() {
     if (isIntersecting && broadcastRequests.hasNextPage && !broadcastRequests.isFetchingNextPage) {
       broadcastRequests.fetchNextPage();
     }
-  }, [isIntersecting, broadcastRequests]);
+  }, [isIntersecting, broadcastRequests.hasNextPage, broadcastRequests.isFetchingNextPage, broadcastRequests.fetchNextPage]);
 
   const followCount = followRequests.data?.followRequests?.length ?? 0;
   const broadcastItems = flattenPages(broadcastRequests.data);

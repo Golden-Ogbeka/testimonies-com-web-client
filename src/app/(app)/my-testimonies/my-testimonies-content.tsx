@@ -1,12 +1,12 @@
 'use client';
 
-import moment from 'moment';
 import { EmptyState, PageHeader, SkeletonCard, Spinner, TabBar, VirtualList } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
-import { useMyReplies, useMyTestimonies, useTestimonyStats } from '@/hooks/useTestimonies';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { useMyReplies, useMyTestimonies, useTestimonyStats } from '@/hooks/useTestimonies';
 import { flattenPages } from '@/lib/utils';
-import { BookOpen, Heart, Eye, Reply } from 'lucide-react';
+import { BookOpen, Eye, Heart, Reply } from 'lucide-react';
+import moment from 'moment';
 import { useEffect, useState } from 'react';
 
 type Tab = 'testimonies' | 'replies' | 'stats';
@@ -25,13 +25,13 @@ export default function MyTestimoniesContent() {
     if (testimoniesIntersecting && myTestimonies.hasNextPage && !myTestimonies.isFetchingNextPage) {
       myTestimonies.fetchNextPage();
     }
-  }, [testimoniesIntersecting, myTestimonies]);
+  }, [testimoniesIntersecting, myTestimonies.hasNextPage, myTestimonies.isFetchingNextPage, myTestimonies.fetchNextPage]);
 
   useEffect(() => {
     if (repliesIntersecting && myReplies.hasNextPage && !myReplies.isFetchingNextPage) {
       myReplies.fetchNextPage();
     }
-  }, [repliesIntersecting, myReplies]);
+  }, [repliesIntersecting, myReplies.hasNextPage, myReplies.isFetchingNextPage, myReplies.fetchNextPage]);
 
   return (
     <div>

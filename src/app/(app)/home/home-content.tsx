@@ -3,8 +3,8 @@
 import { EmptyState, ErrorState, PageHeader, SkeletonCard, Spinner, VirtualList } from '@/components/common';
 import { Composer } from '@/components/feed/Composer';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
-import { useFeed } from '@/hooks/useTestimonies';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { useFeed } from '@/hooks/useTestimonies';
 import { flattenPages } from '@/lib/utils';
 import { Home } from 'lucide-react';
 import { useEffect } from 'react';
@@ -18,7 +18,7 @@ export default function HomeContent() {
     if (isIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) {
       feed.fetchNextPage();
     }
-  }, [isIntersecting, feed]);
+  }, [isIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
 
   return (
     <>
