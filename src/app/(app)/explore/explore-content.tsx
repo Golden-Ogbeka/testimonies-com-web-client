@@ -1,17 +1,17 @@
 'use client';
 
-import { EmptyState, PageHeader, SearchInput, SkeletonCard, Spinner, TabBar, UserRow } from '@/components/common';
+import { EmptyState, ErrorState, PageHeader, SearchInput, SkeletonCard, Spinner, TabBar, UserRow } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
-import { useSearchUsers } from '@/hooks/useProfile';
-import { useFeed, useTestimonyTags, useTrending } from '@/hooks/useTestimonies';
+import { ROUTES } from '@/constants/routes';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { useSearchUsers } from '@/hooks/useProfile';
+import { useFeed, useTestimonyTags, useTrending } from '@/hooks/useTestimonies';
 import { flattenPages } from '@/lib/utils';
+import type { LucideIcon } from 'lucide-react';
 import { ArrowLeft, Hash, Search, TrendingUp, Users } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { ROUTES } from '@/constants/routes';
-import type { LucideIcon } from 'lucide-react';
 
 type Tab = 'people' | 'trending' | 'tags';
 
@@ -78,7 +78,8 @@ function ExploreContent() {
           <>
             <SearchInput value={query} onChange={setQuery} placeholder="Search people..." />
             {users.isLoading && <SkeletonCard />}
-            {!users.isLoading && debouncedQuery.length > 1 && (users.data?.users ?? []).length === 0 && (
+            {users.isError && <ErrorState message="Could not search users." onRetry={() => users.refetch()} />}
+            {!users.isLoading && !users.isError && debouncedQuery.length > 1 && (users.data?.users ?? []).length === 0 && (
               <EmptyState title="No users found" message="Try a different name." icon={<Users className="h-8 w-8" />} />
             )}
             {debouncedQuery.length <= 1 && (
@@ -93,7 +94,8 @@ function ExploreContent() {
         {tab === 'trending' && (
           <>
             {trending.isLoading && <SkeletonCard />}
-            {(trending.data?.results ?? []).length === 0 && !trending.isLoading && (
+            {trending.isError && <ErrorState message="Could not load trending." onRetry={() => trending.refetch()} />}
+            {!trending.isLoading && !trending.isError && (trending.data?.results ?? []).length === 0 && (
               <EmptyState title="Nothing trending" message="Check back later." icon={<TrendingUp className="h-8 w-8" />} />
             )}
             {(trending.data?.results ?? []).map((t) => (
@@ -114,7 +116,8 @@ function ExploreContent() {
                 </button>
                 <h2 className="text-base font-bold text-foreground">#{selectedTag}</h2>
                 {feed.isLoading && <SkeletonCard />}
-                {!feed.isLoading && tagTestimonies.length === 0 && (
+                {feed.isError && <ErrorState message="Could not load testimonies." onRetry={() => feed.refetch()} />}
+                {!feed.isLoading && !feed.isError && tagTestimonies.length === 0 && (
                   <EmptyState
                     title="No testimonies found"
                     message={`No testimonies with tag #${selectedTag}.`}
@@ -129,6 +132,7 @@ function ExploreContent() {
             ) : (
               <>
                 {tags.isLoading && <SkeletonCard />}
+                {tags.isError && <ErrorState message="Could not load tags." onRetry={() => tags.refetch()} />}
                 <div className="flex flex-wrap gap-2">
                   {(tags.data ?? []).map((tag) => (
                     <button

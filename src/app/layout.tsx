@@ -7,8 +7,14 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const lora = Lora({ subsets: ['latin'], variable: '--font-serif', weight: ['400', '500', '600', '700'] });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+if (!siteUrl && process.env.NODE_ENV === 'production') {
+  // Fail the build rather than silently serving wrong OpenGraph/Twitter URLs.
+  throw new Error('NEXT_PUBLIC_SITE_URL is required in production. Set it in your environment variables.');
+}
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(siteUrl ?? 'http://localhost:3000'),
   title: { template: '%s — Testimonies', default: 'Testimonies — Share His Goodness' },
   description: "Share your testimony of God's goodness and inspire the world.",
   icons: { icon: '/favicon.svg' },
@@ -26,7 +32,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#fbfbfb',
+  themeColor: '#fafbfc',
   width: 'device-width',
   initialScale: 1,
 };

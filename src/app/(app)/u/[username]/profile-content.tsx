@@ -1,19 +1,19 @@
 'use client';
 
-import moment from 'moment';
-import { Avatar, Button, EmptyState, PageHeader, SkeletonCard, Spinner, TabBar, VirtualList } from '@/components/common';
+import { Avatar, Button, EmptyState, ErrorState, PageHeader, SkeletonCard, Spinner, TabBar, VirtualList } from '@/components/common';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
-import { useMe } from '@/hooks/useAuth';
-import { useFollowers, useFollowing, useFollowUser, useProfileByUsername, useUnfollowUser } from '@/hooks/useProfile';
-import { useFeed, useUserReplies } from '@/hooks/useTestimonies';
-import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
-import { flattenPages } from '@/lib/utils';
 import { ROUTES } from '@/constants/routes';
+import { useMe } from '@/hooks/useAuth';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { useFollowers, useFollowing, useFollowUser, useProfileByUsername, useUnfollowUser } from '@/hooks/useProfile';
+import { useUserReplies, useUserTestimonies } from '@/hooks/useTestimonies';
+import { flattenPages } from '@/lib/utils';
 import { Settings, User, UserMinus, UserPlus } from 'lucide-react';
+import moment from 'moment';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UserListItem } from './user-list-item';
 
 type Tab = 'testimonies' | 'replies' | 'followers' | 'following';
@@ -37,19 +37,18 @@ export default function ProfileContent() {
   const followers = useFollowers(userId);
   const following = useFollowing(userId);
   const userReplies = useUserReplies(userId);
-  const feed = useFeed();
-  const allFeedPages = flattenPages(feed.data);
-  const userTestimonies = useMemo(() => allFeedPages.filter((t) => t.userDetails._id === userId), [allFeedPages, userId]);
+  const userTestimonies = useUserTestimonies(userId);
+  const allUserTestimonies = flattenPages(userTestimonies.data);
   const allUserReplies = flattenPages(userReplies.data);
 
   const { ref: testimoniesSentinel, isIntersecting: testimoniesIntersecting } = useIntersectionObserver();
   const { ref: repliesSentinel, isIntersecting: repliesIntersecting } = useIntersectionObserver();
 
   useEffect(() => {
-    if (tab === 'testimonies' && testimoniesIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) {
-      feed.fetchNextPage();
+    if (tab === 'testimonies' && testimoniesIntersecting && userTestimonies.hasNextPage && !userTestimonies.isFetchingNextPage) {
+      userTestimonies.fetchNextPage();
     }
-  }, [tab, testimoniesIntersecting, feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
+  }, [tab, testimoniesIntersecting, userTestimonies.hasNextPage, userTestimonies.isFetchingNextPage, userTestimonies.fetchNextPage]);
 
   useEffect(() => {
     if (tab === 'replies' && repliesIntersecting && userReplies.hasNextPage && !userReplies.isFetchingNextPage) {
@@ -63,6 +62,14 @@ export default function ProfileContent() {
     return (
       <div className="p-4">
         <SkeletonCard />
+      </div>
+    );
+  }
+
+  if (profile.isError) {
+    return (
+      <div className="p-4">
+        <ErrorState message="Could not load this profile." onRetry={() => profile.refetch()} />
       </div>
     );
   }
@@ -147,22 +154,29 @@ export default function ProfileContent() {
       <div>
         {tab === 'testimonies' && (
           <>
-            {feed.isLoading && <SkeletonCard />}
-            {!feed.isLoading && userTestimonies.length === 0 && (
+            {userTestimonies.isLoading && <SkeletonCard />}
+            {userTestimonies.isError && (
+              <div className="p-4">
+                <ErrorState message="Could not load testimonies." onRetry={() => userTestimonies.refetch()} />
+              </div>
+            )}
+            {!userTestimonies.isLoading && !userTestimonies.isError && allUserTestimonies.length === 0 && (
               <div className="p-4">
                 <EmptyState title="No testimonies" message="This user has not posted yet." />
               </div>
             )}
-            {userTestimonies.length > 0 && (
+            {allUserTestimonies.length > 0 && (
               <VirtualList
-                items={userTestimonies}
+                items={allUserTestimonies}
                 renderItem={(t) => <TestimonyCard key={t._id} testimony={t} compact />}
                 estimateSize={120}
               />
             )}
             <div ref={testimoniesSentinel} className="flex justify-center py-4">
-              {feed.isFetchingNextPage && <Spinner />}
-              {!feed.hasNextPage && userTestimonies.length > 0 && <p className="text-xs text-muted">You&apos;ve reached the end.</p>}
+              {userTestimonies.isFetchingNextPage && <Spinner />}
+              {!userTestimonies.hasNextPage && allUserTestimonies.length > 0 && (
+                <p className="text-xs text-muted">You&apos;ve reached the end.</p>
+              )}
             </div>
           </>
         )}
@@ -170,7 +184,12 @@ export default function ProfileContent() {
         {tab === 'replies' && (
           <>
             {userReplies.isLoading && <SkeletonCard />}
-            {allUserReplies.length === 0 && !userReplies.isLoading && (
+            {userReplies.isError && (
+              <div className="p-4">
+                <ErrorState message="Could not load replies." onRetry={() => userReplies.refetch()} />
+              </div>
+            )}
+            {!userReplies.isLoading && !userReplies.isError && allUserReplies.length === 0 && (
               <div className="p-4">
                 <EmptyState title="No replies" message="This user has not replied yet." />
               </div>
@@ -191,9 +210,14 @@ export default function ProfileContent() {
         {tab === 'followers' && (
           <>
             {followers.isLoading && <SkeletonCard />}
-            {(followers.data ?? []).length === 0 && !followers.isLoading && (
+            {followers.isError && (
               <div className="p-4">
-                <EmptyState title="No followers" message="" />
+                <ErrorState message="Could not load followers." onRetry={() => followers.refetch()} />
+              </div>
+            )}
+            {!followers.isLoading && !followers.isError && (followers.data ?? []).length === 0 && (
+              <div className="p-4">
+                <EmptyState title="No followers" message="This user has no followers yet." />
               </div>
             )}
             {(followers.data ?? [])
@@ -209,9 +233,14 @@ export default function ProfileContent() {
         {tab === 'following' && (
           <>
             {following.isLoading && <SkeletonCard />}
-            {(following.data ?? []).length === 0 && !following.isLoading && (
+            {following.isError && (
               <div className="p-4">
-                <EmptyState title="Not following anyone" message="" />
+                <ErrorState message="Could not load following." onRetry={() => following.refetch()} />
+              </div>
+            )}
+            {!following.isLoading && !following.isError && (following.data ?? []).length === 0 && (
+              <div className="p-4">
+                <EmptyState title="Not following anyone" message="This user is not following anyone yet." />
               </div>
             )}
             {(following.data ?? [])

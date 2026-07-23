@@ -16,6 +16,7 @@ export const testimonyKeys = {
   myTestimonies: ['testimony', 'mine'] as const,
   myReplies: ['testimony', 'my-replies'] as const,
   userReplies: (userId: string) => ['testimony', 'user-replies', userId] as const,
+  userTestimonies: (userId: string) => ['testimony', 'user', userId] as const,
   stats: ['testimony', 'stats'] as const,
   tags: (limit?: number) => ['testimony', 'tags', limit ?? 'all'] as const,
   broadcastRequests: ['testimony', 'broadcast', 'requests'] as const,
@@ -82,6 +83,17 @@ export function useUserReplies(userId: string) {
     queryKey: testimonyKeys.userReplies(userId),
     queryFn: async ({ pageParam = 1 }) =>
       unwrap<Paginated<Reply>>((await api.get(`/user/testimony/user-replies/${userId}?page=${pageParam}`)).data),
+    getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
+    initialPageParam: 1,
+    enabled: !!userId,
+  });
+}
+
+export function useUserTestimonies(userId: string) {
+  return useInfiniteQuery({
+    queryKey: testimonyKeys.userTestimonies(userId),
+    queryFn: async ({ pageParam = 1 }) =>
+      unwrap<Paginated<Testimony>>((await api.get(`/user/testimony/user/${userId}?page=${pageParam}`)).data),
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
     initialPageParam: 1,
     enabled: !!userId,

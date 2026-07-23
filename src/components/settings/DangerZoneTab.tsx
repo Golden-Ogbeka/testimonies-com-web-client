@@ -1,19 +1,16 @@
 'use client';
 
-import { useCallback } from 'react';
-import { useAuthState } from '@/app/providers';
+import { ROUTES } from '@/constants/routes';
 import { useDeleteProfile } from '@/hooks/useProfile';
 import { useDeleteAllReplies, useDeleteAllTestimonies } from '@/hooks/useTestimonies';
-import { ROUTES } from '@/constants/routes';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
+import { storage } from '@/lib/storage';
 import { deleteAccountSchema, deleteAllContentSchema } from '@/lib/validations';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback } from 'react';
+import { useForm } from 'react-hook-form';
 import { DangerSection } from './danger-section';
 
 export default function DangerZoneTab() {
-  const router = useRouter();
-  const { clearAuth } = useAuthState();
   const deleteProfile = useDeleteProfile();
   const deleteAllTestimonies = useDeleteAllTestimonies();
   const deleteAllReplies = useDeleteAllReplies();
@@ -39,10 +36,12 @@ export default function DangerZoneTab() {
   const handleDeleteAccount = useCallback(
     async (password: string) => {
       await deleteProfile.mutateAsync({ password });
-      clearAuth();
-      router.replace(ROUTES.SIGNIN);
+      // Clear storage (including the cookie) BEFORE navigating so the
+      // middleware doesn't see a stale token and redirect back to /home.
+      storage.clear();
+      window.location.href = ROUTES.SIGNIN;
     },
-    [deleteProfile, clearAuth, router],
+    [deleteProfile],
   );
 
   return (

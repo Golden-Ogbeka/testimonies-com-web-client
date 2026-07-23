@@ -1,9 +1,9 @@
 'use client';
 
-import { EmptyState, SkeletonCard, VirtualList } from '@/components/common';
-import { TestimonyCard } from '@/components/feed/TestimonyCard';
+import { EmptyState, ErrorState, SkeletonCard, VirtualList } from '@/components/common';
 import ReplyComposer from '@/components/feed/ReplyComposer';
 import ReplyItem from '@/components/feed/ReplyItem';
+import { TestimonyCard } from '@/components/feed/TestimonyCard';
 import { useReplies, useTestimony } from '@/hooks/useTestimonies';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -36,9 +36,14 @@ export default function PostDetailContent() {
             <SkeletonCard />
           </div>
         )}
+        {testimony.isError && (
+          <div className="p-4">
+            <ErrorState message="Could not load this testimony." onRetry={() => testimony.refetch()} />
+          </div>
+        )}
         {testimony.data && <TestimonyCard testimony={testimony.data} />}
 
-        <ReplyComposer testimonyId={id} />
+        {testimony.data && <ReplyComposer testimonyId={id} />}
 
         <div>
           {replies.isLoading && (
@@ -46,7 +51,12 @@ export default function PostDetailContent() {
               <SkeletonCard />
             </div>
           )}
-          {!replies.isLoading && (replies.data?.results ?? []).length === 0 && (
+          {replies.isError && (
+            <div className="p-4">
+              <ErrorState message="Could not load replies." onRetry={() => replies.refetch()} />
+            </div>
+          )}
+          {!replies.isLoading && !replies.isError && (replies.data?.results ?? []).length === 0 && (
             <div className="p-4">
               <EmptyState title="No replies yet" message="Be the first to reply." icon={<MessageCircle className="h-8 w-8" />} />
             </div>
