@@ -66,6 +66,10 @@ export default function ForgotPasswordContent() {
 
   return (
     <div className="flex w-full flex-col gap-4 py-8">
+      <div className="mb-2">
+        <h1 className="font-serif text-2xl font-semibold text-foreground">Password Reset</h1>
+        <p className="mt-1 text-sm text-foreground-secondary">Enter your email to receive a verification code and reset your password.</p>
+      </div>
       {step === 'send-otp' ? (
         <form className="flex flex-col gap-4" onSubmit={otpForm.handleSubmit(onSendOtp)}>
           <Input

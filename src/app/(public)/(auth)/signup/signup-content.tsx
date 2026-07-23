@@ -84,6 +84,10 @@ export default function SignUpContent() {
 
   return (
     <div className="flex w-full flex-col gap-4 py-8">
+      <div className="mb-2">
+        <h1 className="font-serif text-2xl font-semibold text-foreground">Create Account</h1>
+        <p className="mt-1 text-sm text-foreground-secondary">Join the community and share your testimony.</p>
+      </div>
       <div className="grid grid-cols-2 gap-1 border border-border bg-background-secondary p-1">
         <button
           onClick={() => setKind('individual')}

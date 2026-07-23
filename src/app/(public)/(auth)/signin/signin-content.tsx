@@ -45,6 +45,10 @@ export default function SignInContent() {
 
   return (
     <div className="flex w-full flex-col gap-4 py-8">
+      <div className="mb-2">
+        <h1 className="font-serif text-2xl font-semibold text-foreground">Sign In</h1>
+        <p className="mt-1 text-sm text-foreground-secondary">Welcome back. Enter your credentials to continue.</p>
+      </div>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
         <Input
           label="Email"

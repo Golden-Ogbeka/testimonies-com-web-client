@@ -64,6 +64,10 @@ export default function VerifyOtpContent() {
 
   return (
     <div className="flex w-full flex-col gap-4 py-8">
+      <div className="mb-2">
+        <h1 className="font-serif text-2xl font-semibold text-foreground">Verify Your Email</h1>
+        <p className="mt-1 text-sm text-foreground-secondary">Enter the 6-digit code sent to your email.</p>
+      </div>
       <Input
         type="email"
         value={email}
