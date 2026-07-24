@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Lora } from 'next/font/google';
 import Script from 'next/script';
+import { SerwistProvider } from '@/components/serwist-provider';
 import './globals.css';
 import { Providers } from './providers';
 
@@ -53,7 +54,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Script id="strip-ext-attrs" strategy="beforeInteractive" src="/strip-ext-attrs.js" />
       </head>
       <body className={`${inter.variable} ${lora.variable} font-sans antialiased`} suppressHydrationWarning>
-        <Providers>{children}</Providers>
+        <SerwistProvider swUrl="/api/serwist/sw.js">
+          <Providers>{children}</Providers>
+        </SerwistProvider>
       </body>
     </html>
   );
