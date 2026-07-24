@@ -38,7 +38,7 @@ function ReplyItem({ reply }: { reply: Reply }) {
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-foreground">{fullName}</span>
             <span className="text-xs text-muted">@{reply.userDetails.username}</span>
-            <span className="text-xs text-gray-300">·</span>
+            <span className="text-xs text-border">·</span>
             <span className="text-xs text-muted">{formatDistanceToNowStrict(new Date(reply.createdAt), { addSuffix: true })}</span>
           </div>
           <p className="mt-0.5 text-sm text-foreground break-all">{reply.content}</p>

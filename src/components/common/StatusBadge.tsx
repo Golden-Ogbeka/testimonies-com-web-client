@@ -19,7 +19,7 @@ export function StatusBadge({ status, activeLabel = 'Active', inactiveLabel = 'I
   }
 
   return (
-    <span className={cn('inline-block bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500', className)}>
+    <span className={cn('inline-block bg-primary-muted px-2 py-0.5 text-xs font-medium text-foreground-secondary', className)}>
       {s === 'pending' ? 'Pending' : inactiveLabel}
     </span>
   );

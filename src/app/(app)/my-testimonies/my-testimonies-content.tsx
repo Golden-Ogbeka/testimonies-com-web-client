@@ -121,7 +121,7 @@ export default function MyTestimoniesContent() {
                 renderItem={(reply) => (
                   <div key={reply._id} className="border-b border-border px-4 py-3 hover:bg-card-hover">
                     <p className="text-sm text-foreground">{reply.content}</p>
-                    <p className="mt-1 text-xs text-gray-400">
+                    <p className="mt-1 text-xs text-foreground-secondary">
                       {formatDistanceToNowStrict(new Date(reply.createdAt), { addSuffix: true })}
                     </p>
                   </div>

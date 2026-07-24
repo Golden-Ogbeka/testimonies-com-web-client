@@ -113,46 +113,48 @@
 
 /* Global */
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-/* Interactive */
+  /* Interactive */
 
-button {
-  cursor: pointer;
-  transition:
-    background-color 0.25s ease,
-    color 0.25s ease,
-    border-color 0.25s ease,
-    transform 0.2s ease,
-    box-shadow 0.25s ease;
-}
+  button {
+    cursor: pointer;
+    transition:
+      background-color 0.25s ease,
+      color 0.25s ease,
+      border-color 0.25s ease,
+      transform 0.2s ease,
+      box-shadow 0.25s ease;
+  }
 
-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
+  button:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
 
-button:active:not(:disabled) {
-  transform: translateY(0);
-}
+  button:active:not(:disabled) {
+    transform: translateY(0);
+  }
 
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 
-a {
-  color: inherit;
-  transition: color 0.25s ease;
-}
+  a {
+    color: inherit;
+    transition: color 0.25s ease;
+  }
 
-a:hover {
-  color: var(--accent);
+  a:hover {
+    color: var(--accent);
+  }
 }
 
 /* Animations */

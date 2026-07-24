@@ -40,7 +40,7 @@ function TestimonyCardBase({ testimony, compact }: Props) {
               {fullName}
             </Link>
             <span className="text-xs text-muted">@{testimony.userDetails.username}</span>
-            <span className="text-xs text-gray-300">·</span>
+            <span className="text-xs text-border">·</span>
             <span className="text-xs text-muted">{formatDistanceToNowStrict(new Date(testimony.createdAt), { addSuffix: true })}</span>
             {testimony.isBroadcast && (
               <span className="inline-flex items-center gap-1 bg-foreground/5 px-2 py-0.5 text-xs text-foreground">
