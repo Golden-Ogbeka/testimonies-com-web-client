@@ -134,7 +134,7 @@ export function useCreateTestimony() {
       if (!payload.mediaFiles?.length) {
         const { mediaFiles: _mf, ...rest } = payload;
         void _mf;
-        return (await api.post('/user/testimony', rest)).data;
+        return (await api.post('/user/testimony', { ...rest, tags: rest.tags?.length ? JSON.stringify(rest.tags) : undefined })).data;
       }
 
       const formData = new FormData();
