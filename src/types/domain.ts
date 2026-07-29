@@ -16,8 +16,6 @@ export type UpdateProfilePayload = {
   lastName?: string;
   bio?: string;
   address?: string;
-  phone?: string;
-  username?: string;
 };
 
 export type UpdateTestimonyPayload = {

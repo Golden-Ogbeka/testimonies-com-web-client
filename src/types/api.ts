@@ -12,7 +12,7 @@ export type Paginated<T> = {
 
 export type SearchUsersResponse = {
   users: import('./auth').User[];
-  organizations: Record<string, unknown>[];
+  organizations: Partial<import('./auth').User>[];
 };
 
 export type FollowRequestsResponse = {

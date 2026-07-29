@@ -1,18 +1,30 @@
 'use client';
 
-import { EmptyState, ErrorState, SkeletonCard, VirtualList } from '@/components/common';
+import { EmptyState, ErrorState, SkeletonCard, Spinner, VirtualList } from '@/components/common';
 import ReplyComposer from '@/components/feed/ReplyComposer';
 import ReplyItem from '@/components/feed/ReplyItem';
 import { TestimonyCard } from '@/components/feed/TestimonyCard';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useReplies, useTestimony } from '@/hooks/useTestimonies';
+import { flattenPages } from '@/lib/utils';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function PostDetailContent() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const testimony = useTestimony(id);
   const replies = useReplies(id);
+  const allReplies = flattenPages(replies.data);
+
+  const { ref: sentinel, isIntersecting } = useIntersectionObserver();
+
+  useEffect(() => {
+    if (isIntersecting && replies.hasNextPage && !replies.isFetchingNextPage) {
+      replies.fetchNextPage();
+    }
+  }, [isIntersecting, replies.hasNextPage, replies.isFetchingNextPage, replies.fetchNextPage]);
 
   return (
     <div>
@@ -56,18 +68,18 @@ export default function PostDetailContent() {
               <ErrorState message="Could not load replies." onRetry={() => replies.refetch()} />
             </div>
           )}
-          {!replies.isLoading && !replies.isError && (replies.data?.results ?? []).length === 0 && (
+          {!replies.isLoading && !replies.isError && allReplies.length === 0 && (
             <div className="p-4">
               <EmptyState title="No replies yet" message="Be the first to reply." icon={<MessageCircle className="h-8 w-8" />} />
             </div>
           )}
-          {(replies.data?.results ?? []).length > 0 && (
-            <VirtualList
-              items={replies.data?.results ?? []}
-              renderItem={(reply) => <ReplyItem key={reply._id} reply={reply} />}
-              estimateSize={80}
-            />
+          {allReplies.length > 0 && (
+            <VirtualList items={allReplies} renderItem={(reply) => <ReplyItem key={reply._id} reply={reply} />} estimateSize={80} />
           )}
+          <div ref={sentinel} className="flex justify-center py-4">
+            {replies.isFetchingNextPage && <Spinner />}
+            {!replies.hasNextPage && allReplies.length > 0 && <p className="text-xs text-muted">You&apos;ve reached the end.</p>}
+          </div>
         </div>
       </div>
     </div>

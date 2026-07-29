@@ -263,6 +263,17 @@ export function useRejectFollowRequest() {
   });
 }
 
+export function useBlockUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => (await api.post(`/user/profile/block/${id}`)).data,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: profileKeys.blocked });
+      qc.invalidateQueries({ queryKey: profileKeys.profile() });
+    },
+  });
+}
+
 export function useUnblockUser() {
   const qc = useQueryClient();
   return useMutation({
