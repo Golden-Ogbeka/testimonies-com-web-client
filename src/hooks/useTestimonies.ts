@@ -96,7 +96,7 @@ export function useUserTestimonies(userId: string) {
   return useInfiniteQuery({
     queryKey: testimonyKeys.userTestimonies(userId),
     queryFn: async ({ pageParam = 1 }) =>
-      unwrap<Paginated<Testimony>>((await api.get(`/user/testimony/user/${userId}?page=${pageParam}`)).data),
+      unwrap<Paginated<Testimony>>((await api.get(`/user/testimony/by-user/${userId}?page=${pageParam}`)).data),
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
     initialPageParam: 1,
     enabled: !!userId,
