@@ -26,13 +26,14 @@ function TestimonyCardBase({ testimony, compact }: Props) {
     like.mutate(testimony._id);
   }, [testimony.isLiked, testimony._id, like, unlike]);
 
-  const fullName = `${testimony.userDetails.firstName} ${testimony.userDetails.lastName}`;
+  const ud = testimony.userDetails;
+  const fullName = ud.firstName && ud.lastName ? `${ud.firstName} ${ud.lastName}` : (ud.businessName ?? ud.username ?? 'User');
 
   return (
     <div className="group border-b border-border/60 px-5 py-4 transition-colors duration-300 hover:bg-card-hover/40">
       <div className="flex items-start gap-3.5">
         <Link href={ROUTES.profile(testimony.userDetails.username)}>
-          <Avatar src={testimony.userDetails.profileImage} name={fullName} size="md" />
+          <Avatar src={testimony.userDetails.profileImage || testimony.userDetails.businessLogoURL} name={fullName} size="md" />
         </Link>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">

@@ -28,12 +28,13 @@ function ReplyItem({ reply }: { reply: Reply }) {
     likeReply.mutate({ id: reply._id, testimonyId: reply.testimonyId });
   }, [reply.isLiked, reply._id, reply.testimonyId, likeReply, unlikeReply]);
 
-  const fullName = `${reply.userDetails.firstName} ${reply.userDetails.lastName}`;
+  const ud = reply.userDetails;
+  const fullName = ud.firstName && ud.lastName ? `${ud.firstName} ${ud.lastName}` : (ud.businessName ?? ud.username ?? 'User');
 
   return (
     <div className="border-b border-border/60 px-5 py-3.5 transition-colors duration-300 hover:bg-card-hover/40">
       <div className="flex items-start gap-3">
-        <Avatar src={reply.userDetails.profileImage} name={fullName} size="sm" />
+        <Avatar src={reply.userDetails.profileImage || reply.userDetails.businessLogoURL} name={fullName} size="sm" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-foreground">{fullName}</span>

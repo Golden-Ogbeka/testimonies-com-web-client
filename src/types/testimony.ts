@@ -1,11 +1,13 @@
 export type UserDetails = {
   _id: string;
   username: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   accountType: string;
-  profileImage: string;
+  profileImage?: string;
   profileVisibility: string;
+  businessName?: string;
+  businessLogoURL?: string;
 };
 
 export type Testimony = {

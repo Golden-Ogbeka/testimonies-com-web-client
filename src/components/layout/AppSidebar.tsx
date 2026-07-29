@@ -12,6 +12,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
+const displayName = (u: { firstName?: string; lastName?: string; businessName?: string; username?: string }) =>
+  u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : (u.businessName ?? u.username ?? 'User');
+
 const nav = [
   { href: ROUTES.HOME, label: 'Home', icon: Home },
   { href: ROUTES.EXPLORE, label: 'Explore', icon: Search },
@@ -102,9 +105,9 @@ export function AppSidebar() {
               prefetch={false}
               className="flex items-center gap-3 rounded-none p-3 transition-colors duration-150 hover:bg-background-secondary"
             >
-              <Avatar src={user.profileImage} name={`${user.firstName} ${user.lastName}`} size="md" />
+              <Avatar src={user.profileImage || user.businessLogoURL} name={displayName(user)} size="md" />
               <div className="hidden min-w-0 flex-1 md:block">
-                <p className="truncate text-sm font-semibold text-foreground">{`${user.firstName} ${user.lastName}`}</p>
+                <p className="truncate text-sm font-semibold text-foreground">{displayName(user)}</p>
                 <p className="truncate text-xs text-muted">@{user.username}</p>
               </div>
             </Link>

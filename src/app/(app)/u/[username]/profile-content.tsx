@@ -83,6 +83,8 @@ export default function ProfileContent() {
   }
 
   const user = profile.data;
+  const displayName =
+    user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.businessName ?? user.username ?? 'User');
 
   return (
     <div>
@@ -95,7 +97,7 @@ export default function ProfileContent() {
 
       <div className="relative z-10 px-4 pb-4">
         <div className="flex items-end justify-between -mt-14 mb-3">
-          <Avatar src={user.profileImage} name={`${user.firstName} ${user.lastName}`} size="xl" className="ring-4 ring-background" />
+          <Avatar src={user.profileImage || user.businessLogoURL} name={displayName} size="xl" className="ring-4 ring-background" />
           <div className="flex gap-2">
             {!isMe ? (
               user.isFollowing ? (
@@ -127,7 +129,7 @@ export default function ProfileContent() {
           </div>
         </div>
 
-        <h1 className="text-xl font-bold text-foreground">{`${user.firstName} ${user.lastName}`}</h1>
+        <h1 className="text-xl font-bold text-foreground">{displayName}</h1>
         <p className="text-sm text-muted">@{user.username}</p>
         {user.verified && <span className="mt-1 inline-block bg-green-50 px-2 py-0.5 text-xs text-green-700">Verified</span>}
 
