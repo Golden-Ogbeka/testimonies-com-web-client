@@ -30,7 +30,12 @@ export default function SignInContent() {
   const onSubmit = useCallback(
     async (values: Form) => {
       try {
-        await signin.mutateAsync(values);
+        const response = await signin.mutateAsync(values);
+        if ((response as { data?: { needsVerification?: boolean } })?.data?.needsVerification) {
+          toast.success('Verify your account to continue');
+          router.push(ROUTES.verifyOtp('signin', values.email, redirectTo));
+          return;
+        }
         await signinOtp.mutateAsync({ email: values.email });
         toast.success('OTP sent to your email');
         router.push(ROUTES.verifyOtp('signin', values.email, redirectTo));
