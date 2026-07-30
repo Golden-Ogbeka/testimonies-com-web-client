@@ -139,6 +139,10 @@ The following modules are wired in the backend but the routes are commented out.
 - Mutations invalidate relevant query keys on success
 - Forms validate with Zod schemas and disable submit during loading
 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
 ## Disabled Frontend Routes
 
 The following backend routers are commented out in `backend/src/api/v1/routes/index.ts`:
